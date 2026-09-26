@@ -2,7 +2,7 @@
 
 An interactive 3D shooting game built in Unity for the **SE3032 – Graphics and Visualization** group assignment at SLIIT.
 
-> **Theme:** _To be confirmed_
+> **Theme:** Lab Lockdown
 > **Status:** In development
 
 ---
