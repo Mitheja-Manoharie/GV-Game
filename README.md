@@ -162,7 +162,8 @@ Models created from scratch by the team in Blender:
 
 | Asset | Source | License | Used for |
 |-------|--------|---------|----------|
-| _Asset name_ | _Link_ | _CC0 / Standard Unity Asset Store EULA_ | _–_ |
+| Modular Sci-Fi MegaKit (Standard) by Quaternius | [quaternius.com](https://quaternius.com) | CC0 1.0 | Modular walls, columns, platforms, decals, props and alien models for the lab environment |
+| Sci-Fi Essentials Kit (Standard) by Quaternius | [quaternius.com](https://quaternius.com) | CC0 1.0 | Weapons, ammo, enemy models and props such as crates, barrels and desks |
 
 ---
 
