@@ -1,0 +1,16 @@
+{
+    "name": "LabLockdown.AI.DroneStalker.Core",
+    "rootNamespace": "LabLockdown.AI.DroneStalker",
+    "references": [
+        "LabLockdown.AI.Facility.Core"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": true
+}
