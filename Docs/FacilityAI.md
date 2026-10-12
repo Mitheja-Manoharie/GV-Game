@@ -175,7 +175,7 @@ Ordering the slots removes k! duplicate branches.
   It sits in Assembly-CSharp because the Facility assemblies must not depend on teammates' scripts.
 - `PlaceholderSpawnService` (red capsules that disappear after 20 s) and `PlaceholderDoorService`
   (solid red barrier) let the Director run before robots and doors exist.
-- `IPlayerStatusSource` will connect the Core Developer's health; until then a Debug Health slider is used.
+- `IPlayerStatusSource` connects the human player's health script (issue #25); until then a Debug Health slider is used.
 
 ### Verification
 
