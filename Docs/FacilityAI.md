@@ -32,8 +32,9 @@ use and which doors to lock.
 
 | Assembly | Contents | Unity dependency |
 |---|---|---|
-| `LabLockdown.AI.Facility.Core` | `LevelGraph`, `LevelGraphBuilder`, `LabLockdownLayout`, `Csp/` solver (later: utility model, director) | **None** (`noEngineReferences`) |
-| `LabLockdown.AI.Facility.Runtime` | `LevelGraphProvider`, `SpawnPointMarker` (later: director runner, door/spawn services) | Yes |
+| `LabLockdown.AI.Facility.Core` | `LevelGraph`, `LevelGraphBuilder`, `LabLockdownLayout`, `Csp/` solver, `Director/` (intensity model, facility CSP, director) | **None** (`noEngineReferences`) |
+| `LabLockdown.AI.Facility.Runtime` | `LevelGraphProvider`, `SpawnPointMarker`, `FacilityDirectorRunner`, service interfaces and placeholders | Yes |
+| Assembly-CSharp (`AI/FacilityIntegration`) | `DoorControllerDoorService`: adapter to the Systems Engineer's `DoorController` | Yes |
 | `LabLockdown.AI.Facility.Tests` | EditMode unit tests for the core | Test runner only |
 
 The decision logic ("brain") cannot reference Unity, which enforces the separation of AI logic
@@ -111,6 +112,91 @@ validates the graph against the scene (door markers, spawn markers, NavMesh cove
 colours, impossible global sum), node consistency, forward checking detecting a dead end early, the node
 budget, and **200 random problems checked against brute force for every combination of options**.
 
+## Week 3: the Director
+
+### Decision loop
+
+`FacilityDirectorRunner` (Unity) senses → `FacilityDirector` (pure C#) decides → the runner acts through
+`ISpawnService` / `IDoorService`. Decisions happen every 4–8 s (faster when intensity is high), never per frame.
+
+1. **Sense** – player node, health, recent damage (5 s window), calm time, enemies alive, line of sight
+   to each spawn point (one `Physics.Linecast` per candidate), current door states.
+2. **Utility: how much** – `IntensityModel`:
+   `intensity = clamp01(0.15 + 0.35·health + 0.25·progress + 0.30·calm − 0.50·damage − 0.40·enemies/max)`.
+   It sets the phase, the spawn budget k, whether doors may lock (≥ 0.55) and how many (1 in build-up,
+   2 at a peak).
+3. **CSP: where** – `FacilityProblem` builds the constraints below; `BacktrackingSolver.SolveBest`
+   (branch and bound) returns the highest-utility valid configuration.
+4. **Degrade** – if k spawns cannot be placed fairly, try k−1 … 0; if nothing is valid, open every door.
+5. **Remember** – door change and lock times, the last 4 spawn points, a relief window after a peak.
+
+### Phases
+
+| Phase | When | Effect |
+|---|---|---|
+| Relief | health < 30 %, player in a safe area, or 15 s after a peak | no spawns; doors reopen (immediately if the player is hurt) |
+| Build-up | intensity < 0.8 | small waves (wave size grows with intensity), at most 1 locked door |
+| Peak | intensity ≥ 0.8 | full wave, up to 2 locked doors, then a relief window |
+
+### Constraints
+
+| Kind | Constraint |
+|---|---|
+| unary | spawn hidden from the player (line of sight) |
+| unary | spawn not in the player's area |
+| unary | spawn 12–40 m walking distance from the player |
+| unary | door open if the player is at it / it has been locked ≥ 25 s / the player is hurt |
+| unary | door keeps its state for 10 s after changing (cooldown) |
+| unary | door open when locking is not allowed |
+| binary | Spawn_i < Spawn_i+1 (all-different plus symmetry breaking) |
+| global | exit reachable from the player with the chosen doors locked |
+| global | at most L doors locked |
+| global | every spawn can reach the player with the chosen doors locked |
+
+**Symmetry breaking:** spawn slots are interchangeable, so {A, B} and {B, A} are the same decision.
+Ordering the slots removes k! duplicate branches.
+
+### Utility (value ordering + branch-and-bound objective)
+
+- **Spawn:** walking distance near the middle of the window; **flank**: at high intensity prefer spawns
+  *behind* the player (further from the exit), at low intensity *ahead* (fairer, head-on); **variety**:
+  avoid recent spawn points; **spread**: distance to the other chosen spawns.
+- **Door:** Locked scores `intensity × detour`, where detour is how much longer the player's route to the
+  exit becomes. A door that does not change the route is never worth locking.
+- **Bound:** assigned variables score their current value; unassigned ones their best possible value.
+  Spread can only fall as more spawns are placed, so the bound never underestimates.
+
+### Integration
+
+- `DoorControllerDoorService` drives the Systems Engineer's `DoorController` (`Close()`, `SetLocked()`)
+  and adds a carving `NavMeshObstacle` while locked, because doors are excluded from the NavMesh bake.
+  It sits in Assembly-CSharp because the Facility assemblies must not depend on teammates' scripts.
+- `PlaceholderSpawnService` (red capsules that disappear after 20 s) and `PlaceholderDoorService`
+  (solid red barrier) let the Director run before robots and doors exist.
+- `IPlayerStatusSource` will connect the Core Developer's health; until then a Debug Health slider is used.
+
+### Verification
+
+61 unit tests. The key one plays 25 random games of 20 decisions (random positions, health, damage,
+visibility, enemy counts) and checks after every decision that the exit is reachable, no locked door is
+next to the player, at most 2 doors are locked, and every spawn is hidden, outside the safe areas and
+the player's area, within 12–40 m and able to reach the player – while still spawning and locking regularly.
+
+**Scripted playthrough** (start → armoury → service corridor → lab → control room):
+
+| t (s) | Player | Phase | Intensity | Spawned | Locked |
+|---|---|---|---|---|---|
+| 8 | quarantine cell | Relief (safe area) | 0.62 | 0 | – |
+| 22 | service corridor | Build-up | 0.77 | 3 | LabSouth |
+| 34 | crossroads, hurt | Build-up | 0.21 | 0 | – |
+| 48 | lab corridor | Build-up | 0.66 | 2 | ControlEast |
+| 60 | research lab, 25 % health | Relief (health) | 0.14 | 0 | – |
+| 84 | control room | Peak | 0.86 | 3 | – |
+
+The simulation caught two pacing problems that every test passed: robots spawning while the player was
+still choosing gear, and a 40 % health player receiving a full wave. Hence the safe-area rule and wave
+sizes that grow with intensity. Decisions take about 1 ms (.NET 8): 4–120 search nodes, always proven optimal.
+
 ## Default spawn points
 
 Eight candidates spread over both routes; none in the quarantine cell, armoury or control room:
@@ -123,6 +209,6 @@ InfirmaryNorth, WestCorridor.
 |---|---|
 | 1 | Level graph, BFS/Dijkstra, gizmos, spawn markers, tests ✅ |
 | 2 | Generic CSP solver (backtracking, MRV + degree, LCV, forward checking) + tests ✅ |
-| 3 | Facility constraints, intensity model, spawn/door services |
+| 3 | Facility constraints, intensity model, branch and bound, director, spawn/door services ✅ |
 | 4 | Edge cases, tuning, debug overlay, integration |
 | 5 | Performance checks, viva preparation |
