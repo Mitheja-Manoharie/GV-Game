@@ -15,6 +15,23 @@ namespace LabLockdown.AI.Facility.Csp
     /// <summary>Score for trying <paramref name="value"/> on <paramref name="variable"/>; higher scores are tried first.</summary>
     public delegate double ValueScore(int variable, int value, IAssignment assignment);
 
+    /// <summary>
+    /// Objective for <see cref="BacktrackingSolver.SolveBest"/> (branch and bound): the solver returns the
+    /// consistent complete assignment with the highest <see cref="Score"/>.
+    /// </summary>
+    public interface ISolutionObjective
+    {
+        /// <summary>Score of a complete, consistent assignment. Higher is better.</summary>
+        double Score(IAssignment complete);
+
+        /// <summary>
+        /// An optimistic estimate: no completion of <paramref name="partial"/> may score higher than this.
+        /// The solver skips any branch whose upper bound cannot beat the best solution found so far,
+        /// so an estimate that is too low would wrongly discard good solutions.
+        /// </summary>
+        double UpperBound(IAssignment partial);
+    }
+
     public sealed class SolverOptions
     {
         /// <summary>MRV ("most constrained variable", fail-first): pick the variable with the fewest legal values left.</summary>
@@ -66,22 +83,41 @@ namespace LabLockdown.AI.Facility.Csp
         /// <summary>Number of domain values removed by node consistency and forward checking.</summary>
         public int ValuesPruned { get; internal set; }
 
+        /// <summary>Complete solutions found (more than one only when optimising).</summary>
+        public int SolutionsFound { get; internal set; }
+
+        /// <summary>Branches skipped by branch and bound because they could not beat the best solution.</summary>
+        public int BoundPrunes { get; internal set; }
+
         public override string ToString() =>
-            $"nodes {NodesExpanded}, backtracks {Backtracks}, checks {ConstraintChecks}, pruned {ValuesPruned}";
+            $"nodes {NodesExpanded}, backtracks {Backtracks}, checks {ConstraintChecks}, pruned {ValuesPruned}, " +
+            $"solutions {SolutionsFound}, bound prunes {BoundPrunes}";
     }
 
     public sealed class SolveResult
     {
-        internal SolveResult(SolveStatus status, int[] values, List<int> assignmentOrder, SolverStats stats)
+        internal SolveResult(SolveStatus status, int[] values, List<int> assignmentOrder, SolverStats stats,
+            double score = double.NaN, bool isProvenOptimal = false)
         {
             Status = status;
             Values = values;
             AssignmentOrder = assignmentOrder;
             Stats = stats;
+            Score = score;
+            IsProvenOptimal = isProvenOptimal;
         }
 
         public SolveStatus Status { get; }
         public bool IsSolved => Status == SolveStatus.Solved;
+
+        /// <summary>Objective score of <see cref="Values"/> (only set by <see cref="BacktrackingSolver.SolveBest"/>).</summary>
+        public double Score { get; }
+
+        /// <summary>
+        /// True when branch and bound searched the whole space, so no better solution exists.
+        /// False when the node budget ran out first: <see cref="Values"/> is then the best found so far.
+        /// </summary>
+        public bool IsProvenOptimal { get; }
 
         /// <summary>Value of each variable (indexed by variable), or null if not solved.</summary>
         public IReadOnlyList<int> Values { get; }
@@ -100,10 +136,23 @@ namespace LabLockdown.AI.Facility.Csp
     /// </summary>
     public sealed class BacktrackingSolver
     {
+        /// <summary>Finds the first solution (or proves there is none).</summary>
         public SolveResult Solve(CspProblem problem, SolverOptions options = null)
         {
             if (problem == null) throw new ArgumentNullException(nameof(problem));
-            return new Search(problem, options ?? new SolverOptions()).Run();
+            return new Search(problem, options ?? new SolverOptions(), null).Run();
+        }
+
+        /// <summary>
+        /// Branch and bound: keeps searching after the first solution and returns the highest-scoring one.
+        /// Branches whose <see cref="ISolutionObjective.UpperBound"/> cannot beat the current best are skipped.
+        /// If the node budget runs out, the best solution found so far is returned with IsProvenOptimal = false.
+        /// </summary>
+        public SolveResult SolveBest(CspProblem problem, ISolutionObjective objective, SolverOptions options = null)
+        {
+            if (problem == null) throw new ArgumentNullException(nameof(problem));
+            if (objective == null) throw new ArgumentNullException(nameof(objective));
+            return new Search(problem, options ?? new SolverOptions(), objective).Run();
         }
 
         private sealed class NodeLimitException : Exception
@@ -132,10 +181,17 @@ namespace LabLockdown.AI.Facility.Csp
             private readonly List<int> order = new List<int>();
             private readonly SolverStats stats = new SolverStats();
 
-            public Search(CspProblem problem, SolverOptions options)
+            // Branch and bound state (objective == null means "first solution" mode).
+            private readonly ISolutionObjective objective;
+            private double bestScore = double.NegativeInfinity;
+            private int[] bestValues;
+            private List<int> bestOrder;
+
+            public Search(CspProblem problem, SolverOptions options, ISolutionObjective objective)
             {
                 this.problem = problem;
                 this.options = options;
+                this.objective = objective;
                 count = problem.Variables.Count;
                 assignment = new Assignment(count);
 
@@ -165,17 +221,34 @@ namespace LabLockdown.AI.Facility.Csp
                 if (!ApplyNodeConsistency())
                     return new SolveResult(SolveStatus.NoSolution, null, new List<int>(), stats);
 
+                bool exhausted;
+                bool found;
                 try
                 {
-                    bool solved = Backtrack();
-                    return solved
-                        ? new SolveResult(SolveStatus.Solved, assignment.ToArray(), new List<int>(order), stats)
-                        : new SolveResult(SolveStatus.NoSolution, null, new List<int>(), stats);
+                    found = Backtrack();
+                    exhausted = true;
                 }
                 catch (NodeLimitException)
                 {
-                    return new SolveResult(SolveStatus.NodeLimitReached, null, new List<int>(), stats);
+                    found = false;
+                    exhausted = false;
                 }
+
+                if (objective == null)
+                {
+                    if (found)
+                        return new SolveResult(SolveStatus.Solved, assignment.ToArray(), new List<int>(order), stats);
+                    return exhausted
+                        ? new SolveResult(SolveStatus.NoSolution, null, new List<int>(), stats)
+                        : new SolveResult(SolveStatus.NodeLimitReached, null, new List<int>(), stats);
+                }
+
+                // Branch and bound: Backtrack() never stops early, so the result is the best seen.
+                if (bestValues != null)
+                    return new SolveResult(SolveStatus.Solved, bestValues, bestOrder, stats, bestScore, isProvenOptimal: exhausted);
+                return exhausted
+                    ? new SolveResult(SolveStatus.NoSolution, null, new List<int>(), stats)
+                    : new SolveResult(SolveStatus.NodeLimitReached, null, new List<int>(), stats);
             }
 
             /// <summary>Removes every value that breaks a unary constraint. Returns false if any domain becomes empty.</summary>
@@ -201,7 +274,21 @@ namespace LabLockdown.AI.Facility.Csp
 
             private bool Backtrack()
             {
-                if (assignment.IsComplete) return true;
+                if (assignment.IsComplete)
+                {
+                    stats.SolutionsFound++;
+                    if (objective == null) return true;
+
+                    double score = objective.Score(assignment);
+                    if (score > bestScore)
+                    {
+                        bestScore = score;
+                        bestValues = assignment.ToArray();
+                        bestOrder = new List<int>(order);
+                    }
+
+                    return false; // keep searching for a better solution
+                }
 
                 int variable = SelectUnassignedVariable();
                 foreach (int index in OrderDomainValues(variable))
@@ -214,9 +301,16 @@ namespace LabLockdown.AI.Facility.Csp
                         int mark = trail.Count;
                         if (!options.UseForwardChecking || ForwardCheck(variable))
                         {
-                            order.Add(variable);
-                            if (Backtrack()) return true;
-                            order.RemoveAt(order.Count - 1);
+                            if (objective != null && objective.UpperBound(assignment) <= bestScore)
+                            {
+                                stats.BoundPrunes++; // this branch cannot beat the best solution so far
+                            }
+                            else
+                            {
+                                order.Add(variable);
+                                if (Backtrack()) return true;
+                                order.RemoveAt(order.Count - 1);
+                            }
                         }
 
                         Restore(mark);

@@ -136,6 +136,14 @@ namespace LabLockdown.AI.Facility
             return true;
         }
 
+        /// <summary>The edge carrying the given door, or null if no edge has that door.</summary>
+        public GraphEdge FindDoorEdge(string doorId)
+        {
+            foreach (var edge in edges)
+                if (edge.DoorId == doorId) return edge;
+            return null;
+        }
+
         public static bool IsPassable(GraphEdge edge, ICollection<string> lockedDoors)
             => !edge.IsDoor || lockedDoors == null || !lockedDoors.Contains(edge.DoorId);
 
