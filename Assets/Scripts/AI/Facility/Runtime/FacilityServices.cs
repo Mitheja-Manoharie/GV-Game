@@ -21,7 +21,7 @@ namespace LabLockdown.AI.Facility.Runtime
         void SetLocked(string doorId, bool locked);
     }
 
-    /// <summary>The player's health, 0 to 1. Implemented by the Core Developer's player code.</summary>
+    /// <summary>The player's health, 0 to 1. Implemented by the human player's health script (issue #25).</summary>
     public interface IPlayerStatusSource
     {
         float Health01 { get; }
