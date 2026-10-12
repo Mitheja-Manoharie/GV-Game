@@ -65,6 +65,16 @@ namespace LabLockdown.AI.Facility.Runtime
             }
         }
 
+        /// <summary>Spawn markers in the same order as <see cref="SpawnNodes"/>.</summary>
+        public IReadOnlyList<SpawnPointMarker> SpawnMarkers
+        {
+            get
+            {
+                if (graph == null) Build();
+                return spawnMarkers;
+            }
+        }
+
         public Vector3 NodePosition(int nodeId)
         {
             var node = Graph.Nodes[nodeId];
