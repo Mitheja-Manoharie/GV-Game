@@ -13,7 +13,7 @@ use and which doors to lock.
 | **Performance** | Keep player tension in a target range; the game must always stay fair and winnable |
 | **Environment** | Level graph (rooms, corridors, doors), player state, enemies alive |
 | **Actuators** | Spawn enemies at spawn points; lock and unlock doors |
-| **Sensors** | Player node, health, recent damage, kills, calm time, progress to exit, door states, enemy count |
+| **Sensors** | Player node, health, recent damage, calm time, progress to exit, door states, enemy count, line of sight, occupied spawn points, blocked doorways |
 
 ## Architecture
 
@@ -23,7 +23,8 @@ use and which doors to lock.
    spawn points and door states under hard constraints:
    - not visible to the player
    - path distance within [d_min, d_max]
-   - one enemy per spawn point
+   - one enemy per spawn point, and only on free spawn points
+   - never lock a door with something in the doorway
    - the exit stays reachable with the chosen doors locked
    - every spawn can reach the player
    - never lock the player in, at most L doors locked
@@ -32,10 +33,10 @@ use and which doors to lock.
 
 | Assembly | Contents | Unity dependency |
 |---|---|---|
-| `LabLockdown.AI.Facility.Core` | `LevelGraph`, `LevelGraphBuilder`, `LabLockdownLayout`, `Csp/` solver, `Director/` (intensity model, facility CSP, director) | **None** (`noEngineReferences`) |
-| `LabLockdown.AI.Facility.Runtime` | `LevelGraphProvider`, `SpawnPointMarker`, `FacilityDirectorRunner`, service interfaces and placeholders | Yes |
+| `LabLockdown.AI.Facility.Core` | `LevelGraph`, `LevelGraphBuilder`, `LabLockdownLayout`, `Csp/` solver, `Director/` (intensity model, facility CSP, director, `Simulation/` pacing simulator) | **None** (`noEngineReferences`) |
+| `LabLockdown.AI.Facility.Runtime` | `LevelGraphProvider`, `SpawnPointMarker`, `FacilityDirectorRunner`, `FacilityEvents`, service interfaces and placeholders | Yes |
 | Assembly-CSharp (`AI/FacilityIntegration`) | `DoorControllerDoorService`: adapter to the Systems Engineer's `DoorController` | Yes |
-| `LabLockdown.AI.Facility.Tests` | EditMode unit tests for the core | Test runner only |
+| `LabLockdown.AI.Facility.Tests` | EditMode unit and pacing tests for the core | Test runner only |
 
 The decision logic ("brain") cannot reference Unity, which enforces the separation of AI logic
 from visuals and lets every algorithm be unit tested.
@@ -143,9 +144,10 @@ budget, and **200 random problems checked against brute force for every combinat
 | Kind | Constraint |
 |---|---|
 | unary | spawn hidden from the player (line of sight) |
+| unary | spawn point free: nothing already standing on it *(Week 4)* |
 | unary | spawn not in the player's area |
 | unary | spawn 12–40 m walking distance from the player |
-| unary | door open if the player is at it / it has been locked ≥ 25 s / the player is hurt |
+| unary | door open if the player is at it / something is in the doorway *(Week 4)* / it has been locked ≥ 25 s / the player is hurt |
 | unary | door keeps its state for 10 s after changing (cooldown) |
 | unary | door open when locking is not allowed |
 | binary | Spawn_i < Spawn_i+1 (all-different plus symmetry breaking) |
@@ -197,6 +199,167 @@ The simulation caught two pacing problems that every test passed: robots spawnin
 still choosing gear, and a 40 % health player receiving a full wave. Hence the safe-area rule and wave
 sizes that grow with intensity. Decisions take about 1 ms (.NET 8): 4–120 search nodes, always proven optimal.
 
+## Week 4: edge cases, tuning, integration
+
+### Edge cases
+
+| Situation | Risk | Handling |
+|---|---|---|
+| Something already on a spawn point (a robot that has not moved, a dragged canister) | robots spawn inside each other or inside props | The runner checks a 0.75 m sphere at each marker for enemies (`NavMeshAgent`), the player (`CharacterController`) and physics props (`Rigidbody`). New unary constraint: *spawn on a free spawn point*. |
+| Something in an open doorway | locking shuts the door on a robot or prop; a robot gets stuck in the carving obstacle | The runner checks a box covering the doorway (4 × 2 × 1.5 m, in the door's frame). New door rule: *must be open: something is in the doorway*. Only open doors are checked, so a robot waiting at a locked door does not unlock it. |
+| Player off the level graph (falling, out of bounds, more than 3 m from any tile centre or below y = −2) | decisions made for the wrong room | The runner skips the decision, shows *Waiting: …* in the overlay and retries every second. The Director itself rejects invalid nodes. |
+| Time spent choosing gear counted as calm | the first fight after the armoury was always a peak | Calm time only counts from when the player leaves a safe area. |
+| Every spawn point blocked | – | Zero spawns: still a valid decision, not the fallback. |
+| Decision cost | frame hitches | Timed with a stopwatch and shown in the overlay. .NET 8, 2,000 random states: median 0.08 ms, 95th percentile 0.37 ms, max 5.3 ms. |
+
+### Pacing simulator
+
+`PacingSimulator.Run(level, settings, player, seed)` plays a whole run against the **real Director** on the
+real level graph, in 0.5 s steps:
+
+- **The simulated player:**
+  - walks the shortest open route at 2.5 m/s and stops to fight while robots are engaging;
+  - loses health for each engaging robot and defeats robots at a skill-dependent rate;
+  - regenerates after 6 s without damage, and uses the three medkits.
+- **Robots** reach the player at 3 m/s along the graph.
+- **Three player profiles:**
+
+  | Profile | Robots defeated per second | Health lost per robot per second |
+  |---|---|---|
+  | Weak | 0.15 | 1.8 % |
+  | Average | 0.25 | 1.2 % |
+  | Strong | 0.40 | 0.8 % |
+
+  Each run varies these values by ±20 %.
+- Results are deterministic for a given seed.
+
+It models pacing, not combat. Its numbers are for comparing settings with each other, not for predicting how
+real players will do.
+
+### Experiment: adaptive vs fixed difficulty
+
+50 runs per cell. *Fixed pressure* uses a constant intensity with no relief.
+
+| Director | Weak: finished / lowest health / robots per min | Average | Strong |
+|---|---|---|---|
+| **Adaptive (default)** | **98 % / 0.14 / 4.9** | **100 % / 0.57 / 8.7** | **100 % / 0.84 / 9.5** |
+| Adaptive, no relief | 34 % / 0.03 / 6.1 | 100 % / 0.54 / 9.0 | 100 % / 0.80 / 9.9 |
+| Fixed 0.70 | 0 % / 0.00 / 8.9 | 0 % / 0.00 / 11.4 | 0 % / 0.00 / 13.8 |
+| Fixed 0.50 | 0 % / 0.00 / 7.6 | 100 % / 0.65 / 9.6 | 100 % / 0.90 / 9.2 |
+| Fixed 0.35 | 100 % / 0.49 / 5.7 | 100 % / 0.88 / 6.2 | 100 % / 0.96 / 7.1 |
+
+- **No single fixed level suits every player.**
+  - Fixed 0.50 kills every weak player.
+  - Fixed 0.35 barely touches a strong player: their lowest health is 96 %.
+- **The adaptive Director:**
+  - gives the weak player about half the robots it gives the strong player (4.9 vs 9.5 per minute);
+  - still pushes the strong player (lowest health 84 %).
+- **Relief is the mechanism that matters most.** Without it, weak-player survival drops from 98 % to 34 %.
+- **Fairness held in every run:**
+  - the exit stayed reachable in all 750 adaptive runs;
+  - the fallback was never needed in 1,445 decisions;
+  - every decision was proven optimal (median 9 search nodes, max 88).
+
+![Pacing for a weak, average and strong player](FacilityAI_pacing.png)
+
+### Tuning
+
+Fixing calm time removed every peak: intensity no longer reached 0.8, so runs had no climax.
+
+Candidate settings, 50 runs each:
+
+| Change | Weak survival | Peaks per run | Locks per average run |
+|---|---|---|---|
+| none | 100 % | 0 | 1.1 |
+| peak threshold 0.80 → 0.75 | 98 % | 1.0 | 2.0 |
+| **calm saturation 20 s → 12 s** | **98 %** | **1.0** | **2.0** |
+| progress weight 0.25 → 0.35 | 94 % | 1.0 | 2.8 |
+| progress 0.35 + calm 12 s | 88 % | 1.0 | 2.6 |
+
+**Chosen: calm saturation 12 s.** It gives the same result as lowering the peak threshold, but it changes
+*what triggers* a peak (a healthy player who has been calm for a while) instead of making peaks easier to
+reach for everyone. Raising the progress weight cost weak players too much.
+
+### Debug overlay
+
+- **Live intensity graph** covering the last 60 s:
+  - intensity in blue and health in orange;
+  - build-up and peak bands;
+  - lock and peak threshold lines.
+
+  It is sampled every 0.5 s with `FacilityDirector.PreviewIntensity`, the same calculation a decision uses,
+  but without changing the Director's memory.
+- **Text panel additions:**
+  - why the Director is waiting;
+  - blocked spawn points and doorways;
+  - decision time (last and max).
+- **Gizmos:** magenta marks occupied spawn points and blocked doorways.
+
+### Integration for teammates
+
+`FacilityEvents` (namespace `LabLockdown.AI.Facility.Runtime`) announces what the Facility AI does.
+Teammates' scripts in Assembly-CSharp can subscribe without referencing the runner.
+
+| Event / property | Typical use |
+|---|---|
+| `DoorLockChanged(doorId, locked)` | robots re-plan their path (`NavMeshAgent.ResetPath` / `SetDestination`) |
+| `WaveSpawned(positions, phase)` | alarm sound, warning UI |
+| `PhaseChanged(previous, current)` | music and lighting intensity (e.g. red lights at Peak) |
+| `DecisionMade(decision)` | logging, analytics |
+| `Phase`, `Intensity`, `IsDoorLocked(id)`, `LockedDoors` | polling instead of events |
+
+```csharp
+using LabLockdown.AI.Facility.Runtime;
+
+void OnEnable()  => FacilityEvents.DoorLockChanged += OnDoorLockChanged;
+void OnDisable() => FacilityEvents.DoorLockChanged -= OnDoorLockChanged;
+
+void OnDoorLockChanged(string doorId, bool locked)
+{
+    if (locked) agent.SetDestination(target.position); // re-plan around the locked door
+}
+```
+
+**Behaviour:**
+
+- Events are raised after the decision has been applied to the scene.
+- A subscriber that throws does not stop the others.
+- Subscribers are cleared when Play mode starts.
+
+**What teammates need to provide:**
+
+- Robots need a non-trigger collider, so spawn points and doorways can detect them.
+- Props that can block a doorway need a `Rigidbody`.
+- When the player respawns, call `FacilityDirectorRunner.ResetDirector()`.
+
+### Verification
+
+There are now 77 tests (16 new).
+
+**Edge-case tests (8):**
+
+- occupied spawn points;
+- obstructed doors;
+- calm time after leaving the safe area (two tests);
+- `PreviewIntensity`;
+- an off-graph player;
+- null percept collections;
+- every spawn point blocked.
+
+**Random-games test:** it now also randomises occupied spawn points and obstructed doors.
+
+**Pacing tests (8):** 20 full simulated runs per player type check that:
+
+- the exit is always reachable and the enemy cap holds;
+- average and strong players always finish, and weak players finish at least 90 % of runs;
+- adaptive pacing beats fixed 0.5 for the weak player;
+- the weak player meets fewer than 75 % of the strong player's robots per minute;
+- every average-player run has a climax, followed by a relief window with no spawns;
+- adaptive pacing challenges a strong player more than fixed 0.35;
+- the simulation is deterministic.
+
+The runtime code compiles against Unity API stubs. Behaviour in the scene still needs a check in Play mode.
+
 ## Default spawn points
 
 Eight candidates spread over both routes; none in the quarantine cell, armoury or control room:
@@ -210,5 +373,5 @@ InfirmaryNorth, WestCorridor.
 | 1 | Level graph, BFS/Dijkstra, gizmos, spawn markers, tests ✅ |
 | 2 | Generic CSP solver (backtracking, MRV + degree, LCV, forward checking) + tests ✅ |
 | 3 | Facility constraints, intensity model, branch and bound, director, spawn/door services ✅ |
-| 4 | Edge cases, tuning, debug overlay, integration |
+| 4 | Edge cases, pacing simulator and tuning, live intensity graph, events for teammates ✅ |
 | 5 | Performance checks, viva preparation |
