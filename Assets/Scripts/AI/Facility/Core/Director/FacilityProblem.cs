@@ -74,8 +74,9 @@ namespace LabLockdown.AI.Facility.Director
     ///   one per lockable door – domain: {Open = 0, Locked = 1}
     ///
     /// Constraints
-    ///   unary   Spawn hidden from the player, not in the player's area, within the walking-distance window
-    ///   unary   door rules: open when the player is at it / locked too long / player hurt;
+    ///   unary   Spawn hidden from the player, on a free spawn point, not in the player's area,
+    ///           within the walking-distance window
+    ///   unary   door rules: open when the player is at it / the doorway is obstructed / locked too long / player hurt;
     ///           otherwise keep its state during the cooldown; otherwise open if locking is not allowed
     ///   binary  Spawn_i &lt; Spawn_i+1 (all different + symmetry breaking: spawn slots are interchangeable)
     ///   global  the exit stays reachable from the player with the chosen doors locked
@@ -135,6 +136,7 @@ namespace LabLockdown.AI.Facility.Director
                 spawnVariables[i] = v;
 
                 problem.AddUnary($"{name} hidden from the player", v, node => !percepts.VisibleNodes.Contains(node));
+                problem.AddUnary($"{name} on a free spawn point", v, node => !percepts.OccupiedSpawnNodes.Contains(node));
                 problem.AddUnary($"{name} not in the player's area ({playerArea})", v, node => graph.Nodes[node].Area != playerArea);
                 problem.AddUnary($"{name} {settings.MinSpawnDistance:0}–{settings.MaxSpawnDistance:0} m from the player", v,
                     node => playerDistance[node] >= settings.MinSpawnDistance && playerDistance[node] <= settings.MaxSpawnDistance);
@@ -170,6 +172,11 @@ namespace LabLockdown.AI.Facility.Director
                 if (playerAtDoor)
                 {
                     rule = $"{id} must be open: the player is at the door";
+                    allowed = new[] { Open };
+                }
+                else if (percepts.ObstructedDoors.Contains(id))
+                {
+                    rule = $"{id} must be open: something is in the doorway";
                     allowed = new[] { Open };
                 }
                 else if (lockedFor >= settings.MaxLockSeconds)
