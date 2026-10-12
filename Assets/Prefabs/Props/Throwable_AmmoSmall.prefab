@@ -12,6 +12,8 @@ GameObject:
   - component: {fileID: 446028006609804742}
   - component: {fileID: 3249729593477113553}
   - component: {fileID: 8148609206756244335}
+  - component: {fileID: 1988818692565779248}
+  - component: {fileID: 102185332194997424}
   m_Layer: 7
   m_Name: Throwable_AmmoSmall
   m_TagString: Untagged
@@ -112,3 +114,52 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.40230688, y: 0.28336364, z: 0.4338416}
   m_Center: {x: 0, y: 0.15019292, z: 0.000000007450581}
+--- !u!54 &1988818692565779248
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 395714326884165867}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
+--- !u!114 &102185332194997424
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 395714326884165867}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da9c9f4d50c46d4489031a50c2efe185, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GVGame.Interaction.PhysicsProp
+  kind: 0
+  mass: 0.6
+  linearDamping: 0.05
+  angularDamping: 0.1
+  noiseSpeedThreshold: 2.5
+  noiseLoudness: 8
+  impactClip: {fileID: 0}
+  impactVolume: 0.7
+  noiseCooldown: 0.25
+  carveNavMesh: 0
