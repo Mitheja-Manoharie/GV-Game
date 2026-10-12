@@ -258,7 +258,12 @@ namespace LabLockdown.AI.Facility.Tests
                         LockedDoors = new HashSet<string>(locked),
                     };
                     foreach (int node in candidates)
+                    {
                         if (random.NextDouble() < 0.3) percepts.VisibleNodes.Add(node);
+                        if (random.NextDouble() < 0.15) percepts.OccupiedSpawnNodes.Add(node);
+                    }
+                    foreach (string door in settings.LockableDoors)
+                        if (!locked.Contains(door) && random.NextDouble() < 0.15) percepts.ObstructedDoors.Add(door);
 
                     var decision = director.Decide(percepts);
                     AssertDecisionIsFair(decision, percepts, settings);
@@ -294,6 +299,7 @@ namespace LabLockdown.AI.Facility.Tests
             {
                 var edge = graph.FindDoorEdge(door);
                 Assert.Greater(Math.Min(playerDistance[edge.A], playerDistance[edge.B]), edge.Cost, $"{door} locked next to the player: {context}");
+                Assert.IsFalse(percepts.ObstructedDoors.Contains(door), $"{door} locked while obstructed: {context}");
             }
 
             var seen = new HashSet<int>();
@@ -302,6 +308,7 @@ namespace LabLockdown.AI.Facility.Tests
                 var tile = graph.Nodes[node];
                 Assert.IsTrue(seen.Add(node), "Duplicate spawn: " + context);
                 Assert.IsFalse(percepts.VisibleNodes.Contains(node), "Visible spawn: " + context);
+                Assert.IsFalse(percepts.OccupiedSpawnNodes.Contains(node), "Occupied spawn: " + context);
                 Assert.IsFalse(LabLockdownLayout.IsSafeArea(tile.Area), "Spawn in safe area: " + context);
                 Assert.AreNotEqual(graph.Nodes[percepts.PlayerNode].Area, tile.Area, "Spawn in player's area: " + context);
                 Assert.That(playerDistance[node], Is.InRange(settings.MinSpawnDistance, settings.MaxSpawnDistance), "Distance: " + context);

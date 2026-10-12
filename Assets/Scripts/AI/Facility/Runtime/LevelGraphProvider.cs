@@ -75,6 +75,21 @@ namespace LabLockdown.AI.Facility.Runtime
             }
         }
 
+        /// <summary>Parent of the Door_* markers (Environment/Doors), or null if the scene has none.</summary>
+        public Transform DoorMarkersRoot
+        {
+            get
+            {
+                if (doorMarkersRoot == null)
+                {
+                    var doors = GameObject.Find("Environment/Doors");
+                    if (doors != null) doorMarkersRoot = doors.transform;
+                }
+
+                return doorMarkersRoot;
+            }
+        }
+
         public Vector3 NodePosition(int nodeId)
         {
             var node = Graph.Nodes[nodeId];

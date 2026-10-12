@@ -61,6 +61,7 @@ namespace LabLockdown.AI.Facility.Director
         private readonly Dictionary<string, DoorMemory> doors = new Dictionary<string, DoorMemory>();
         private readonly List<int> recentSpawns = new List<int>();
         private double reliefUntil = double.NegativeInfinity;
+        private double lastSeenInSafeArea = double.NegativeInfinity;
 
         public FacilityDirector(FacilityLevel level, DirectorSettings settings)
         {
@@ -85,6 +86,7 @@ namespace LabLockdown.AI.Facility.Director
             doors.Clear();
             recentSpawns.Clear();
             reliefUntil = double.NegativeInfinity;
+            lastSeenInSafeArea = double.NegativeInfinity;
             LastDecision = null;
             NextDecisionTime = now + Settings.DecisionIntervalCalm;
         }
@@ -98,12 +100,18 @@ namespace LabLockdown.AI.Facility.Director
             Settings.Validate();
             percepts.VisibleNodes = percepts.VisibleNodes ?? new HashSet<int>();
             percepts.LockedDoors = percepts.LockedDoors ?? new HashSet<string>();
+            percepts.OccupiedSpawnNodes = percepts.OccupiedSpawnNodes ?? new HashSet<int>();
+            percepts.ObstructedDoors = percepts.ObstructedDoors ?? new HashSet<string>();
             SyncDoorMemory(percepts);
 
             float progress = Level.Progress(percepts.PlayerNode);
             bool inSafeArea = LabLockdownLayout.IsSafeArea(Level.Graph.Nodes[percepts.PlayerNode].Area);
-            var evaluation = IntensityModel.Evaluate(percepts, progress, Settings, percepts.Time < reliefUntil, inSafeArea);
             var notes = new List<string>();
+
+            if (inSafeArea) lastSeenInSafeArea = percepts.Time;
+            percepts.CalmSeconds = EffectiveCalmSeconds(percepts, inSafeArea);
+
+            var evaluation = IntensityModel.Evaluate(percepts, progress, Settings, percepts.Time < reliefUntil, inSafeArea);
 
             // Graceful degradation: ask for k spawns; if the constraints cannot be met, ask for fewer.
             FacilityProblem facility = null;
@@ -176,6 +184,34 @@ namespace LabLockdown.AI.Facility.Director
             NextDecisionTime = percepts.Time + evaluation.DecisionDelay;
             LastDecision = decision;
             return decision;
+        }
+
+        /// <summary>
+        /// The intensity the Director would compute right now, without deciding or changing its memory.
+        /// Used by the live intensity graph in the debug overlay.
+        /// </summary>
+        public float PreviewIntensity(FacilityPercepts percepts)
+        {
+            if (percepts == null) throw new ArgumentNullException(nameof(percepts));
+            if (percepts.PlayerNode < 0 || percepts.PlayerNode >= Level.Graph.NodeCount) return 0f;
+
+            bool inSafeArea = LabLockdownLayout.IsSafeArea(Level.Graph.Nodes[percepts.PlayerNode].Area);
+            float calm = percepts.CalmSeconds;
+            percepts.CalmSeconds = EffectiveCalmSeconds(percepts, inSafeArea);
+            float intensity = IntensityModel.ComputeIntensity(percepts, Level.Progress(percepts.PlayerNode), Settings);
+            percepts.CalmSeconds = calm;
+            return intensity;
+        }
+
+        /// <summary>
+        /// Time spent choosing gear in a safe area is preparation, not boredom: outside a safe area, calm time
+        /// only counts from when the player was last seen in one. Otherwise the first encounter after the
+        /// armoury would always be a peak.
+        /// </summary>
+        private float EffectiveCalmSeconds(FacilityPercepts percepts, bool inSafeArea)
+        {
+            if (inSafeArea) return percepts.CalmSeconds;
+            return (float)Math.Min(percepts.CalmSeconds, percepts.Time - lastSeenInSafeArea);
         }
 
         /// <summary>Keeps lock times in step with the real doors (they may be changed by other code).</summary>

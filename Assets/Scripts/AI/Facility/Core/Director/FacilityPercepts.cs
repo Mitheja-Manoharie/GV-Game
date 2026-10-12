@@ -30,5 +30,11 @@ namespace LabLockdown.AI.Facility.Director
 
         /// <summary>Doors that are locked right now (read from the door system, the source of truth).</summary>
         public ICollection<string> LockedDoors = new HashSet<string>();
+
+        /// <summary>Spawn candidate nodes with something already standing on them (an enemy, a dragged crate).</summary>
+        public ICollection<int> OccupiedSpawnNodes = new HashSet<int>();
+
+        /// <summary>Doors with an enemy or a movable prop in the doorway: locking them would trap or clip it.</summary>
+        public ICollection<string> ObstructedDoors = new HashSet<string>();
     }
 }

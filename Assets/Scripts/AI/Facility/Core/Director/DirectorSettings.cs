@@ -54,7 +54,7 @@ namespace LabLockdown.AI.Facility.Director
         public float CalmWeight = 0.3f;
 
         /// <summary>Calm time at which the "player is bored" term reaches its maximum.</summary>
-        public float CalmSaturationSeconds = 20f;
+        public float CalmSaturationSeconds = 12f;
 
         public float DamageWeight = 0.5f;
         public float CrowdWeight = 0.4f;
