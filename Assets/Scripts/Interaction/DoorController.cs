@@ -1,16 +1,26 @@
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace GVGame.Interaction
 {
     /// <summary>
-    /// Hinged door driven by a kinematic Rigidbody so it correctly pushes / blocks the player
-    /// and dynamic props. Swing angle is clamped between closed (0) and openAngle, and the door
-    /// always swings AWAY from whoever interacts with it.
+    /// One controller per door. Drives one or more hinged LEAVES (the Door_* markers use two panels).
+    /// Each leaf is a child object with a kinematic Rigidbody + collider whose pivot is the hinge.
+    /// Expected hierarchy:
+    ///   Door_X (this component, on the marker; marker local X = along the opening, local Z = door normal)
+    ///     |- Hinge_L  (Rigidbody, collider, panel model)
+    ///     |- Hinge_R  (Rigidbody, collider, panel model, rotated 180 degrees)
+    ///     |- AutoOpenTrigger (optional, for AI)
+    /// A single-leaf door also works: put this component on the hinge object itself.
     ///
-    /// Hierarchy expected:  DoorController (this, sits on the hinge pivot)
-    ///                        └─ Leaf (mesh + collider, offset from the pivot)
+    /// Behaviour (per leaf, so a blocked leaf never stops the other one):
+    ///   light prop (<= maxPushableMass)  -> shoved aside at reduced speed
+    ///   heavy movable prop               -> door STOPS; walking into it forces it open slowly up to maxPryAngle
+    ///   the player / immovable           -> door stops (never crushes, never pushes the player)
+    /// The door always swings AWAY from whoever opens it.
+    /// Public API used by the Facility AI adapter: Current, IsLocked, SetLocked, Open, Close, Toggle.
     /// </summary>
-    [RequireComponent(typeof(Rigidbody))]
     public class DoorController : MonoBehaviour, IInteractable
     {
         public enum State { Closed, Opening, Open, Closing }
@@ -29,51 +39,95 @@ namespace GVGame.Interaction
         public float autoCloseDelay = 0f;
 
         [Header("Obstacles")]
-        [Tooltip("Props up to this mass are pushed aside by the swinging door. Heavier props (and the player) stop it.")]
+        [Tooltip("Props up to this mass are pushed aside by a swinging leaf.")]
         public float maxPushableMass = 10f;
-        [Tooltip("Swing speed multiplier while shoving a light prop.")]
         [Range(0.1f, 1f)] public float pushSpeedFactor = 0.5f;
-        [Tooltip("Heavier props up to this mass block the door, but the player can FORCE it open by walking into it (slowly, limited angle). Above this nothing can move them.")]
+        [Tooltip("Heavier props up to this mass block the leaf, but the player can FORCE it by walking into it.")]
         public float maxPryMass = 120f;
-        [Tooltip("Swing speed multiplier while the player forces the door against a heavy prop.")]
         [Range(0.05f, 0.5f)] public float pryFactor = 0.12f;
-        [Tooltip("Maximum angle the door can be forced open against a heavy prop: enough to squeeze through, not to clear the way.")]
+        [Tooltip("Maximum angle a leaf can be forced open against a heavy prop (enough to squeeze through).")]
         [Range(10f, 90f)] public float maxPryAngle = 60f;
+
+        [Header("NavMesh")]
+        [Tooltip("If true, every closed leaf carves the NavMesh (issue #11 option). Default off: the Facility AI " +
+                 "adds its own barrier on LOCKED doors, and robots open unlocked doors.")]
+        public bool blockNavMeshWhenClosed = false;
 
         [Header("Feedback (optional)")]
         public AudioClip openClip;
         public AudioClip closeClip;
         public AudioClip lockedClip;
         [Range(0f, 1f)] public float volume = 0.8f;
-        [Tooltip("Loudness emitted to the AI noise bus when the door moves.")]
+        [Tooltip("Loudness emitted to the AI noise bus when the door starts opening.")]
         public float noiseLoudness = 6f;
 
         public State Current { get; private set; } = State.Closed;
         public bool IsLocked { get; private set; }
 
-        Rigidbody _rb;
-        Quaternion _closedRot;
-        float _angle;          // signed current angle from closed
-        float _targetAngle;
-        float _openSign = 1f;  // +1 / -1 swing direction
-        float _closeTimer;
-        AudioSource _audio;
-        Collider[] _cols;
-        float _blockedUntil;
-        bool _pryable;          // blocked by a heavy-but-movable prop: walking into the door can force it
-        bool _forcingActive;    // the player is currently shouldering the door open
-        float _forceUntil;
+        class Leaf
+        {
+            public Rigidbody rb;
+            public Quaternion closedLocal;
+            public Vector3 radial0;      // horizontal hinge -> leaf centre when closed
+            public float radius;         // safe swing radius
+            public float sign = 1f;      // maps "swing magnitude" to a signed rotation about +Y
+            public float mag;            // current opening magnitude (0 = closed)
+            public float target;         // target magnitude
+            public bool pryable;         // blocked by a heavy-but-movable prop
+            public bool forcing;         // player is shouldering this leaf open
+            public float forceUntil;
+            public NavMeshObstacle obstacle;
+            public bool carving;
+        }
 
         enum Obstacle { None, Light, Pry, Heavy }   // order matters: later = stronger
 
+        Leaf[] _leaves;
+        Vector3 _closedForward;
+        Vector3 _swingDir;
+        bool _wantOpen;
+        float _closeTimer;
+        float _blockedUntil;
+        AudioSource _audio;
+
         void Awake()
         {
-            _rb = GetComponent<Rigidbody>();
-            _rb.isKinematic = true;
-            _rb.interpolation = RigidbodyInterpolation.Interpolate;
-            _closedRot = transform.localRotation;
-            _cols = GetComponentsInChildren<Collider>();
             IsLocked = startLocked;
+
+            _closedForward = Vector3.ProjectOnPlane(transform.forward, Vector3.up);
+            _closedForward = _closedForward.sqrMagnitude > 1e-4f ? _closedForward.normalized : Vector3.forward;
+            _swingDir = -_closedForward;
+
+            var list = new List<Leaf>();
+            foreach (Rigidbody rb in GetComponentsInChildren<Rigidbody>())
+            {
+                rb.isKinematic = true;
+                rb.interpolation = RigidbodyInterpolation.Interpolate;
+
+                Bounds b = default;
+                bool has = false;
+                foreach (Collider c in rb.GetComponentsInChildren<Collider>())
+                {
+                    if (c.isTrigger) continue;
+                    if (!has) { b = c.bounds; has = true; } else b.Encapsulate(c.bounds);
+                }
+
+                Vector3 r = has ? b.center - rb.transform.position : rb.transform.right;
+                r.y = 0f;
+                if (r.sqrMagnitude < 1e-4f) r = rb.transform.right;
+
+                var leaf = new Leaf
+                {
+                    rb = rb,
+                    closedLocal = rb.transform.localRotation,
+                    radial0 = r,
+                    radius = has ? r.magnitude + new Vector2(b.extents.x, b.extents.z).magnitude : 1f
+                };
+                if (blockNavMeshWhenClosed) AddObstacle(leaf);
+                list.Add(leaf);
+            }
+            _leaves = list.ToArray();
+            ApplySwingSigns();
 
             _audio = GetComponent<AudioSource>();
             if (_audio == null)
@@ -89,14 +143,14 @@ namespace GVGame.Interaction
         public string GetPrompt(Transform interactor)
         {
             if (IsLocked) return "Locked";
-            if (_pryable) return "Door blocked - walk into it to force it";
+            if (Current == State.Closed && AnyPryable()) return "Door blocked - walk into it to force it";
             if (Time.time < _blockedUntil) return "Door blocked";
             return Current == State.Closed || Current == State.Closing ? "Open door" : "Close door";
         }
 
         public void Interact(Transform interactor) => Toggle(interactor);
 
-        // ---------- Public API (also usable by AI / triggers / other scripts) ----------
+        // ---------- Public API ----------
         public void Toggle(Transform from)
         {
             if (IsLocked) { PlayClip(lockedClip); return; }
@@ -108,8 +162,10 @@ namespace GVGame.Interaction
         {
             if (IsLocked) { PlayClip(lockedClip); return; }
             ChooseSwingDirection(from);
-            _targetAngle = _openSign * openAngle;
-            if (Current != State.Opening && Current != State.Open)
+            bool wasShut = Current == State.Closed || Current == State.Closing;
+            _wantOpen = true;
+            foreach (Leaf l in _leaves) { l.target = openAngle; l.pryable = false; l.forcing = false; }
+            if (wasShut)
             {
                 PlayClip(openClip);
                 InteractionNoise.Emit(transform.position, noiseLoudness, gameObject);
@@ -118,147 +174,142 @@ namespace GVGame.Interaction
             _closeTimer = autoCloseDelay;
         }
 
-        // Called by PlayerRigidbodyPusher while the player walks into the door. Only works when the door
-        // is blocked by a heavy-but-movable prop: the player shoulders it open, slowly, up to maxPryAngle.
-        public void ForceOpen(Transform pusher)
-        {
-            if (IsLocked || !_pryable) return;
-            ChooseSwingDirection(pusher);
-            _forcingActive = true;
-            _forceUntil = Time.time + 0.2f;      // renewed every frame the player keeps pushing
-            _targetAngle = _openSign * maxPryAngle;
-            Current = State.Opening;
-        }
-
-        // Choose the swing direction only while the door is (nearly) closed.
-        void ChooseSwingDirection(Transform from)
-        {
-            if (from == null || Mathf.Abs(_angle) >= 1f) return;
-            Vector3 r = LeafRadial(out _);
-            // Direction the free edge of the leaf moves for a POSITIVE angle (rotation about +Y).
-            Vector3 swingDir = Vector3.Cross(Vector3.up, r).normalized;
-            Vector3 toOpener = from.position - transform.position;
-            toOpener.y = 0f;
-            // If a positive swing would move the leaf towards the opener, swing the other way.
-            _openSign = Vector3.Dot(swingDir, toOpener) < 0f ? 1f : -1f;
-        }
-
         public void Close()
         {
-            _pryable = false;
-            _forcingActive = false;
-            _targetAngle = 0f;
-            if (Current != State.Closing && Current != State.Closed)
-                PlayClip(closeClip);
+            _wantOpen = false;
+            foreach (Leaf l in _leaves) { l.target = 0f; l.pryable = false; l.forcing = false; }
+            if (Current != State.Closing && Current != State.Closed) PlayClip(closeClip);
             Current = State.Closing;
         }
 
         public void SetLocked(bool locked) => IsLocked = locked;
 
+        /// <summary>
+        /// Called by PlayerRigidbodyPusher while the player walks into the door. Works only on leaves that
+        /// are blocked by a heavy-but-movable prop: the player shoulders that leaf open, slowly.
+        /// </summary>
+        public void ForceOpen(Transform pusher, Collider hit = null)
+        {
+            if (IsLocked) return;
+            Rigidbody hitBody = hit != null ? hit.attachedRigidbody : null;
+            bool any = false;
+            foreach (Leaf l in _leaves)
+            {
+                if (!l.pryable) continue;
+                if (hitBody != null && l.rb != hitBody) continue;
+                l.forcing = true;
+                l.forceUntil = Time.time + 0.2f;     // renewed every frame the player keeps pushing
+                l.target = Mathf.Min(maxPryAngle, openAngle);
+                any = true;
+            }
+            if (!any) return;
+            ChooseSwingDirection(pusher);            // only takes effect while fully closed
+            _wantOpen = true;
+            Current = State.Opening;
+        }
+
+        // ---------- Direction ----------
+        // The door swings away from the opener; chosen only while every leaf is (nearly) closed.
+        void ChooseSwingDirection(Transform from)
+        {
+            if (from == null) return;
+            foreach (Leaf l in _leaves) if (l.mag > 1f) return;
+            Vector3 toOpener = from.position - transform.position;
+            toOpener.y = 0f;
+            _swingDir = Vector3.Dot(toOpener, _closedForward) >= 0f ? -_closedForward : _closedForward;
+            ApplySwingSigns();
+        }
+
+        // Rotating +angle about +Y moves a leaf's free edge along Cross(up, radial).
+        // Pick each leaf's sign so that movement points along the chosen swing direction.
+        void ApplySwingSigns()
+        {
+            foreach (Leaf l in _leaves)
+                l.sign = Vector3.Dot(Vector3.Cross(Vector3.up, l.radial0), _swingDir) >= 0f ? 1f : -1f;
+        }
+
         // ---------- Motion ----------
         void FixedUpdate()
         {
-            // The player stopped pushing: hold the door where it is.
-            if (_forcingActive && Time.time >= _forceUntil)
+            bool anyMoving = false, anyOpen = false;
+            foreach (Leaf l in _leaves)
             {
-                _forcingActive = false;
-                _targetAngle = _angle;
-                Current = Mathf.Abs(_angle) < 0.5f ? State.Closed : State.Open;
+                StepLeaf(l);
+                if (!Mathf.Approximately(l.mag, l.target)) anyMoving = true;
+                if (l.mag > 0.5f) anyOpen = true;
             }
 
-            if (Mathf.Approximately(_angle, _targetAngle))
-            {
-                if (Current == State.Opening) Current = State.Open;
-                else if (Current == State.Closing) Current = State.Closed;
+            if (anyMoving) Current = _wantOpen ? State.Opening : State.Closing;
+            else Current = anyOpen ? State.Open : State.Closed;
 
-                if (Current == State.Open && autoCloseDelay > 0f)
-                {
-                    _closeTimer -= Time.fixedDeltaTime;
-                    if (_closeTimer <= 0f) Close();
-                }
-                return;
+            if (Current == State.Open && autoCloseDelay > 0f)
+            {
+                _closeTimer -= Time.fixedDeltaTime;
+                if (_closeTimer <= 0f) Close();
             }
 
-            float remaining = _targetAngle - _angle;
+            UpdateObstacles();
+        }
+
+        void StepLeaf(Leaf l)
+        {
+            // The player stopped pushing: hold the leaf where it is.
+            if (l.forcing && Time.time >= l.forceUntil) { l.forcing = false; l.target = l.mag; }
+            if (Mathf.Approximately(l.mag, l.target)) return;
+
             float speed = swingSpeed;
             if (smooth)
             {
-                // Slow down near the end (ease-out) but never stall completely.
-                float t = Mathf.Clamp01(Mathf.Abs(remaining) / Mathf.Max(1f, openAngle * 0.35f));
+                float t = Mathf.Clamp01(Mathf.Abs(l.target - l.mag) / Mathf.Max(1f, openAngle * 0.35f));
                 speed *= Mathf.Lerp(0.25f, 1f, t);
             }
-
             float step = speed * Time.fixedDeltaTime;
-            float next = Mathf.MoveTowards(_angle, _targetAngle, step);
+            float next = Mathf.MoveTowards(l.mag, l.target, step);
+            bool opening = l.target > l.mag;
 
-            // Look ahead along the swing (opening AND closing):
-            //   light prop (<= maxPushableMass) -> shoved aside at reduced speed (small hindrance)
-            //   heavy movable prop              -> the door STOPS against it ("Door blocked").
-            //                                      Only if the player walks into the door does it open,
-            //                                      slowly, up to maxPryAngle (squeeze-through gap)
-            //   the player / immovable          -> the door stops (never crushes, never pushes the player)
-            Obstacle obstacle = SweepObstacle(next - _angle);
-            bool opening = Mathf.Abs(_targetAngle) > Mathf.Abs(_angle);
-
-            if (obstacle == Obstacle.Pry)
+            Obstacle ob = SweepObstacle(l, next - l.mag);
+            if (ob == Obstacle.Pry)
             {
-                bool allowed = _forcingActive && opening && Mathf.Abs(_angle) < maxPryAngle;
-                if (!allowed)
-                {
-                    StopAgainstObstacle(opening && Mathf.Abs(_angle) < maxPryAngle);
-                    return;
-                }
-                next = Mathf.MoveTowards(_angle, _targetAngle, step * pryFactor);
-                if (Mathf.Abs(next) > maxPryAngle) next = Mathf.Sign(_targetAngle) * maxPryAngle;
+                bool allowed = l.forcing && opening && l.mag < maxPryAngle;
+                if (!allowed) { StopLeaf(l, opening && l.mag < maxPryAngle); return; }
+                next = Mathf.MoveTowards(l.mag, l.target, step * pryFactor);
+                if (next > maxPryAngle) next = maxPryAngle;
             }
-            else if (obstacle == Obstacle.Heavy)
+            else if (ob == Obstacle.Heavy)
             {
-                StopAgainstObstacle(false);
+                StopLeaf(l, false);
                 return;
             }
-            else if (obstacle == Obstacle.Light)
+            else if (ob == Obstacle.Light)
             {
-                next = Mathf.MoveTowards(_angle, _targetAngle, step * pushSpeedFactor);
+                next = Mathf.MoveTowards(l.mag, l.target, step * pushSpeedFactor);
             }
 
-            _angle = next;
-            // Hard angle limits.
-            float lo = Mathf.Min(0f, _openSign * openAngle), hi = Mathf.Max(0f, _openSign * openAngle);
-            _angle = Mathf.Clamp(_angle, lo, hi);
+            l.mag = Mathf.Clamp(next, 0f, openAngle);
 
-            Quaternion local = _closedRot * Quaternion.Euler(0f, _angle, 0f);
-            Quaternion world = transform.parent != null ? transform.parent.rotation * local : local;
-            _rb.MoveRotation(world);
+            Quaternion local = l.closedLocal * Quaternion.Euler(0f, l.sign * l.mag, 0f);
+            Transform t2 = l.rb.transform;
+            l.rb.MoveRotation(t2.parent != null ? t2.parent.rotation * local : local);
         }
 
-        // Horizontal vector from the hinge to the centre of the leaf's colliders, plus a safe radius.
-        Vector3 LeafRadial(out float radius)
+        void StopLeaf(Leaf l, bool canBeForced)
         {
-            Bounds b = default;
-            bool has = false;
-            foreach (var c in _cols)
-            {
-                if (c == null || c.isTrigger) continue;
-                if (!has) { b = c.bounds; has = true; }
-                else b.Encapsulate(c.bounds);
-            }
-            Vector3 r = has ? b.center - transform.position : transform.right;
-            r.y = 0f;
-            if (r.sqrMagnitude < 1e-4f) r = transform.right;
-            radius = has ? r.magnitude + new Vector2(b.extents.x, b.extents.z).magnitude : 1f;
-            return r;
+            l.pryable = canBeForced;
+            l.forcing = false;
+            l.target = l.mag;
+            _blockedUntil = Time.time + 1.5f;
         }
 
-        // Strongest obstacle found in the path of the next small swing step.
-        Obstacle SweepObstacle(float deltaAngle)
+        // Strongest obstacle in the path of this leaf's next small swing step.
+        Obstacle SweepObstacle(Leaf l, float deltaMag)
         {
-            if (Mathf.Approximately(deltaAngle, 0f)) return Obstacle.None;
-            Vector3 r = LeafRadial(out float radius);
-            Vector3 dir = Vector3.Cross(Vector3.up, r).normalized * Mathf.Sign(deltaAngle);
-            float dist = radius * Mathf.Abs(deltaAngle) * Mathf.Deg2Rad + 0.05f;
+            if (Mathf.Approximately(deltaMag, 0f)) return Obstacle.None;
+            Vector3 r = Quaternion.AngleAxis(l.sign * l.mag, Vector3.up) * l.radial0;
+            Vector3 dir = Vector3.Cross(Vector3.up, r).normalized * Mathf.Sign(deltaMag * l.sign);
+            float dist = l.radius * Mathf.Abs(deltaMag) * Mathf.Deg2Rad + 0.05f;
 
             Obstacle worst = Obstacle.None;
-            foreach (RaycastHit hit in _rb.SweepTestAll(dir, dist, QueryTriggerInteraction.Ignore))
+            foreach (RaycastHit hit in l.rb.SweepTestAll(dir, dist, QueryTriggerInteraction.Ignore))
             {
                 Obstacle o = Classify(hit.collider, hit.rigidbody);
                 if (o > worst) worst = o;
@@ -270,36 +321,47 @@ namespace GVGame.Interaction
         Obstacle Classify(Collider col, Rigidbody body)
         {
             if (col.GetComponent<CharacterController>() != null) return Obstacle.Heavy;   // never push the player
-            if (body == null || body.isKinematic) return Obstacle.None;                   // walls, frame, other doors
+            if (body == null || body.isKinematic) return Obstacle.None;                   // walls, frame, other leaves
             if (body.mass <= maxPushableMass) return Obstacle.Light;
             return body.mass <= maxPryMass ? Obstacle.Pry : Obstacle.Heavy;
         }
 
-        void StopAgainstObstacle(bool canBeForced)
+        bool AnyPryable()
         {
-            _pryable = canBeForced;
-            _forcingActive = false;
-            _targetAngle = _angle;
-            Current = Mathf.Abs(_angle) < 0.5f ? State.Closed : State.Open;   // stays where it is
-            _blockedUntil = Time.time + 1.5f;
+            foreach (Leaf l in _leaves) if (l.pryable) return true;
+            return false;
+        }
+
+        // ---------- NavMesh (optional) ----------
+        void AddObstacle(Leaf l)
+        {
+            var bc = l.rb.GetComponent<BoxCollider>();
+            if (bc == null) { Debug.LogWarning("[Door] " + name + ": leaf has no BoxCollider for a NavMeshObstacle.", this); return; }
+            var ob = l.rb.GetComponent<NavMeshObstacle>();
+            if (ob == null) ob = l.rb.gameObject.AddComponent<NavMeshObstacle>();
+            ob.shape = NavMeshObstacleShape.Box;
+            ob.center = bc.center;
+            ob.size = bc.size;
+            ob.carveOnlyStationary = true;
+            ob.carving = false;
+            l.obstacle = ob;
+        }
+
+        void UpdateObstacles()
+        {
+            if (!blockNavMeshWhenClosed) return;
+            bool carve = Current == State.Closed;
+            foreach (Leaf l in _leaves)
+            {
+                if (l.obstacle == null || l.carving == carve) continue;
+                l.obstacle.carving = carve;
+                l.carving = carve;
+            }
         }
 
         void PlayClip(AudioClip clip)
         {
             if (clip != null && _audio != null) _audio.PlayOneShot(clip, volume);
         }
-
-#if UNITY_EDITOR
-        void OnDrawGizmosSelected()
-        {
-            Gizmos.color = Color.cyan;
-            Vector3 p = transform.position + Vector3.up * 0.1f;
-            Quaternion baseRot = transform.parent != null ? transform.parent.rotation * transform.localRotation : transform.rotation;
-            Gizmos.DrawRay(p, baseRot * Vector3.right * 1.2f);
-            Gizmos.color = Color.green;
-            Gizmos.DrawRay(p, baseRot * Quaternion.Euler(0, openAngle, 0) * Vector3.right * 1.2f);
-            Gizmos.DrawRay(p, baseRot * Quaternion.Euler(0, -openAngle, 0) * Vector3.right * 1.2f);
-        }
-#endif
     }
 }
