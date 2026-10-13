@@ -7,7 +7,7 @@ namespace GVGame.Interaction
     ///  - Walking into SMALL props (mugs, ammo boxes) nudges them.
     ///  - Heavy props (barrels, crates, barricades) are NOT pushed by walking: they block the player
     ///    like a wall and can only be moved deliberately by dragging them (F).
-    ///  - Walking into a door that is blocked by a heavy prop forces it open slowly (shouldering it),
+    ///  - Walking into a door leaf that is blocked by a heavy prop forces it open slowly (shouldering it),
     ///    just far enough to squeeze through (see DoorController.ForceOpen).
     /// </summary>
     [RequireComponent(typeof(CharacterController))]
@@ -25,7 +25,7 @@ namespace GVGame.Interaction
             if (door != null)
             {
                 if (Vector3.Dot(hit.moveDirection, hit.normal) < -0.3f)
-                    door.ForceOpen(transform);
+                    door.ForceOpen(transform, hit.collider);
                 return;
             }
 
