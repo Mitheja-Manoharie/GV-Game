@@ -11,6 +11,8 @@ GameObject:
   - component: {fileID: 5905037796808559407}
   - component: {fileID: 3060403920635913155}
   - component: {fileID: 7514133738602438662}
+  - component: {fileID: 8504665897198738017}
+  - component: {fileID: 5571025477182153808}
   m_Layer: 0
   m_Name: Pickup_HealthPack
   m_TagString: Untagged
@@ -90,3 +92,42 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!135 &8504665897198738017
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5894774735397077050}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 0.8
+  m_Center: {x: 0, y: 0.3, z: 0}
+--- !u!114 &5571025477182153808
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5894774735397077050}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b85fd141f92e52a478a6bd47a66300ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GVGame.Interaction.HealthPickup
+  healAmount: 35
+  respawnSeconds: 0
+  pickupClip: {fileID: 0}
+  spinSpeed: 90
+  bobHeight: 0.08
+  bobSpeed: 2
