@@ -98,6 +98,21 @@ namespace LabLockdown.AI.Facility.Runtime
 
         public int NearestNode(Vector3 worldPosition) => Graph.FindNearestNode(worldPosition.x, worldPosition.z);
 
+        /// <summary>
+        /// Shortest open route between two world positions, as tile-centre waypoints: the tile nearest
+        /// <paramref name="from"/> first, the tile nearest <paramref name="to"/> last. Empty if the goal cannot be reached.
+        /// Pass <see cref="FacilityEvents.LockedDoors"/> to route around the doors the Facility AI has locked.
+        /// </summary>
+        public List<Vector3> FindPath(Vector3 from, Vector3 to, IEnumerable<string> lockedDoors = null)
+        {
+            var locked = lockedDoors as ICollection<string> ?? (lockedDoors != null ? new HashSet<string>(lockedDoors) : null);
+            int[] route = Graph.ShortestPath(NearestNode(from), NearestNode(to), locked);
+
+            var points = new List<Vector3>(route.Length);
+            foreach (int node in route) points.Add(NodePosition(node));
+            return points;
+        }
+
         private void Reset()
         {
             // Called when the component is first added: wire up the usual scene objects automatically.

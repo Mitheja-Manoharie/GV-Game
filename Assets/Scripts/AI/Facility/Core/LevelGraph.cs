@@ -191,19 +191,53 @@ namespace LabLockdown.AI.Facility
         }
 
         /// <summary>
-        /// Dijkstra's algorithm from <paramref name="start"/>. Unreachable nodes get float.PositiveInfinity.
-        /// Uses the O(V²) array version: the level has 45 nodes, so it is fast enough, simple to verify,
-        /// and needs no priority queue (not available in Unity's .NET Standard 2.1 profile).
-        /// Used for the spawn "distance window" constraint, which needs real walking distance, not straight-line distance.
+        /// Walking distance from <paramref name="start"/> to every node (Dijkstra). Unreachable nodes get
+        /// float.PositiveInfinity. Used for the spawn "distance window" constraint, which needs real walking distance, not straight-line distance.
         /// </summary>
         public float[] ShortestDistances(int start, ICollection<string> lockedDoors = null)
         {
             ValidateNode(start);
+            return Dijkstra(start, lockedDoors, out _);
+        }
 
+        /// <summary>
+        /// Shortest route from <paramref name="start"/> to <paramref name="goal"/> through open doors, as node ids
+        /// from start to goal (both included). Returns [start] when start == goal, and an empty array when the
+        /// goal cannot be reached. Locked doors are treated exactly as in the Facility AI's CSP
+        /// (<see cref="IsPassable"/>), so robots and the Director always agree on what is reachable.
+        /// </summary>
+        public int[] ShortestPath(int start, int goal, ICollection<string> lockedDoors = null)
+        {
+            ValidateNode(start);
+            ValidateNode(goal);
+            if (start == goal) return new[] { start };
+
+            float[] distance = Dijkstra(start, lockedDoors, out int[] previous);
+            if (float.IsPositiveInfinity(distance[goal])) return Array.Empty<int>();
+
+            var path = new List<int>();
+            for (int node = goal; node != -1; node = previous[node]) path.Add(node);
+            path.Reverse();
+            return path.ToArray();
+        }
+
+        /// <summary>
+        /// Dijkstra's algorithm from one node, with the predecessor of each node on its shortest route.
+        /// Uses the O(V²) array version: the level has 45 nodes, so it is fast enough, simple to verify,
+        /// and needs no priority queue (not available in Unity's .NET Standard 2.1 profile).
+        /// </summary>
+        private float[] Dijkstra(int start, ICollection<string> lockedDoors, out int[] previous)
+        {
             int count = nodes.Count;
             var distance = new float[count];
             var settled = new bool[count];
-            for (int i = 0; i < count; i++) distance[i] = float.PositiveInfinity;
+            previous = new int[count];
+            for (int i = 0; i < count; i++)
+            {
+                distance[i] = float.PositiveInfinity;
+                previous[i] = -1;
+            }
+
             distance[start] = 0f;
 
             for (int step = 0; step < count; step++)
@@ -227,7 +261,11 @@ namespace LabLockdown.AI.Facility
                     if (!IsPassable(edge, lockedDoors)) continue;
                     int next = edge.Other(current);
                     float candidate = distance[current] + edge.Cost;
-                    if (candidate < distance[next]) distance[next] = candidate;
+                    if (candidate < distance[next])
+                    {
+                        distance[next] = candidate;
+                        previous[next] = current;
+                    }
                 }
             }
 
