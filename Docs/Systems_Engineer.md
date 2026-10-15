@@ -32,3 +32,38 @@ E interact (doors) · F pick up / drag / drop · Q throw · Mouse wheel hold dis
 - Door leaf is a placeholder cube unless a model (e.g. Quaternius `Door_Simple`) is assigned in the setup window.
 - Door opening is assumed to run along the marker's local X; rotate the marker 90° for doors in north-south walls.
 - `Systems_Test` uses its own minimal player; the real player comes from the Core Developer.
+
+---
+
+# Update: player, combat, health and two-panel doors
+
+## New scripts
+| Folder | Script | Purpose |
+|---|---|---|
+| `Scripts/Player` | `PlayerController` | CharacterController FPS: WASD, mouse look, sprint, jump, crouch (hold Ctrl). Speed capped by `PlayerInteractor.MaxCarrySpeed`. Footsteps raise noise on `InteractionNoise` (sprint loud, crouch silent). |
+| `Scripts/Player` | `PlayerHealth` | Implements `IDamageable`, `IHealable` and the Facility AI's `IPlayerStatusSource` (`Health01`). Death disables movement and shooting; R respawns. |
+| `Scripts/Player` | `PlayerHud` | IMGUI health bar, ammo, damage flash, hit marker, death screen. |
+| `Scripts/Combat` | `IDamageable`, `IHealable`, `DamageInfo` | Shared interfaces. Robots implement `IDamageable` so bullets can hurt them, and call `PlayerHealth.TakeDamage` to hurt the player. |
+| `Scripts/Combat` | `WeaponController` | Hitscan weapon: LMB fire (auto), R reload, spread, recoil, tracer, muzzle flash, pushes props, raises a gunshot noise on `InteractionNoise`. |
+| `Scripts/Combat` | `WeaponPickup`, `TrainingDummy` | Armoury pickup trigger; shootable test target. |
+| `Scripts/Interaction` | `HealthPickup` | Heals anything `IHealable` that needs healing. |
+
+## Controls
+WASD move, mouse look, Shift sprint, Space jump, hold Ctrl crouch, LMB fire, R reload (respawn when dead),
+E interact (doors), F pick up / drag / drop, hold Q to charge a throw, mouse wheel hold distance.
+
+## Doors (issue #11)
+- One `DoorController` per `Door_*` marker (the Facility AI adapter finds it with `GetComponentInChildren`).
+- Two hinged leaves per door (`Door_DarkMetal`, 2.1 x 4.05 x 0.2 m, hinges at the outer edges of the 4 m opening).
+- Each leaf is independent: a barricade blocking one leaf does not stop the other, so a door can never fully lock the player out.
+- Swing direction is computed from each leaf's geometry and the opener's side (always away from the opener).
+- Per leaf: light prop (<= 10 kg) is shoved aside slowly; heavy movable prop (<= 120 kg) stops the leaf, and walking into it forces it open slowly up to 60 degrees; the player or anything heavier stops the leaf. Closing never forces a heavy prop.
+- NavMesh: closed doors do NOT carve by default (`blockNavMeshWhenClosed`), because the Facility AI blocks LOCKED doors with its own barrier and robots open unlocked doors. Switch it on if the team decides every closed door should block.
+
+## Design decisions (combat and player)
+- **Hitscan, not projectiles**: instant, cheap, deterministic, and easy for AI to reason about; bullet drop adds nothing to a short-range facility.
+- **Ignore own colliders by root**: the shot ignores the player's hierarchy so the weapon can never hit its owner.
+- **`IDamageable` / `IHealable` interfaces**: the player, robots and dummies share one damage path, and health packs work with any healable.
+- **Gunshots and footsteps on `InteractionNoise`**: the same event bus that carries door and prop noise, so the Security Hunter hears everything the player does.
+- **IMGUI HUD**: no Canvas or font assets to merge, easy to replace later.
+- **Respawn instead of scene reload**: reloading a scene that is not in Build Settings fails in the editor, and respawn keeps the level state.

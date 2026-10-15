@@ -3,56 +3,83 @@ using System.IO;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.SceneManagement;
+using GVGame.Combat;
 using GVGame.Interaction;
-using GVGame.Dev;
+using GVGame.Player;
 
 namespace GVGame.EditorTools
 {
     /// <summary>
     /// Systems Engineer setup window:  menu  GV Game > Systems Setup
-    ///   1. Setup Prop Prefabs  – adds Rigidbody + PhysicsProp to Barricade_* / Throwable_* prefabs
-    ///   2. Build Doors         – turns the Door_* marker objects in the open scene into working doors
-    ///   3. Add Player Rig      – adds PlayerInteractor + pusher to the player in the open scene
-    ///   4. Build Test Scene    – creates Assets/Scenes/Dev/Systems_Test.unity to demo everything
+    ///   1. Setup Prop Prefabs   - Rigidbody + PhysicsProp (+ NavMeshObstacle on barricades) on Barricade_* / Throwable_*,
+    ///                              trigger + HealthPickup on Pickup_HealthPack
+    ///   2. Build Doors          - turns every Door_* marker in the open scene into a two-panel working door
+    ///   3. Create Player Prefab - Assets/Prefabs/Player/Player.prefab (controller, health, weapon, HUD, interaction)
+    ///   4. Build Systems_Test   - standalone scene that exercises everything
     /// </summary>
     public class SystemsSetupTools : EditorWindow
     {
         const string PropsFolder = "Assets/Prefabs/Props";
-        const string MatPath = "Assets/Art/Materials/DoorPlaceholder.mat";
+        const string MatFolder = "Assets/Art/Materials";
+        const string PlayerPrefabPath = "Assets/Prefabs/Player/Player.prefab";
 
-        float doorWidth = 2.0f;
-        float doorHeight = 2.8f;
-        float doorThickness = 0.15f;
-        float doorOpenAngle = 100f;
-        float doorAutoCloseDelay = 0f;
-        GameObject doorLeafPrefab;   // optional: real door model (e.g. Quaternius Door_Simple)
+        // Door dimensions from issue #11 (opening 4 m, two Door_DarkMetal panels of 2.1 x 4.05 x 0.2 m).
+        float openingWidth = 4f;
+        float panelWidth = 2.1f;
+        float panelHeight = 4.05f;
+        float panelThickness = 0.2f;
+        float floorClearance = 0.02f;
+        float openAngle = 100f;
+        float autoCloseDelay = 0f;
+        bool blockNavMeshWhenClosed = false;
+        GameObject panelPrefab;
 
         [MenuItem("GV Game/Systems Setup")]
         static void Open() => GetWindow<SystemsSetupTools>("Systems Setup");
 
+        void OnEnable()
+        {
+            if (panelPrefab == null)
+            {
+                foreach (string guid in AssetDatabase.FindAssets("Door_DarkMetal t:GameObject"))
+                {
+                    string p = AssetDatabase.GUIDToAssetPath(guid);
+                    if (Path.GetFileNameWithoutExtension(p) == "Door_DarkMetal")
+                    {
+                        panelPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(p);
+                        break;
+                    }
+                }
+            }
+        }
+
         void OnGUI()
         {
-            EditorGUILayout.LabelField("1. Physics props", EditorStyles.boldLabel);
-            if (GUILayout.Button("Setup Prop Prefabs (Barricade_* / Throwable_*)")) SetupPropPrefabs();
+            EditorGUILayout.LabelField("1. Props", EditorStyles.boldLabel);
+            if (GUILayout.Button("Setup Prop Prefabs (barricades, throwables, health pack)")) SetupPropPrefabs();
 
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("2. Doors (open scene)", EditorStyles.boldLabel);
-            doorWidth = EditorGUILayout.FloatField("Opening width (m)", doorWidth);
-            doorHeight = EditorGUILayout.FloatField("Door height (m)", doorHeight);
-            doorThickness = EditorGUILayout.FloatField("Thickness (m)", doorThickness);
-            doorOpenAngle = EditorGUILayout.Slider("Open angle limit", doorOpenAngle, 10f, 140f);
-            doorAutoCloseDelay = EditorGUILayout.FloatField("Auto close (s, 0 = off)", doorAutoCloseDelay);
-            doorLeafPrefab = (GameObject)EditorGUILayout.ObjectField("Leaf model (optional)", doorLeafPrefab, typeof(GameObject), false);
+            openingWidth = EditorGUILayout.FloatField("Opening width (m)", openingWidth);
+            panelWidth = EditorGUILayout.FloatField("Panel width (m)", panelWidth);
+            panelHeight = EditorGUILayout.FloatField("Panel height (m)", panelHeight);
+            panelThickness = EditorGUILayout.FloatField("Panel thickness (m)", panelThickness);
+            openAngle = EditorGUILayout.Slider("Open angle limit", openAngle, 10f, 140f);
+            autoCloseDelay = EditorGUILayout.FloatField("Auto close (s, 0 = off)", autoCloseDelay);
+            blockNavMeshWhenClosed = EditorGUILayout.Toggle("Closed doors carve NavMesh", blockNavMeshWhenClosed);
+            panelPrefab = (GameObject)EditorGUILayout.ObjectField("Panel model", panelPrefab, typeof(GameObject), false);
             EditorGUILayout.HelpBox(
-                "Doors are built on every object named Door_* in the open scene. The door opening is assumed to run " +
-                "along the marker's local X axis; rotate the marker 90° (Y) for doors in north-south walls, then rebuild.",
-                MessageType.Info);
+                "Builds two hinged panels (hinges at the outer edges of the opening) on every Door_* marker. " +
+                "The marker's rotation decides the direction: 0 = door spans east-west, 90 = north-south. " +
+                "No panel model = grey placeholder boxes.", MessageType.Info);
             if (GUILayout.Button("Build Doors From Markers")) BuildDoors();
 
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("3. Player", EditorStyles.boldLabel);
-            if (GUILayout.Button("Add Interaction To Selected Player (needs CharacterController)")) AddPlayerRig();
+            if (GUILayout.Button("Create Player Prefab")) CreatePlayerPrefab();
+            if (GUILayout.Button("Add Interaction To Selected Player (custom player)")) AddInteractionToSelected();
 
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("4. Test scene", EditorStyles.boldLabel);
@@ -62,47 +89,76 @@ namespace GVGame.EditorTools
         // ------------------------------------------------------------------ 1. Props
         static void SetupPropPrefabs()
         {
-            string[] guids = AssetDatabase.FindAssets("t:Prefab", new[] { PropsFolder });
             int count = 0;
-            foreach (string guid in guids)
+            foreach (string guid in AssetDatabase.FindAssets("t:Prefab", new[] { PropsFolder }))
             {
                 string path = AssetDatabase.GUIDToAssetPath(guid);
                 string name = Path.GetFileNameWithoutExtension(path);
                 bool barricade = name.StartsWith("Barricade_");
                 bool throwable = name.StartsWith("Throwable_");
-                if (!barricade && !throwable) continue;
+                bool healthPack = name.StartsWith("Pickup_HealthPack");
+                if (!barricade && !throwable && !healthPack) continue;
 
                 GameObject root = PrefabUtility.LoadPrefabContents(path);
                 try
                 {
-                    var rb = root.GetComponent<Rigidbody>();
-                    if (rb == null) rb = root.AddComponent<Rigidbody>();
-
-                    var prop = root.GetComponent<PhysicsProp>();
-                    if (prop == null) prop = root.AddComponent<PhysicsProp>();
-                    prop.kind = barricade ? PhysicsProp.Kind.Barricade : PhysicsProp.Kind.Throwable;
-                    prop.ApplyDefaultsForKind();
-                    prop.mass = MassFor(name, prop.mass);
-                    prop.carveNavMesh = barricade;
-
-                    int layer = LayerMask.NameToLayer("DynamicProps");
-                    if (layer >= 0) SetLayerRecursive(root, layer);
-
-                    // Prefabs only have a BoxCollider; make sure one exists so physics works.
-                    if (root.GetComponentInChildren<Collider>() == null) root.AddComponent<BoxCollider>();
-
-                    // Physics props must be dynamic for the lightmap bake / occlusion to ignore them.
-                    GameObjectUtility.SetStaticEditorFlags(root, 0);
-                    foreach (Transform t in root.GetComponentsInChildren<Transform>())
-                        GameObjectUtility.SetStaticEditorFlags(t.gameObject, 0);
-
+                    if (healthPack) SetupHealthPack(root);
+                    else SetupPhysicsProp(root, name, barricade);
                     PrefabUtility.SaveAsPrefabAsset(root, path);
                     count++;
                 }
                 finally { PrefabUtility.UnloadPrefabContents(root); }
             }
             AssetDatabase.SaveAssets();
-            Debug.Log($"[Systems] Configured {count} prop prefabs with Rigidbody + PhysicsProp.");
+            Debug.Log($"[Systems] Configured {count} prop prefabs.");
+        }
+
+        static void SetupPhysicsProp(GameObject root, string name, bool barricade)
+        {
+            if (root.GetComponent<Rigidbody>() == null) root.AddComponent<Rigidbody>();
+            var prop = root.GetComponent<PhysicsProp>();
+            if (prop == null) prop = root.AddComponent<PhysicsProp>();
+            prop.kind = barricade ? PhysicsProp.Kind.Barricade : PhysicsProp.Kind.Throwable;
+            prop.ApplyDefaultsForKind();
+            prop.mass = MassFor(name, prop.mass);
+            prop.carveNavMesh = barricade;
+
+            int layer = LayerMask.NameToLayer("DynamicProps");
+            if (layer >= 0) SetLayerRecursive(root, layer);
+            if (root.GetComponentInChildren<Collider>() == null) root.AddComponent<BoxCollider>();
+
+            foreach (Transform t in root.GetComponentsInChildren<Transform>())
+                GameObjectUtility.SetStaticEditorFlags(t.gameObject, 0);   // physics props are dynamic
+
+            if (barricade)
+            {
+                // Serialized on the prefab so it is visible in the Inspector (issue #17).
+                var ob = root.GetComponent<NavMeshObstacle>();
+                if (ob == null) ob = root.AddComponent<NavMeshObstacle>();
+                var box = root.GetComponent<BoxCollider>();
+                ob.shape = NavMeshObstacleShape.Box;
+                if (box != null) { ob.center = box.center; ob.size = box.size; }
+                ob.carving = true;
+                ob.carveOnlyStationary = true;
+                ob.carvingMoveThreshold = 0.1f;
+                ob.carvingTimeToStationary = 0.5f;
+            }
+        }
+
+        static void SetupHealthPack(GameObject root)
+        {
+            Collider trigger = null;
+            foreach (Collider c in root.GetComponentsInChildren<Collider>()) if (c.isTrigger) trigger = c;
+            if (trigger == null)
+            {
+                var sc = root.AddComponent<SphereCollider>();
+                sc.isTrigger = true;
+                sc.radius = 0.8f;
+                sc.center = new Vector3(0f, 0.3f, 0f);
+            }
+            if (root.GetComponent<HealthPickup>() == null) root.AddComponent<HealthPickup>();
+            foreach (Transform t in root.GetComponentsInChildren<Transform>())
+                GameObjectUtility.SetStaticEditorFlags(t.gameObject, 0);   // it spins and bobs
         }
 
         static float MassFor(string name, float fallback)
@@ -126,177 +182,243 @@ namespace GVGame.EditorTools
         {
             Scene scene = SceneManager.GetActiveScene();
             int built = 0;
-            Material mat = GetOrCreateDoorMaterial();
-            int doorsLayer = LayerMask.NameToLayer("Doors");
-
             foreach (Transform t in Resources.FindObjectsOfTypeAll<Transform>())
             {
-                if (!t.gameObject.scene.IsValid() || t.gameObject.scene != scene) continue;
                 if (EditorUtility.IsPersistent(t)) continue;
+                if (t.gameObject.scene != scene) continue;
                 if (!t.name.StartsWith("Door_")) continue;
                 if (t.GetComponentInChildren<DoorController>() != null) continue;   // already built
-
-                BuildDoor(t, mat, doorsLayer);
+                BuildDoor(t);
                 built++;
             }
-
             if (built > 0) EditorSceneManager.MarkSceneDirty(scene);
-            Debug.Log($"[Systems] Built {built} door(s). Doors already built were skipped.");
+            Debug.Log($"[Systems] Built {built} door(s). Doors that already had a DoorController were skipped.");
         }
 
-        void BuildDoor(Transform marker, Material mat, int doorsLayer)
+        void BuildDoor(Transform marker)
         {
-            // Hinge pivot on the left edge of the opening.
-            var hinge = new GameObject("Hinge");
+            int doorsLayer = LayerMask.NameToLayer("Doors");
+
+            var door = marker.gameObject.AddComponent<DoorController>();
+            Undo.RegisterCreatedObjectUndo(door, "Build door");
+            door.openAngle = openAngle;
+            door.autoCloseDelay = autoCloseDelay;
+            door.blockNavMeshWhenClosed = blockNavMeshWhenClosed;
+
+            BuildLeaf(marker, "Hinge_L", new Vector3(-openingWidth * 0.5f, 0f, 0f), Quaternion.identity, doorsLayer);
+            BuildLeaf(marker, "Hinge_R", new Vector3(openingWidth * 0.5f, 0f, 0f), Quaternion.Euler(0f, 180f, 0f), doorsLayer);
+
+            // Trigger in front of the door so AI agents can open it.
+            var trig = new GameObject("AutoOpenTrigger");
+            Undo.RegisterCreatedObjectUndo(trig, "Build door");
+            trig.transform.SetParent(marker, false);
+            trig.transform.localPosition = new Vector3(0f, panelHeight * 0.5f, 0f);
+            var box = trig.AddComponent<BoxCollider>();
+            box.isTrigger = true;
+            box.size = new Vector3(openingWidth + 1f, panelHeight, 3.5f);
+            var auto = trig.AddComponent<DoorAutoOpenTrigger>();
+            auto.door = door;
+            trig.layer = 2;   // Ignore Raycast, so the player's interaction ray never hits it
+        }
+
+        void BuildLeaf(Transform marker, string name, Vector3 localPos, Quaternion localRot, int doorsLayer)
+        {
+            var hinge = new GameObject(name);
             Undo.RegisterCreatedObjectUndo(hinge, "Build door");
             hinge.transform.SetParent(marker, false);
-            hinge.transform.localPosition = new Vector3(-doorWidth * 0.5f, 0f, 0f);
+            hinge.transform.localPosition = localPos;
+            hinge.transform.localRotation = localRot;
             if (doorsLayer >= 0) hinge.layer = doorsLayer;
 
             var rb = hinge.AddComponent<Rigidbody>();
             rb.isKinematic = true;
-            var door = hinge.AddComponent<DoorController>();
-            door.openAngle = doorOpenAngle;
-            door.autoCloseDelay = doorAutoCloseDelay;
 
-            // Leaf (placeholder cube unless a model was supplied).
-            GameObject leaf;
-            if (doorLeafPrefab != null)
+            // Collider on the hinge object: panel extends along the hinge's local +X.
+            var bc = hinge.AddComponent<BoxCollider>();
+            bc.size = new Vector3(panelWidth, panelHeight - floorClearance, panelThickness);
+            bc.center = new Vector3(panelWidth * 0.5f, floorClearance + (panelHeight - floorClearance) * 0.5f, 0f);
+
+            GameObject visual;
+            if (panelPrefab != null)
             {
-                leaf = (GameObject)PrefabUtility.InstantiatePrefab(doorLeafPrefab);
-                leaf.transform.SetParent(hinge.transform, false);
-                leaf.transform.localPosition = new Vector3(doorWidth * 0.5f, 0f, 0f);
-                if (leaf.GetComponentInChildren<Collider>() == null)
-                {
-                    var bc = leaf.AddComponent<BoxCollider>();   // fallback collider
-                    bc.center = new Vector3(0f, doorHeight * 0.5f, 0f);
-                    bc.size = new Vector3(doorWidth, doorHeight, doorThickness);
-                }
+                visual = (GameObject)PrefabUtility.InstantiatePrefab(panelPrefab);
+                visual.transform.SetParent(hinge.transform, false);
+                visual.transform.localPosition = Vector3.zero;
+                visual.transform.localRotation = Quaternion.identity;
+                foreach (Collider c in visual.GetComponentsInChildren<Collider>()) DestroyImmediate(c);
             }
             else
             {
-                leaf = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                leaf.name = "Leaf";
-                leaf.transform.SetParent(hinge.transform, false);
-                leaf.transform.localPosition = new Vector3(doorWidth * 0.5f, doorHeight * 0.5f, 0f);
-                leaf.transform.localScale = new Vector3(doorWidth, doorHeight, doorThickness);
-                leaf.GetComponent<MeshRenderer>().sharedMaterial = mat;
+                visual = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                visual.name = "PanelPlaceholder";
+                DestroyImmediate(visual.GetComponent<Collider>());
+                visual.transform.SetParent(hinge.transform, false);
+                visual.transform.localPosition = new Vector3(panelWidth * 0.5f, panelHeight * 0.5f, 0f);
+                visual.transform.localScale = new Vector3(panelWidth, panelHeight, panelThickness);
+                visual.GetComponent<MeshRenderer>().sharedMaterial = GetOrCreateMaterial("DoorPlaceholder", new Color(0.35f, 0.38f, 0.42f), 0.6f);
             }
-            Undo.RegisterCreatedObjectUndo(leaf, "Build door");
-            if (doorsLayer >= 0) SetLayerRecursive(leaf, doorsLayer);
-            foreach (Transform c in hinge.GetComponentsInChildren<Transform>())
-                GameObjectUtility.SetStaticEditorFlags(c.gameObject, 0);   // doors are dynamic
+            Undo.RegisterCreatedObjectUndo(visual, "Build door");
 
-            // Trigger volume so AI agents open doors automatically.
-            var trig = new GameObject("AutoOpenTrigger");
-            Undo.RegisterCreatedObjectUndo(trig, "Build door");
-            trig.transform.SetParent(marker, false);
-            trig.transform.localPosition = new Vector3(0f, 1.25f, 0f);
-            var box = trig.AddComponent<BoxCollider>();
-            box.isTrigger = true;
-            box.size = new Vector3(doorWidth + 1.0f, 2.5f, 3.0f);
-            var auto = trig.AddComponent<DoorAutoOpenTrigger>();
-            auto.door = door;
-            trig.layer = 2; // Ignore Raycast: the player's interaction ray must not hit the trigger
+            foreach (Transform t in hinge.GetComponentsInChildren<Transform>())
+            {
+                GameObjectUtility.SetStaticEditorFlags(t.gameObject, 0);   // doors are dynamic
+                if (doorsLayer >= 0) t.gameObject.layer = doorsLayer;
+            }
         }
 
-        static Material GetOrCreateDoorMaterial()
+        static Material GetOrCreateMaterial(string name, Color color, float metallic)
         {
-            var mat = AssetDatabase.LoadAssetAtPath<Material>(MatPath);
+            string path = MatFolder + "/" + name + ".mat";
+            var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
             if (mat != null) return mat;
-            Directory.CreateDirectory(Path.GetDirectoryName(MatPath));
+            Directory.CreateDirectory(MatFolder);
             Shader sh = Shader.Find("Universal Render Pipeline/Lit");
-            mat = new Material(sh != null ? sh : Shader.Find("Standard")) { name = "DoorPlaceholder" };
-            mat.SetColor("_BaseColor", new Color(0.35f, 0.38f, 0.42f));
-            mat.SetFloat("_Metallic", 0.6f);
-            mat.SetFloat("_Smoothness", 0.5f);
-            AssetDatabase.CreateAsset(mat, MatPath);
+            mat = new Material(sh != null ? sh : Shader.Find("Standard")) { name = name };
+            mat.SetColor("_BaseColor", color);
+            mat.SetFloat("_Metallic", metallic);
+            AssetDatabase.CreateAsset(mat, path);
+            return mat;
+        }
+
+        static Material GetOrCreateTracerMaterial()
+        {
+            string path = MatFolder + "/Tracer.mat";
+            var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (mat != null) return mat;
+            Directory.CreateDirectory(MatFolder);
+            Shader sh = Shader.Find("Universal Render Pipeline/Unlit");
+            if (sh == null) return null;
+            mat = new Material(sh) { name = "Tracer" };
+            mat.SetColor("_BaseColor", new Color(1f, 0.9f, 0.55f));
+            AssetDatabase.CreateAsset(mat, path);
             return mat;
         }
 
         // ------------------------------------------------------------------ 3. Player
-        static void AddPlayerRig()
+        static GameObject CreatePlayerPrefab()
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(PlayerPrefabPath));
+
+            var go = new GameObject("Player");
+            go.tag = "Player";
+            var cc = go.AddComponent<CharacterController>();
+            cc.height = 1.8f; cc.radius = 0.35f; cc.center = new Vector3(0f, 0.9f, 0f);
+            cc.stepOffset = 0.35f; cc.skinWidth = 0.03f;
+
+            var camRoot = new GameObject("CameraRoot");
+            camRoot.transform.SetParent(go.transform, false);
+            camRoot.transform.localPosition = new Vector3(0f, 1.6f, 0f);
+
+            var camGo = new GameObject("Main Camera");
+            camGo.tag = "MainCamera";
+            camGo.transform.SetParent(camRoot.transform, false);
+            var cam = camGo.AddComponent<Camera>();
+            cam.nearClipPlane = 0.05f;
+            cam.fieldOfView = 75f;
+            camGo.AddComponent<AudioListener>();
+
+            var pc = go.AddComponent<PlayerController>();
+            pc.cameraRoot = camRoot.transform;
+            go.AddComponent<PlayerHealth>();
+
+            var interactor = go.AddComponent<PlayerInteractor>();
+            interactor.viewCamera = cam;
+            interactor.playerColliders = new Collider[] { cc };
+            go.AddComponent<PlayerRigidbodyPusher>();
+
+            // Placeholder gun model.
+            var gun = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            gun.name = "GunViewModel";
+            UnityEngine.Object.DestroyImmediate(gun.GetComponent<Collider>());
+            gun.transform.SetParent(camGo.transform, false);
+            gun.transform.localPosition = new Vector3(0.22f, -0.2f, 0.45f);
+            gun.transform.localScale = new Vector3(0.07f, 0.1f, 0.4f);
+            gun.GetComponent<MeshRenderer>().sharedMaterial = GetOrCreateMaterial("GunPlaceholder", new Color(0.12f, 0.12f, 0.14f), 0.4f);
+
+            var weapon = go.AddComponent<WeaponController>();
+            weapon.aimCamera = cam;
+            weapon.viewModel = gun.transform;
+            weapon.tracerMaterial = GetOrCreateTracerMaterial();
+
+            go.AddComponent<PlayerHud>();
+
+            GameObject prefab = PrefabUtility.SaveAsPrefabAsset(go, PlayerPrefabPath);
+            UnityEngine.Object.DestroyImmediate(go);
+            AssetDatabase.SaveAssets();
+            Debug.Log("[Systems] Player prefab saved to " + PlayerPrefabPath);
+            return prefab;
+        }
+
+        static void AddInteractionToSelected()
         {
             GameObject sel = Selection.activeGameObject;
             if (sel == null || sel.GetComponent<CharacterController>() == null)
             {
-                EditorUtility.DisplayDialog("Systems Setup",
-                    "Select the player GameObject (it needs a CharacterController) first.", "OK");
+                EditorUtility.DisplayDialog("Systems Setup", "Select a player GameObject with a CharacterController first.", "OK");
                 return;
             }
-            Undo.AddComponent<PlayerRigidbodyPusher>(sel);
-            var interactor = sel.GetComponent<PlayerInteractor>() ?? Undo.AddComponent<PlayerInteractor>(sel);
+            if (sel.GetComponent<PlayerRigidbodyPusher>() == null) Undo.AddComponent<PlayerRigidbodyPusher>(sel);
+            var interactor = sel.GetComponent<PlayerInteractor>();
+            if (interactor == null) interactor = Undo.AddComponent<PlayerInteractor>(sel);
             interactor.playerColliders = sel.GetComponentsInChildren<Collider>();
             interactor.viewCamera = sel.GetComponentInChildren<Camera>();
             EditorUtility.SetDirty(sel);
-            Debug.Log("[Systems] PlayerInteractor and PlayerRigidbodyPusher added to " + sel.name);
         }
 
         // ------------------------------------------------------------------ 4. Test scene
         void BuildTestScene()
         {
-            SetupPropPrefabs();   // make sure prefabs are physics-ready first
+            SetupPropPrefabs();
+            GameObject playerPrefab = CreatePlayerPrefab();
 
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
-            // Light
             var lightGo = new GameObject("Directional Light");
             var light = lightGo.AddComponent<Light>();
             light.type = LightType.Directional;
             light.intensity = 1.2f;
             lightGo.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
 
-            Material floorMat = GetOrCreateDoorMaterial();
+            Material wall = GetOrCreateMaterial("DoorPlaceholder", new Color(0.35f, 0.38f, 0.42f), 0.6f);
 
-            // Floor and walls: a 12 x 20 room split by a wall with a door gap.
-            MakeBox("Floor", new Vector3(0, -0.25f, 8), new Vector3(14, 0.5f, 26), floorMat);
-            MakeBox("Wall_N", new Vector3(0, 1.5f, 21), new Vector3(14, 3, 0.4f), floorMat);
-            MakeBox("Wall_S", new Vector3(0, 1.5f, -5), new Vector3(14, 3, 0.4f), floorMat);
-            MakeBox("Wall_W", new Vector3(-7, 1.5f, 8), new Vector3(0.4f, 3, 26), floorMat);
-            MakeBox("Wall_E", new Vector3(7, 1.5f, 8), new Vector3(0.4f, 3, 26), floorMat);
-            // Divider wall at z = 8 with a 2 m opening centred on x = 0
-            MakeBox("Divider_L", new Vector3(-4.0f, 1.5f, 8), new Vector3(6.0f, 3, 0.4f), floorMat);
-            MakeBox("Divider_R", new Vector3(4.0f, 1.5f, 8), new Vector3(6.0f, 3, 0.4f), floorMat);
-            MakeBox("Divider_Top", new Vector3(0f, 2.9f, 8), new Vector3(2.0f, 0.2f, 0.4f), floorMat);
+            // Room x -9..9, z -6..28, 5 m walls; divider at z = 10 with a 4 m door opening (x -2..2).
+            MakeBox("Floor", new Vector3(0, -0.25f, 11), new Vector3(20, 0.5f, 36), wall);
+            MakeBox("Wall_N", new Vector3(0, 2.5f, 28), new Vector3(20, 5, 0.4f), wall);
+            MakeBox("Wall_S", new Vector3(0, 2.5f, -6), new Vector3(20, 5, 0.4f), wall);
+            MakeBox("Wall_W", new Vector3(-9.8f, 2.5f, 11), new Vector3(0.4f, 5, 36), wall);
+            MakeBox("Wall_E", new Vector3(9.8f, 2.5f, 11), new Vector3(0.4f, 5, 36), wall);
+            MakeBox("Divider_L", new Vector3(-5.5f, 2.5f, 10), new Vector3(7f, 5, 0.4f), wall);
+            MakeBox("Divider_R", new Vector3(5.5f, 2.5f, 10), new Vector3(7f, 5, 0.4f), wall);
+            MakeBox("Divider_Top", new Vector3(0, 4.55f, 10), new Vector3(4f, 0.9f, 0.4f), wall);
 
-            // Door marker (named Door_* so the normal builder handles it)
-            var doorMarker = new GameObject("Door_TestDivider");
-            doorMarker.transform.position = new Vector3(0, 0, 8);
-            BuildDoor(doorMarker.transform, floorMat, LayerMask.NameToLayer("Doors"));
+            var marker = new GameObject("Door_TestDivider");
+            marker.transform.position = new Vector3(0, 0, 10);
+            BuildDoor(marker.transform);
 
-            // Player rig
-            var player = new GameObject("Player");
-            player.transform.position = new Vector3(0, 1.1f, 0);
-            var cc = player.AddComponent<CharacterController>();
-            cc.height = 1.8f; cc.radius = 0.35f; cc.center = new Vector3(0, 0, 0);
-            var camRoot = new GameObject("CameraRoot");
-            camRoot.transform.SetParent(player.transform, false);
-            camRoot.transform.localPosition = new Vector3(0, 0.7f, 0);
-            var cam = new GameObject("Main Camera");
-            cam.tag = "MainCamera";
-            cam.transform.SetParent(camRoot.transform, false);
-            cam.AddComponent<Camera>();
-            cam.AddComponent<AudioListener>();
-            var tp = player.AddComponent<SystemsTestPlayer>();
-            tp.cameraRoot = camRoot.transform;
-            player.AddComponent<PlayerRigidbodyPusher>();
-            var inter = player.AddComponent<PlayerInteractor>();
-            inter.viewCamera = cam.GetComponent<Camera>();
-            inter.playerColliders = new Collider[] { cc };
+            var player = (GameObject)PrefabUtility.InstantiatePrefab(playerPrefab);
+            player.transform.position = new Vector3(0, 0, 0);
 
-            // Props from the project's own prefabs
-            SpawnPrefabs("Barricade_Barrel", 3, new Vector3(-3, 0, 3), new Vector3(1.4f, 0, 0));
-            SpawnPrefabs("Barricade_CrateTarp", 2, new Vector3(3, 0, 3), new Vector3(0, 0, 2.2f));
-            SpawnPrefabs("Throwable_Mug", 4, new Vector3(-1.5f, 1.0f, 4.5f), new Vector3(0.5f, 0, 0));
-            SpawnPrefabs("Throwable_AmmoSmall", 3, new Vector3(1.0f, 1.0f, 4.5f), new Vector3(0.6f, 0, 0));
-            SpawnPrefabs("Throwable_AmmoClosed", 3, new Vector3(-1.5f, 1.0f, 6f), new Vector3(0.6f, 0, 0));
-            // A table surface for the throwables to sit on
-            MakeBox("Table", new Vector3(-0.3f, 0.45f, 5.2f), new Vector3(3.6f, 0.1f, 2.4f), floorMat);
+            SpawnPrefabs("Barricade_Barrel", 3, new Vector3(-6, 0, 3), new Vector3(1.4f, 0, 0));
+            SpawnPrefabs("Barricade_CrateTarp", 2, new Vector3(6, 0, 3), new Vector3(0, 0, 2.5f));
+            SpawnPrefabs("Barricade_Barrel", 1, new Vector3(-1.0f, 0, 11.4f), Vector3.zero);   // inside the door's swing zone
+            SpawnPrefabs("Throwable_Mug", 4, new Vector3(-3.5f, 1.0f, 4.5f), new Vector3(0.5f, 0, 0));
+            SpawnPrefabs("Throwable_AmmoSmall", 3, new Vector3(-3.5f, 1.0f, 5.3f), new Vector3(0.6f, 0, 0));
+            SpawnPrefabs("Throwable_AmmoClosed", 3, new Vector3(-0.8f, 1.0f, 4.5f), new Vector3(0.6f, 0, 0));
+            MakeBox("Table", new Vector3(-2.2f, 0.45f, 4.9f), new Vector3(4.4f, 0.1f, 2.0f), wall);
+            SpawnPrefabs("Pickup_HealthPack", 1, new Vector3(3f, 0.25f, 3f), Vector3.zero);
+
+            // Training dummies behind the door.
+            for (int i = 0; i < 3; i++)
+            {
+                var d = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+                d.name = "TrainingDummy_" + (i + 1);
+                d.transform.position = new Vector3(-4f + i * 4f, 1f, 22f);
+                d.AddComponent<TrainingDummy>();
+            }
 
             Directory.CreateDirectory("Assets/Scenes/Dev");
-            string scenePath = "Assets/Scenes/Dev/Systems_Test.unity";
-            EditorSceneManager.SaveScene(scene, scenePath);
-            Debug.Log("[Systems] Test scene saved to " + scenePath);
+            EditorSceneManager.SaveScene(scene, "Assets/Scenes/Dev/Systems_Test.unity");
+            Debug.Log("[Systems] Test scene saved to Assets/Scenes/Dev/Systems_Test.unity");
         }
 
         static GameObject MakeBox(string name, Vector3 pos, Vector3 size, Material mat)
