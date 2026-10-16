@@ -1,0 +1,16 @@
+{
+    "name": "LabLockdown.AI.Hunter.Core",
+    "rootNamespace": "LabLockdown.AI.Hunter",
+    "references": [
+        "LabLockdown.AI.Facility.Core"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": true
+}
