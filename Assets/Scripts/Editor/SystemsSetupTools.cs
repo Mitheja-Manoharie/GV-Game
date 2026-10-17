@@ -71,7 +71,7 @@ namespace GVGame.EditorTools
             blockNavMeshWhenClosed = EditorGUILayout.Toggle("Closed doors carve NavMesh", blockNavMeshWhenClosed);
             panelPrefab = (GameObject)EditorGUILayout.ObjectField("Panel model", panelPrefab, typeof(GameObject), false);
             EditorGUILayout.HelpBox(
-                "Builds two hinged panels (hinges at the outer edges of the opening) on every Door_* marker. " +
+                "Builds two hinged panels (hinges at the outer edges of the opening) on every empty Door_* marker (door frame models are skipped). " +
                 "The marker's rotation decides the direction: 0 = door spans east-west, 90 = north-south. " +
                 "No panel model = grey placeholder boxes.", MessageType.Info);
             if (GUILayout.Button("Build Doors From Markers")) BuildDoors();
@@ -187,6 +187,8 @@ namespace GVGame.EditorTools
                 if (EditorUtility.IsPersistent(t)) continue;
                 if (t.gameObject.scene != scene) continue;
                 if (!t.name.StartsWith("Door_")) continue;
+                if (t.name.Contains("Frame")) continue;                              // door FRAME models, not markers
+                if (t.GetComponentInChildren<Renderer>() != null) continue;          // markers are empty objects
                 if (t.GetComponentInChildren<DoorController>() != null) continue;   // already built
                 BuildDoor(t);
                 built++;
