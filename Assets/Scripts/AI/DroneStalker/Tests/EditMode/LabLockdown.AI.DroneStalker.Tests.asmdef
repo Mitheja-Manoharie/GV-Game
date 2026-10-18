@@ -1,0 +1,25 @@
+{
+    "name": "LabLockdown.AI.DroneStalker.Tests",
+    "rootNamespace": "LabLockdown.AI.DroneStalker.Tests",
+    "references": [
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner",
+        "LabLockdown.AI.Facility.Core",
+        "LabLockdown.AI.DroneStalker.Core"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
