@@ -330,7 +330,25 @@ void OnDoorLockChanged(string doorId, bool locked)
 
 - Robots need a non-trigger collider, so spawn points and doorways can detect them.
 - Props that can block a doorway need a `Rigidbody`.
-- When the player respawns, call `FacilityDirectorRunner.ResetDirector()`.
+- When the player respawns, call `FacilityDirectorRunner.ResetDirector()`. `RobotSpawnService` does this
+  automatically through `PlayerHealth.Respawned`.
+
+### Robot spawner
+
+`RobotSpawnService` (in `AI/FacilityIntegration`, next to the door adapter) is the real `ISpawnService`.
+The Director decides when, where and how many; the spawner decides which prefab and keeps count.
+
+| Responsibility | How |
+|---|---|
+| Which robot | `Build Up Robots` list during build-up, `Peak Robots` list at a peak (e.g. Hunter, then Flanker). Each list is used in turn. |
+| Placement | Snaps the spawn marker to the NavMesh and warps any `NavMeshAgent` there. |
+| Alive count | A robot stops counting as soon as its `IDamageable.IsAlive` is false, or it is destroyed or deactivated. |
+| Player respawn | Removes all robots and resets the Director (`PlayerHealth.Respawned`). |
+| Robot set-up (optional) | Robot scripts implementing `IFacilitySpawned` are told their spawn point and phase. |
+
+With no prefabs assigned it spawns `TestRobot` capsules (test only): they walk to the player at 3 m/s,
+deal 1.2 health per second within 2 m and have 100 health, matching the pacing simulator, so the full
+loop can be checked in `Main.unity` before the real robots are merged.
 
 ### Verification
 
