@@ -213,12 +213,36 @@ with the Facility AI's 82 tests).
 In the tests, line of sight is a grid approximation (a straight line must stay on floor tiles; locked doors block it).
 In the game it comes from raycasts, so the planner's behaviour in the scene still needs a check in Play mode.
 
+## Runtime (Unity)
+
+`FlankerAgent` (assembly `LabLockdown.AI.Flanker.Runtime`) is the Unity body around the planner:
+
+| | Every 0.25 s (sense and decide) | Every frame (act) |
+|---|---|---|
+| | Player tile, position and facing; tiles the player can see (`PlayerVisibilitySensor`); locked doors (`FacilityEvents`); own health | Move step: hand the step's tile route to the robot's `IPathFollower` once |
+| | Plan still valid? (`IsStillValid`) If not, `Decide` again | Attack step: stop, face the player, fire through `IRobotWeapon` when in range with line of fire |
+
+- **Line of sight:** one ray per tile from the player's eyes (1.6 m) to 1.2 m above the tile centre, blocked by the
+  Default and Doors layers, as in the Facility AI. Robots and the player never block it, so a flanker does not hide
+  its own tile. One shared sensor for all flankers, refreshed every 0.2 s (45 rays).
+- **Extra re-plan triggers:** a door locked or unlocked (`FacilityEvents.DoorLockChanged`, immediately), a move step
+  finished, the follower stuck, or no line of fire for 2 s during an attack.
+- **Off the level:** if the player is more than 3 m from every tile centre or below y = −2, the flanker waits.
+- **Debug:** the overlay (top right) lists each flanker's plan, decision count and decision time; gizmos draw the
+  planned routes (green flank, cyan cover, red assault) and, for the selected flanker, the tiles the player holds
+  (red) and can see without holding (yellow).
+
+The robot's body (movement, animation, health, gun, spawning) is shared with the Security Hunter and documented in
+`Docs/AgentController.md`.
+
 ## Limitations
 
 - Cover is tile-level (a tile the player cannot see), not individual cover props.
 - Move costs are estimated for where the flanker will start each move; the plan is re-checked every sense tick
   and rebuilt when the situation changes, which keeps this accurate in practice.
 - One flanker plans on its own; several flankers do not coordinate (e.g. one pins while another flanks).
+- A player sweeping the view back and forth can make a flanker switch routes repeatedly. If Play mode shows this,
+  the fix is hysteresis: only treat a route as newly held after it has been watched for about half a second.
 
 ## Plan
 
@@ -226,5 +250,6 @@ In the game it comes from raycasts, so the planner's behaviour in the scene stil
 |---|---|
 | 1 | STRIPS planner + A* + tests ✅ |
 | 2 | Threat map, route field, flanker domain, tuning + tests ✅ |
-| 3 | Unity runtime: sensing (raycasts, player facing), decision loop, debug overlay |
-| 4 | Movement and animation along the planned routes (Agent Controller, SE3032) |
+| 3 | Unity runtime: sensing (raycasts, player facing), decision loop, debug overlay ✅ (compiles; Play-mode check pending) |
+| 4 | Movement and animation along the planned routes (Agent Controller, SE3032) ✅ (compiles; Play-mode check pending) |
+| 5 | Play-mode tuning in `Main.unity`, viva preparation |

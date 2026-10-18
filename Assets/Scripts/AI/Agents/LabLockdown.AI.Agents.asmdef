@@ -1,0 +1,14 @@
+{
+    "name": "LabLockdown.AI.Agents",
+    "rootNamespace": "LabLockdown.AI.Agents",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
