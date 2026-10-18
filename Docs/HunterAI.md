@@ -25,7 +25,7 @@ Percepts -> Belief update -> Decision (state + target) -> Plan (A*) -> Path foll
 |---|---|---|
 | Percepts | Convert Unity events to graph facts (noise at node n, door d is closed, player seen at node n) | Runtime |
 | Belief | `BeliefMap`: probability per graph node that the player is there | Core |
-| Decision | State machine (Patrol, Investigate, Search, Chase) plus utility target selection | Core |
+| Decision | State machine (Patrol, Investigate, Chase, Attack, Dead) plus utility target selection | Core |
 | Plan | A* over the level graph with live edge costs | Core |
 | Output | `IPathFollower.SetPath(...)` (implemented by the Agent Controller) | Runtime |
 
@@ -58,11 +58,15 @@ Limitation (stated up front): sound travels only along graph edges, not through 
 
 `b[n]` is a distribution over nodes (sums to 1).
 
-1. **Hear event** at the Hunter's node with `heard = remaining(hunterNode)`. Muffling is a proxy
-   for localisation error: `sigma = sigma0 + kappa * (L - heard)`.
-   Likelihood for node n: `exp(-d(n, source)^2 / (2 sigma^2))`, where d is graph distance.
-   Posterior: `b[n] <- b[n] * likelihood(n)`, normalised.
-2. **See player** at node s: `b` collapses to s.
+1. **Hear event** at the Hunter's node with `heard = level(hunterNode)` from the sound model.
+   Muffling is a proxy for localisation error: `sigma = sigma0 + kappa * (L - heard)`.
+   Likelihood for node n: `exp(-d(n, source)^2 / (2 sigma^2))` (d = walking distance), normalised to sum to 1.
+   The evidence is **blended in**, not multiplied: `b <- (1 - w) * b + w * likelihood`, with
+   `w = heard / (heard + w0)`. Footsteps repeat many times a second; multiplying each repeat would pin the
+   belief to one node after a few steps. Blending converges to the likelihood itself (tested), so repeated
+   noise can never make the Hunter certain.
+2. **See player** at node s: `b` collapses to s. **Being shot** is strong evidence about the shooter: the same
+   blend with the shooter's likelihood (`sigma0`) and weight `shotWeight`.
 3. **Time**: `b[n] <- (1 - delta*dt) * b[n] + delta*dt / N`, so confidence in an old trail fades.
 4. **Search a node** (reach it, no player): `b[n] *= searchedFactor`, renormalise.
 
@@ -74,6 +78,21 @@ U(n) = b[n] / (pathCost(hunter, n) + epsilon)       target = argmax U
 
 Patrol is not a separate algorithm: with a flat belief, searched nodes stay low and stale nodes
 recover, so the Hunter sweeps the level by itself.
+
+## Ranged hitscan attack
+
+Hitscan = the shot lands instantly along a ray (the same mechanism as the player's weapon), no projectile.
+`AttackModel` (Core, pure C#) decides; the Unity side casts the ray and applies the damage.
+
+```
+Idle      : line of sight, in range, not on cooldown  ->  start wind-up
+WindingUp : sight or range lost -> cancel (no shot).  Wind-up over -> fire, roll to hit
+Cooldown  : wait, then Idle
+chance(d) = MaxAccuracy + (MinAccuracy - MaxAccuracy) * d / Range        (0 beyond Range)
+```
+
+The wind-up is the player's counterplay: breaking line of sight cancels the shot. The Hunter stands still
+while winding up. No melee (decided).
 
 ## Planning: A* with dynamic costs
 
