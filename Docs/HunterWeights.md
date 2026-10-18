@@ -31,6 +31,8 @@ Loudness is the open-air audible radius in metres. Tiles are 4 m, so one open ed
 | delta | Belief decay rate | 0.05 /s | About a 20 s time constant for a trail going cold | Observe search duration in playtest | Initial |
 | searchedFactor | Multiplier on a searched node | 0.1 | Searched means unlikely, not impossible (player may have moved) | Test: no oscillation between rooms | Initial |
 | epsilon | Cost offset in U | 1 m | Avoids division by zero at the Hunter's own node | n/a | Initial |
+| w0 | Noise weight half-point: w = heard / (heard + w0) | 5 | A noise heard at level 5 gets weight 0.5; a gunshot heard at 30 gets 0.86, a faint footstep at 1 gets 0.17 | Unit test: louder noise moves the belief more | Initial |
+| shotWeight | Weight of being shot | 0.9 | The shooter's direction is known well; not 1, because the shooter may move | Unit test | Initial |
 
 ## Planning
 
@@ -39,6 +41,23 @@ Loudness is the open-air audible radius in metres. Tiles are 4 m, so one open ed
 | C_closed | A* closed-door penalty | 3 | Door-open time (about 1 s) x walk speed (about 3 m/s) | Test: prefers a short open route over a closed door only when the detour is under 3 m | Initial |
 | locked, blocked | Edge cost | infinity | Cannot be walked through | Test | Fixed |
 | h | Heuristic | Euclidean | Admissible: every edge cost >= Euclidean distance | A* vs Dijkstra test | Fixed |
+
+## Attack and movement (calibrated to the group balance agreed with the Facility AI and Flanker owners)
+
+| Symbol | Meaning | Value | Justification | Check | Status |
+|---|---|---|---|---|---|
+| attackDamage | Health taken per hit | 6 | Group balance | n/a | Fixed (group) |
+| shotInterval | Time between shots = windUp + cooldown | 2.5 s | Group balance | Unit test: shots 2.5 s apart | Fixed (group) |
+| windUp | Aim time before the shot | 0.6 s | Long enough to react and duck behind cover, short enough to stay threatening. Part of the 2.5 s interval | Playtest | Initial |
+| attackCooldown | Pause after a shot | 1.9 s | 2.5 s interval minus the 0.6 s wind-up | Unit test | Derived |
+| maxAccuracy | Hit chance at 0 m | 0.8 | Close range is dangerous but not certain | Statistical unit test | Initial |
+| minAccuracy | Hit chance at attackRange | 0.2 | Long shots mostly miss, so retreating helps | Statistical unit test | Initial |
+| (mid-range accuracy) | Hit chance at 6 m | 0.5 | Equals the group's 50% roll, so average damage per second at mid-range is 6 x 0.5 / 2.5 = 1.2, the same as the group's pacing simulation | Unit test | Derived |
+| attackRange | Furthest shooting distance | 12 m | About three tiles. The group has not fixed a range; to be confirmed | Playtest | Initial |
+| robotHealth | Hunter health | 125 | Group balance: 5 rifle hits of 25 | n/a | Fixed (group) |
+| baseSpeed | Chase speed | 3 m/s | Group balance | n/a | Fixed (group) |
+| patrolSpeedFactor | Patrol speed / base | 0.5 (1.5 m/s) | A patrolling robot listening for noise moves slowly | Playtest | Initial |
+| investigateSpeedFactor | Investigate speed / base | 0.75 (2.25 m/s) | Between patrol and chase | Playtest | Initial |
 
 ## Edge cases
 
@@ -60,3 +79,5 @@ field of view and sight range, search timeout, speeds per state.
 |---|---|---|
 | 2026-10-10 | beta set to 3 (an earlier draft had 5) | With 4 m edges, beta = 5 made a normal throw inaudible through a closed door (8 - 9 < 0), contradicting the intended "muffled, not erased" behaviour |
 | 2026-10-12 | L_gun changed from a proposed 40 to the real 30; footstep loudness values added | The Systems Engineer update defines these values; the register must match the game |
+| 2026-10-17 | Noise update changed from multiplying evidence into the belief to blending it | Footsteps repeat many times a second; multiplication collapses the belief to one node (and shrinks sigma) within a few steps, blending converges to the likelihood |
+| 2026-10-17 | Attack numbers changed: damage 10 to 6, cooldown 1.2 s to 1.9 s (2.5 s between shots), accuracy 0.9 to 0.8 at close range | My first numbers gave about 3.1 damage per second at mid-range, 2.5 times the group's balance of 1.2, which would break the pacing simulation |
