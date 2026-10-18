@@ -63,7 +63,17 @@ namespace GVGame.Interaction
 
         public State Current { get; private set; } = State.Closed;
         public bool IsLocked { get; private set; }
-
+        public bool IsBlocked => Time.time < _blockedUntil;
+        public float OpenFraction
+        {
+            get
+            {
+                if (_leaves == null || _leaves.Length == 0 || openAngle <= 0f) return 0f;
+                float widest = 0f;
+                foreach (Leaf l in _leaves) widest = Mathf.Max(widest, l.mag);
+                return Mathf.Clamp01(widest / openAngle);
+            }
+        }
         class Leaf
         {
             public Rigidbody rb;
