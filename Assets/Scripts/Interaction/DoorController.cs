@@ -178,7 +178,7 @@ namespace GVGame.Interaction
             if (wasShut)
             {
                 PlayClip(openClip);
-                InteractionNoise.Emit(transform.position, noiseLoudness, gameObject);
+                InteractionNoise.Emit(transform.position, noiseLoudness, from != null ? from.gameObject : gameObject);
             }
             Current = State.Opening;
             _closeTimer = autoCloseDelay;
