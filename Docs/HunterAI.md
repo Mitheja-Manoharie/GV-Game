@@ -79,6 +79,57 @@ U(n) = b[n] / (pathCost(hunter, n) + epsilon)       target = argmax U
 Patrol is not a separate algorithm: with a flat belief, searched nodes stay low and stale nodes
 recover, so the Hunter sweeps the level by itself.
 
+## Decision layer (HunterBrain)
+
+Pure C#. Each tick the Unity side reports what the Hunter's sensors saw; the brain returns a command
+(state, gait, target node, hold position, attack result). Noise and being shot arrive as events.
+
+| State | When | Behaviour |
+|---|---|---|
+| Attack | Player visible and within attack range | Stand still, face the player, wind up, shoot |
+| Chase | Player visible but out of range, or seen less than `chaseMemory` ago | Walk to the player's node at chase speed |
+| Investigate | Belief peak is at least `investigateEnterRatio` times the flat level (falls back below `investigateExitRatio`) | Walk to the likeliest place at investigate speed |
+| Patrol | Belief is flat | Walk to the best-utility node at patrol speed |
+| Dead | No health | Stop |
+
+The state follows from the belief, not from a script. Investigate and Patrol use hysteresis (enter at a higher
+peak than exit) so the Hunter cannot flap at the boundary. The target is re-evaluated at most every
+`reselectInterval` unless something new was perceived, and a new target must beat the current one's utility by
+`switchMargin` before the Hunter switches.
+
+Patrol is not a separate algorithm. Entering a node without seeing the player lowers that node's probability;
+time raises every node back toward flat. With a flat belief the target rule picks the nearest node not
+searched recently, so the Hunter sweeps the whole level (tested: all reachable nodes visited, no scripted route).
+
+Being shot is evidence about the shooter. A noise belief is spread over walking distance with every door treated
+as open, because sound passes a locked door and the player may be anywhere on its far side.
+
+## Blocked-door memory
+
+The door scripts report no lasting "blocked by a barricade" signal. When the Hunter orders a door open and it
+stays shut, the Unity side calls `BlockedDoorMemory.MarkBlocked(doorId)`. For the next 20 s that door reports
+Blocked (impassable) to the planner, which routes around it; afterwards the real door is trusted again, because a
+barricade can be dragged away. This is the model-based part in the strict sense: a belief about the world that the
+sensors do not report directly, which expires.
+
+## Measured: how a noise moves the belief
+
+Real 45-node level, Hunter on a central tile, all doors open. "Peak ratio" = highest node probability divided by the
+flat level (1 / 45). Produced by the exploration used to choose the Investigate thresholds.
+
+| Noise | Source distance | Heard level | Peak ratio |
+|---|---|---|---|
+| Gunshot (30) | 0 m | 30 | 11.9 |
+| Gunshot (30) | 8 m | 22 | 4.25 |
+| Gunshot (30) | 16 m | 14 | 2.5 |
+| Gunshot (30) | 24 m | 6 | 1.9 |
+| Gunshot (30) | 32 m | inaudible | 1.0 |
+| Thrown prop (12) | 8 m | 4 | 2.8 |
+| Thrown prop (8) / door opening (6) | 8 m | inaudible | 1.0 |
+| 20 sprint footsteps (8) in a row, 4 m away | 4 m | 4 | 9.4 (never certainty) |
+
+After a gunshot 8 m away the peak decays from 4.25 to 2.6 after 10 s, 1.8 after 20 s, and 1.4 after 30 s.
+
 ## Ranged hitscan attack
 
 Hitscan = the shot lands instantly along a ray (the same mechanism as the player's weapon), no projectile.
