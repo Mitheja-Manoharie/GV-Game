@@ -63,6 +63,17 @@ namespace LabLockdown.AI.Hunter
             for (int i = 0; i < p.Length; i++) p[i] = uniform;
         }
 
+        /// <summary>Largest probability on any node. 1 / Count means the belief is completely flat.</summary>
+        public float MaxProbability
+        {
+            get
+            {
+                float max = 0f;
+                for (int i = 0; i < p.Length; i++) if (p[i] > max) max = p[i];
+                return max;
+            }
+        }
+
         public int MostLikelyNode()
         {
             int best = 0;
