@@ -41,7 +41,7 @@ use and which doors to lock.
 The decision logic ("brain") cannot reference Unity, which enforces the separation of AI logic
 from visuals and lets every algorithm be unit tested.
 
-## Week 1: level graph
+## Level graph
 
 - **45 nodes** (one per 4 m floor tile), **55 edges**, **5 door edges**.
 - Tiles one grid step apart are connected; on this layout every such pair has an opening or a door.
@@ -64,7 +64,7 @@ validates the graph against the scene (door markers, spawn markers, NavMesh cove
 | Lock both route doors, or both control room doors | exit unreachable → must be rejected by the CSP |
 | Lock `Door_ArmouryNorth` | player confined to 9 tiles (the safe area) |
 
-## Week 2: generic CSP solver
+## Generic CSP solver
 
 `Core/Csp/` holds a problem-independent solver, so the Facility constraints (Week 3) are just data.
 
@@ -113,7 +113,7 @@ validates the graph against the scene (door markers, spawn markers, NavMesh cove
 colours, impossible global sum), node consistency, forward checking detecting a dead end early, the node
 budget, and **200 random problems checked against brute force for every combination of options**.
 
-## Week 3: the Director
+## The Director
 
 ### Decision loop
 
@@ -199,7 +199,7 @@ The simulation caught two pacing problems that every test passed: robots spawnin
 still choosing gear, and a 40 % health player receiving a full wave. Hence the safe-area rule and wave
 sizes that grow with intensity. Decisions take about 1 ms (.NET 8): 4–120 search nodes, always proven optimal.
 
-## Week 4: edge cases, tuning, integration
+## Edge cases, tuning, integration
 
 ### Edge cases
 
@@ -383,13 +383,3 @@ The runtime code compiles against Unity API stubs. Behaviour in the scene still 
 Eight candidates spread over both routes; none in the quarantine cell, armoury or control room:
 MaintenanceBay, Crossroads, ServiceCorridor, LabCorridor, ResearchLab, Infirmary,
 InfirmaryNorth, WestCorridor.
-
-## Plan
-
-| Week | Work |
-|---|---|
-| 1 | Level graph, BFS/Dijkstra, gizmos, spawn markers, tests ✅ |
-| 2 | Generic CSP solver (backtracking, MRV + degree, LCV, forward checking) + tests ✅ |
-| 3 | Facility constraints, intensity model, branch and bound, director, spawn/door services ✅ |
-| 4 | Edge cases, pacing simulator and tuning, live intensity graph, events for teammates ✅ |
-| 5 | Performance checks, viva preparation |
