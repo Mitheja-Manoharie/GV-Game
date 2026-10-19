@@ -9293,13 +9293,14 @@ GameObject:
   - component: {fileID: 489904357}
   - component: {fileID: 489904359}
   - component: {fileID: 489904360}
+  - component: {fileID: 489904361}
   m_Layer: 0
   m_Name: FacilityAI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &489904357
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9417,6 +9418,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LabLockdown.AI.Facility.Integration.DoorControllerDoorService
   doorMarkersRoot: {fileID: 307657419}
+--- !u!114 &489904361
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 489904356}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 955f833fb1a45448eacc040c9439e9da, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LabLockdown.AI.Facility.Integration.RobotSpawnService
+  buildUpRobots: []
+  peakRobots: []
+  robotsParent: {fileID: 0}
+  navMeshSearchRadius: 2
+  playerHealth: {fileID: 0}
 --- !u!1 &502193763
 GameObject:
   m_ObjectHideFlags: 0
