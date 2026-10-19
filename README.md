@@ -1,9 +1,11 @@
 # GV-Game
 
-An interactive 3D shooting game built in Unity for the **SE3032 – Graphics and Visualization** group assignment at SLIIT.
+An interactive 3D shooting game built in Unity for the **SE3032 – Graphics and Visualization** group assignment at SLIIT. The AI agents also serve as the team's **SE3062 – Intelligent Systems** project.
 
 > **Theme:** Lab Lockdown
-> **Status:** In development
+> **Status:** In development. The `Main` scene is integrated with the final lighting, occlusion and NavMesh bake, the player systems, physics doors and props, and the Facility AI director.
+
+You are trapped in a research facility in lockdown. Find a weapon, move barricades and throw objects to get past the facility's robots, and reach the exit while the facility decides where to send enemies and which doors to lock.
 
 ---
 
@@ -11,10 +13,10 @@ An interactive 3D shooting game built in Unity for the **SE3032 – Graphics and
 
 | Name | Student ID | Role | Responsibilities |
 |------|-----------|------|------------------|
-| _Name_ | _IT24103443_ | World Builder | Level design, textures, lighting bake, NavMesh bake |
-| _Name_ | _ITxxxxxxxx_ | Systems Engineer | Physics interactions: doors, barricades, throwables |
-| _Name_ | _ITxxxxxxxx_ | Core Developer | Custom 3D models (Blender), import pipeline, player systems |
-| _Name_ | _ITxxxxxxxx_ | Agent Controller | AI agent movement, animation, IS module path integration |
+| Manoharie J A M | IT24103443 | World Builder | Level design, textures, lighting bake, NavMesh bake · Facility AI (IS) |
+| Abeyweera A M P V T C | IT24103428 | Systems Engineer | Physics interactions: doors, barricades, throwables · player, weapon and health · Security Hunter AI (IS) |
+| B G R V Senanayake | IT24103456 | Core Developer | Custom 3D character models (Blender), import pipeline · Drone Stalker AI (IS) |
+| Oshan D L D A | IT24103473 | Agent Controller | Robot agent body, prefabs and spawner · Tactical Flanker AI (IS) |
 
 ---
 
@@ -23,8 +25,9 @@ An interactive 3D shooting game built in Unity for the **SE3032 – Graphics and
 | Tool | Version / Notes |
 |------|-----------------|
 | Unity | **6000.3.25f1 (Unity 6.3 LTS)** – everyone must use this exact version |
-| Render pipeline | Universal Render Pipeline (URP) |
-| Navigation | AI Navigation package (NavMesh) |
+| Render pipeline | Universal Render Pipeline (URP) 17.3 |
+| Navigation | AI Navigation 2.0 (NavMesh) |
+| Input | Input System 1.20 (actions created in code) |
 | Modelling | Blender |
 | Version control | Git + Git LFS, hosted on GitHub |
 | Code editor | Visual Studio Code or JetBrains Rider |
@@ -59,10 +62,66 @@ git config --global user.email "your-github-email@example.com"
 
 ```bash
 git lfs install
-git clone https://github.com/<owner>/GV-Game.git
+git clone https://github.com/Mitheja-Manoharie/GV-Game.git
+cd GV-Game
+git switch dev
 ```
 
 In Unity Hub, click **Add > Add project from disk** and select the cloned `GV-Game` folder. The first open takes a few minutes while Unity rebuilds the `Library` folder.
+
+Open `Assets/Scenes/Main.unity` and press **Play**.
+
+---
+
+## Controls
+
+| Action | Key |
+|--------|-----|
+| Move | WASD |
+| Look | Mouse |
+| Sprint | Left Shift |
+| Crouch (silent footsteps) | Left Ctrl |
+| Jump | Space |
+| Shoot | Left click |
+| Reload | R |
+| Interact (doors) | E |
+| Pick up / drag / drop prop | F |
+| Throw held prop | Q |
+| Move held prop nearer / further | Mouse wheel |
+| Restart after death | R |
+| Release / lock cursor | Esc / Left click |
+
+---
+
+## Gameplay Systems
+
+| System | Scripts | Notes |
+|--------|---------|-------|
+| Player | `Player/PlayerController`, `PlayerHealth`, `PlayerHud` | First-person controller on a `CharacterController`, 100 HP, HUD and restart |
+| Weapon | `Combat/WeaponController`, `WeaponPickup`, `IDamageable` | Hitscan weapon picked up in the armoury, 25 damage, 12-round magazine |
+| Doors | `Interaction/DoorController`, `DoorAutoOpenTrigger` | Two-panel kinematic doors with angle limits; open automatically for NavMesh agents; can be locked by the Facility AI |
+| Props | `Interaction/PhysicsProp`, `PlayerInteractor`, `PlayerRigidbodyPusher` | Barricades (heavy, carve the NavMesh) and throwables (mugs, ammo boxes) |
+| Pickups | `Interaction/HealthPickup` | Health packs heal 40 HP |
+| Noise | `Interaction/InteractionNoise` | Doors, impacts, gunshots and footsteps raise noise events the AI can hear |
+
+Design notes for the interaction physics are in [Docs/Systems_Engineer.md](Docs/Systems_Engineer.md).
+
+---
+
+## AI Agents
+
+Each agent keeps its decision logic in a `Core` assembly with no Unity references, so every algorithm can be unit tested outside the engine.
+
+| Agent | Owner | Technique | Status | Docs |
+|-------|-------|-----------|--------|------|
+| Facility AI ("Lockdown Director") | Mitheja | Utility-based intensity model + CSP (backtracking, MRV, forward checking) to pick spawn points and doors to lock | In `Main`, spawning robots | [FacilityAI.md](Docs/FacilityAI.md) |
+| Security Hunter ("Sound Hunter") | Viduna | Probabilistic belief map from sound + A* with live door costs | Core and tests on `dev` | [HunterAI.md](Docs/HunterAI.md), [HunterWeights.md](Docs/HunterWeights.md) |
+| Drone Stalker | Ravindu | Utility tactics + A* with light and line-of-sight costs | Feature branch | – |
+| Tactical Flanker | Alen | STRIPS/GOAP planner with A* over actions and a threat map | Feature branch | – |
+
+### Running the tests
+
+Open **Window > General > Test Runner**, select **EditMode** and click **Run All**. The test assemblies are `LabLockdown.AI.Facility.Tests` and `LabLockdown.AI.Hunter.Tests`.
 
 ---
 
@@ -71,23 +130,31 @@ In Unity Hub, click **Add > Add project from disk** and select the cloned `GV-Ga
 ```
 GV-Game/
 ├── Assets/
-│   ├── Art/
-│   │   ├── Models/        # Exported FBX files (custom + third-party)
-│   │   ├── Materials/
-│   │   └── Textures/
-│   ├── Audio/
+│   ├── Art/Materials/      # Placeholder materials (doors, gun, tracer)
+│   ├── Models/Characters/  # Custom Alien and Android FBX models
 │   ├── Prefabs/
+│   │   ├── Lighting/       # Light fixtures (white/red, small/wide/floor/corner/spot)
+│   │   ├── Player/         # Player prefab
+│   │   └── Props/          # Barricades, throwables, health pack
 │   ├── Scenes/
-│   │   ├── Main.unity     # Integrated game scene
-│   │   └── Dev/           # One personal scene per team member
+│   │   ├── Main.unity      # Integrated game scene
+│   │   ├── Main/           # Baked lightmaps, reflection probes, NavMesh, occlusion data
+│   │   └── Dev/            # Personal and test scenes (e.g. Systems_Test)
 │   ├── Scripts/
-│   └── ThirdParty/        # Imported store/free assets, kept unmodified
-├── Blender/               # .blend source files (outside Assets on purpose)
+│   │   ├── AI/             # Facility, FacilityIntegration, Hunter (Core / Runtime / Tests)
+│   │   ├── Combat/
+│   │   ├── Interaction/
+│   │   ├── Player/
+│   │   ├── Dev/            # Test-only helpers
+│   │   └── Editor/         # GV Game > Systems Setup menu tools
+│   ├── Settings/           # URP assets and volume profiles
+│   └── ThirdParty/Quaternius/  # MegaKit and Essentials, kept unmodified
+├── Docs/                   # Design notes for the systems and AI agents
 ├── Packages/
 └── ProjectSettings/
 ```
 
-`.blend` source files live in `Blender/` and are exported to FBX in `Assets/Art/Models/`. This keeps imports reliable on machines without Blender installed.
+Keep `.blend` source files outside `Assets/` and export them to FBX in `Assets/Models/`. This keeps imports reliable on machines without Blender installed.
 
 ---
 
@@ -95,11 +162,11 @@ GV-Game/
 
 ### Branching
 
-- `main` always holds a working, buildable project.
-- Create a branch per feature and merge through a pull request:
+- `main` holds the submitted, buildable project. `dev` is the integration branch.
+- Create a branch per feature from `dev` and merge it back through a pull request:
 
 ```bash
-git switch main
+git switch dev
 git pull
 git switch -c feature/door-physics
 ```
@@ -110,6 +177,7 @@ git switch -c feature/door-physics
 
 - Work in your own scene under `Assets/Scenes/Dev/` and share work as **prefabs**.
 - Only **one person at a time** edits `Main.unity`. Announce it in the group chat before you start.
+- After changing level geometry in `Main`, rebake lighting, occlusion and the NavMesh and commit the files in `Assets/Scenes/Main/`.
 
 ### Commits
 
@@ -117,13 +185,13 @@ git switch -c feature/door-physics
 - Write clear messages in the imperative form, for example:
   - `Add door hinge physics with angle limits`
   - `Bake NavMesh for dock area`
-  - `Import custom flintlock model with UVs`
+  - `Import custom android model with UVs`
 - Always commit `.meta` files together with their assets.
 - Save the scene and project in Unity before committing.
 
 ### Large files
 
-Binary assets (`.fbx`, `.png`, `.wav`, etc.) are tracked by Git LFS through `.gitattributes`. Do not commit screen recordings, the demo video, or build output to this repo.
+Binary assets (`.fbx`, `.png`, `.exr`, `.wav`, etc.) are tracked by Git LFS through `.gitattributes`. Do not commit screen recordings, the demo video, or build output to this repo.
 
 ---
 
@@ -133,27 +201,15 @@ Models created from scratch by the team in Blender:
 
 | Model | Author | Polycount | Notes |
 |-------|--------|-----------|-------|
-| _Model 1_ | _Name_ | _–_ | _–_ |
-| _Model 2_ | _Name_ | _–_ | _–_ |
-
----
-
-## Controls
-
-| Action | Key |
-|--------|-----|
-| Move | _WASD_ |
-| Look | _Mouse_ |
-| Shoot | _Left click_ |
-| Interact | _E_ |
-| Throw | _–_ |
+| Android | Ravindu Senanayake | _–_ | Rigged 73-bone humanoid, PBR textures, red emission lights |
+| Alien | Ravindu Senanayake | _–_ | Rigged 73-bone humanoid, base colour and normal textures |
 
 ---
 
 ## Building
 
 1. Open **File > Build Profiles**.
-2. Select **Windows** or **macOS** and make sure `Main.unity` is in the scene list.
+2. Select **Windows** or **macOS** and make sure `Main.unity` is the first scene in the list.
 3. Click **Build** and choose a folder **outside** the repo.
 
 ---
