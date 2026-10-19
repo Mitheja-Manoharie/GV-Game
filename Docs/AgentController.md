@@ -94,6 +94,8 @@ The agent's own rotation is off (`updateRotation = false`); the follower turns t
    `RobotSpawner` warns once per prefab if either is missing.
 6. Open your dev scene (or `Main.unity` in your turn) > **5. Add Robot Spawner To Scene**: creates `RobotSpawner` under
    `FacilityAI` and assigns it as the Director's Spawn Service. Enable `FacilityAI` to run the Director.
+   When the player respawns (`PlayerHealth.Respawned`), `RobotSpawner` removes every robot, dying ones included, and
+   calls `FacilityDirectorRunner.ResetDirector()`.
 
 ## Play-mode checklist
 

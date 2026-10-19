@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using GVGame.Combat;
+using GVGame.Player;
 using LabLockdown.AI.Facility.Runtime;
 using UnityEngine;
 using UnityEngine.AI;
@@ -13,6 +14,7 @@ namespace GVGame.Agents
     /// Assign this to FacilityAI > Facility Director Runner > Spawn Service.
     /// Every robot prefab needs an <see cref="IDamageable"/> (to be shot and counted as dead) and a solid, non-trigger
     /// collider (to be hit, and for the Director to see it standing on a spawn point or in a doorway).
+    /// When the player respawns, every robot (alive or dying) is removed and the Director is reset.
     /// </summary>
     public class RobotSpawner : MonoBehaviour, ISpawnService
     {
@@ -23,37 +25,45 @@ namespace GVGame.Agents
         [Min(0)] public int maxFlankersAlive = 2;
         [Tooltip("Parent for spawned robots, to keep the hierarchy tidy. Optional.")]
         public Transform container;
+        [Tooltip("The player's health. Found by the Player tag if empty. On respawn, robots are removed and the Director resets.")]
+        public PlayerHealth playerHealth;
 
         struct Spawned
         {
-            public IDamageable Health;
-            public Object Owner; // for Unity's destroyed check; the interface reference alone is never null
+            public GameObject Root;
+            public IDamageable Health; // null if the prefab has none: never counted as alive
             public bool IsFlanker;
         }
 
         readonly List<Spawned> _robots = new List<Spawned>();
         readonly HashSet<GameObject> _checkedPrefabs = new HashSet<GameObject>();
+        FacilityDirectorRunner _runner;
 
         /// <summary>Robots still alive. Dead robots stop counting immediately, not when their body is removed.</summary>
-        public int AliveCount
+        public int AliveCount => Count(flankersOnly: false);
+
+        public int FlankersAlive => Count(flankersOnly: true);
+
+        void Awake()
         {
-            get
+            _runner = GetComponentInParent<FacilityDirectorRunner>();
+            if (_runner == null) _runner = FindAnyObjectByType<FacilityDirectorRunner>();
+
+            if (playerHealth == null)
             {
-                Prune();
-                return _robots.Count;
+                var player = GameObject.FindWithTag("Player");
+                if (player != null) playerHealth = player.GetComponentInParent<PlayerHealth>();
             }
         }
 
-        public int FlankersAlive
+        void OnEnable()
         {
-            get
-            {
-                Prune();
-                int count = 0;
-                foreach (var robot in _robots)
-                    if (robot.IsFlanker) count++;
-                return count;
-            }
+            if (playerHealth != null) playerHealth.Respawned += OnPlayerRespawned;
+        }
+
+        void OnDisable()
+        {
+            if (playerHealth != null) playerHealth.Respawned -= OnPlayerRespawned;
         }
 
         public void Spawn(Vector3 position, Quaternion rotation, string spawnPointId)
@@ -76,10 +86,32 @@ namespace GVGame.Agents
 
             if (_checkedPrefabs.Add(prefab)) CheckBody(robot, prefab.name);
 
-            var health = robot.GetComponent<IDamageable>();
-            if (health == null) return;
+            _robots.Add(new Spawned { Root = robot, Health = robot.GetComponent<IDamageable>(), IsFlanker = flanker });
+        }
 
-            _robots.Add(new Spawned { Health = health, Owner = (Object)health, IsFlanker = flanker });
+        /// <summary>Removes every spawned robot, including bodies still playing their death animation.</summary>
+        [ContextMenu("Despawn All")]
+        public void DespawnAll()
+        {
+            foreach (var robot in _robots)
+                if (robot.Root != null) Destroy(robot.Root);
+            _robots.Clear();
+        }
+
+        void OnPlayerRespawned()
+        {
+            DespawnAll();
+            if (_runner != null) _runner.ResetDirector();
+        }
+
+        int Count(bool flankersOnly)
+        {
+            _robots.RemoveAll(r => r.Root == null); // bodies removed after their death animation
+
+            int count = 0;
+            foreach (var robot in _robots)
+                if (robot.Health != null && robot.Health.IsAlive && (!flankersOnly || robot.IsFlanker)) count++;
+            return count;
         }
 
         /// <summary>Warns once per prefab if the robot could not be shot, counted as dead, or seen by the Director.</summary>
@@ -96,7 +128,5 @@ namespace GVGame.Agents
                 Debug.LogWarning($"[RobotSpawner] {prefabName} has no solid (non-trigger) collider: bullets pass through it " +
                                  "and the Director cannot see it on a spawn point or in a doorway.", robot);
         }
-
-        void Prune() => _robots.RemoveAll(r => r.Owner == null || !r.Health.IsAlive);
     }
 }
