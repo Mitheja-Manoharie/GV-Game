@@ -10,7 +10,7 @@ namespace GVGame.Interaction
     [RequireComponent(typeof(Collider))]
     public class HealthPickup : MonoBehaviour
     {
-        public float healAmount = 35f;
+        public float healAmount = 40f;
         [Tooltip("Seconds until the pack comes back. 0 = one use.")]
         public float respawnSeconds = 0f;
         public AudioClip pickupClip;
