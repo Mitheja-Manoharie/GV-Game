@@ -9376,7 +9376,7 @@ MonoBehaviour:
     HealthWeight: 0.35
     ProgressWeight: 0.25
     CalmWeight: 0.3
-    CalmSaturationSeconds: 20
+    CalmSaturationSeconds: 12
     DamageWeight: 0.5
     CrowdWeight: 0.4
     PeakThreshold: 0.8
