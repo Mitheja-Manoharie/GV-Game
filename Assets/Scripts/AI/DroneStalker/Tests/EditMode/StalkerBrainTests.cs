@@ -31,13 +31,14 @@ namespace LabLockdown.AI.DroneStalker.Tests
             return g;
         }
 
-        static StalkerPercepts Percepts(int self, int player, double time = 0, float health = 1f)
+        static StalkerPercepts Percepts(int self, int player, double time = 0, float health = 1f, bool inSight = true)
         {
             return new StalkerPercepts
             {
                 Time = time,
                 SelfNode = self,
                 PlayerNode = player,
+                PlayerInSight = inSight,
                 PlayerHealth01 = health,
                 LightByNode = new float[25],               // all dark unless a test lights something
                 PlayerVisibleNodes = new HashSet<int>(),
@@ -169,7 +170,7 @@ namespace LabLockdown.AI.DroneStalker.Tests
             g.AddEdge(0, 1, 4f);
             g.TagDoor("Door_AB", 2f, 0f, 0.6f);
             var brain = new StalkerBrain(g, new StalkerSettings());
-            var p = new StalkerPercepts { SelfNode = 0, PlayerNode = 1, LockedDoors = new HashSet<string> { "Door_AB" } };
+            var p = new StalkerPercepts { SelfNode = 0, PlayerNode = 1, PlayerInSight = false, LockedDoors = new HashSet<string> { "Door_AB" } };
 
             StalkerDecision d = null;
             Assert.DoesNotThrow(() => d = brain.Think(p));
@@ -189,7 +190,7 @@ namespace LabLockdown.AI.DroneStalker.Tests
         public void MissingSensorDataStillGivesADecision()
         {
             var brain = new StalkerBrain(Grid(), new StalkerSettings());
-            var p = new StalkerPercepts { SelfNode = 0, PlayerNode = 24, LightByNode = null, PlayerVisibleNodes = null, LockedDoors = null, HealNodes = null };
+            var p = new StalkerPercepts { SelfNode = 0, PlayerNode = 24, PlayerInSight = true, LightByNode = null, PlayerVisibleNodes = null, LockedDoors = null, ClosedDoors = null, HealNodes = null };
             var d = brain.Think(p);
             Assert.IsTrue(d.HasRoute);
             Assert.IsNotNull(d.Scores);
@@ -202,6 +203,115 @@ namespace LabLockdown.AI.DroneStalker.Tests
             var x = new StalkerSituation { StraightDistanceToPlayer = 1f, WalkDistanceToPlayer = 4f, SeenNow = true };
             Assert.IsFalse(scorer.CanStrike(x));
             Assert.AreEqual(0f, scorer.Score(x)[StalkerAction.Strike]);
+        }
+        // ---------------- sight-based awareness and patrol ----------------
+
+        [Test]
+        public void PatrolsFromTheStartWhenItHasNeverSeenThePlayer()
+        {
+            var brain = new StalkerBrain(Grid(), new StalkerSettings());
+            var d = brain.Think(Percepts(self: 12, player: 0, inSight: false));
+
+            Assert.AreEqual(StalkerAction.Patrol, d.Action);
+            Assert.IsFalse(brain.IsAwareOfPlayer, "it must not know where an unseen player is");
+            Assert.IsTrue(d.HasRoute, "patrol means moving, not hovering at the spawn point");
+            Assert.AreEqual(-1, brain.LastSeenPlayerNode);
+        }
+
+        [Test]
+        public void SwitchesFromPatrolToTacticsTheMomentItSpotsThePlayer()
+        {
+            var brain = new StalkerBrain(Grid(), new StalkerSettings());
+            Assert.AreEqual(StalkerAction.Patrol, brain.Think(Percepts(self: 12, player: 2, inSight: false)).Action);
+
+            var spotted = Percepts(self: 12, player: 2, time: 0.05);   // before the next decision tick
+            Assert.AreNotEqual(StalkerAction.Patrol, brain.Think(spotted).Action);
+            Assert.AreEqual(2, brain.LastSeenPlayerNode);
+        }
+
+        [Test]
+        public void KeepsHuntingDuringTheGracePeriodThenPatrols()
+        {
+            var settings = new StalkerSettings();
+            var brain = new StalkerBrain(Grid(), settings);
+            brain.Think(Percepts(self: 12, player: 2));                                   // sees the player
+
+            var brieflyLost = Percepts(self: 12, player: 2, time: 1.0, inSight: false);   // a pillar blocks the view
+            Assert.AreNotEqual(StalkerAction.Patrol, brain.Think(brieflyLost).Action);
+            Assert.IsTrue(brain.IsAwareOfPlayer);
+
+            var gone = Percepts(self: 12, player: 2, time: 1.0 + settings.LostSightGraceSeconds + 0.1, inSight: false);
+            Assert.AreEqual(StalkerAction.Patrol, brain.Think(gone).Action);
+            Assert.IsFalse(brain.IsAwareOfPlayer);
+        }
+
+        [Test]
+        public void LosesThePlayerBehindAClosedDoorAndPatrolsAwayFromIt()
+        {
+            var graph = Grid();
+            Assert.IsTrue(graph.TagDoor("Door_Mid", 6f, 8f, 0.6f));     // the door between tiles 11 and 12
+            // Tiles that do not lead away from the vanishing point get no chance at all, so the rule is tested exactly.
+            var brain = new StalkerBrain(graph, new StalkerSettings { PatrolTowardLastSeenFactor = 0f });
+
+            // The drone (tile 11) sees the player (tile 12) through the open doorway.
+            brain.Think(Percepts(self: 11, player: 12));
+
+            // The player steps through and shuts the door: the drone can no longer see them.
+            var shut = Percepts(self: 11, player: 13, time: 3.0, inSight: false);
+            shut.ClosedDoors = new HashSet<string> { "Door_Mid" };
+            var d = brain.Think(shut);
+
+            Assert.AreEqual(StalkerAction.Patrol, d.Action);
+            Assert.IsFalse(UsesEdge(d.Path, 11, 12), "drones cannot pass a closed door");
+            float[] fromLastSeen = Grid().ShortestDistances(12);
+            Assert.Greater(fromLastSeen[d.TargetNode], fromLastSeen[11], "the first patrol leg leads away from where the player vanished");
+        }
+
+        [Test]
+        public void NeverStrikesWithoutSeeingThePlayer()
+        {
+            var brain = new StalkerBrain(Grid(), new StalkerSettings());
+            brain.Think(Percepts(self: 12, player: 13));                     // seen once, so it is aware for the grace period
+
+            var p = Percepts(self: 12, player: 13, time: 0.5, health: 0.2f, inSight: false);
+            p.DistanceToPlayerMetres = 1f;                                   // right behind a wall or door
+            var d = brain.Think(p);
+
+            Assert.IsFalse(d.StrikeNow);
+            Assert.AreNotEqual(StalkerAction.Strike, d.Action);
+        }
+
+        [Test]
+        public void PatrolPrefersDarkTiles()
+        {
+            var graph = Grid();
+            var settings = new StalkerSettings { PatrolRecentTiles = 0 };
+            var light = new float[25];
+            for (int i = 0; i < 25; i++) light[i] = 1f;
+            int[] dark = { 0, 4, 20, 24, 2, 22 };                            // 6 of the 20 tiles 8-24 m from the centre are dark
+            foreach (int i in dark) light[i] = 0f;
+            var percepts = new StalkerPercepts { LightByNode = light };
+
+            var planner = new PatrolPlanner(graph, settings);
+            int darkPicks = 0, picks = 400;
+            for (int k = 0; k < picks; k++)
+            {
+                int next = planner.ChooseNext(12, percepts, new HashSet<string>());
+                if (light[next] == 0f) darkPicks++;
+            }
+            // By count a dark tile would be picked 30% of the time; with weight 4 versus 1 it should be about 63%.
+            Assert.Greater(darkPicks / (float)picks, 0.45f);
+        }
+
+        [Test]
+        public void PatrolAvoidsRecentlyVisitedTiles()
+        {
+            var planner = new PatrolPlanner(Grid(), new StalkerSettings { PatrolMinLegMetres = 0f, PatrolMaxLegMetres = 4f });
+            planner.MarkVisited(11);
+            planner.MarkVisited(13);
+            planner.MarkVisited(7);
+            for (int k = 0; k < 50; k++)
+                Assert.AreEqual(17, planner.ChooseNext(12, null, new HashSet<string>()), "the only fresh neighbour is 17");
         }
     }
 }

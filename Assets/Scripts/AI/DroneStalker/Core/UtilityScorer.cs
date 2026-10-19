@@ -21,6 +21,9 @@ namespace LabLockdown.AI.DroneStalker
         /// <summary>True if the player can see the Stalker right now.</summary>
         public bool SeenNow;
 
+        /// <summary>True if the Stalker can see the player right now (needed to strike: never through a wall or door).</summary>
+        public bool PlayerInSight = true;
+
         /// <summary>Light level of the node the Stalker is in, 0 to 1.</summary>
         public float LightHere = StalkerPercepts.NeutralLight;
 
@@ -43,7 +46,8 @@ namespace LabLockdown.AI.DroneStalker
         readonly float[] scores = new float[All.Length];
         readonly List<(StalkerAction action, string term, float value)> terms = new List<(StalkerAction, string, float)>();
 
-        public float this[StalkerAction action] => scores[(int)action];
+        /// <summary>Score of an action; 0 for actions that are not scored (Patrol).</summary>
+        public float this[StalkerAction action] => (int)action < scores.Length ? scores[(int)action] : 0f;
 
         /// <summary>Every contribution, e.g. (Hide, "seen now", 0.55). Lets you explain exactly why an action won.</summary>
         public IReadOnlyList<(StalkerAction action, string term, float value)> Terms => terms;
@@ -89,8 +93,9 @@ namespace LabLockdown.AI.DroneStalker
             s = settings ?? throw new ArgumentNullException(nameof(settings));
         }
 
-        /// <summary>True if a strike can land right now: in range, unseen, and off cooldown.</summary>
+        /// <summary>True if a strike can land right now: player in sight and in range, the Stalker unseen, and off cooldown.</summary>
         public bool CanStrike(StalkerSituation x) =>
+            x.PlayerInSight &&
             !x.SeenNow &&
             x.StraightDistanceToPlayer <= s.StrikeRangeMetres &&
             x.SecondsSinceStrike >= s.StrikeCooldownSeconds;

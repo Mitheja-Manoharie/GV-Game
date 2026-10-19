@@ -20,5 +20,11 @@ namespace LabLockdown.AI.DroneStalker
 
         /// <summary>Pull back out of sight after being spotted or after a strike.</summary>
         Retreat,
+
+        /// <summary>
+        /// No player in sight: wander the level, preferring dark tiles, until the player is spotted.
+        /// Not scored by the utility scorer; it is the mode the brain falls back to when it has no target.
+        /// </summary>
+        Patrol,
     }
 }

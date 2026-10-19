@@ -28,6 +28,14 @@ namespace LabLockdown.AI.DroneStalker
         public bool PlayerSeesMe;
 
         /// <summary>
+        /// True when the drone itself can see the player right now: within its sight range and field of view, with a
+        /// clear line of sight. Walls and closed doors block it; darkness does not (the drone has night vision).
+        /// The player's node, distance and health are only trusted while this is true; the brain never tracks the
+        /// player through walls or doors.
+        /// </summary>
+        public bool PlayerInSight;
+
+        /// <summary>
         /// Light level of each graph node, indexed by node id: 0 = pitch dark, 1 = fully lit.
         /// Left null when no light data is available; <see cref="LightAt"/> then returns a neutral value.
         /// </summary>
@@ -38,6 +46,9 @@ namespace LabLockdown.AI.DroneStalker
 
         /// <summary>Doors that are locked right now (read from the door system, the source of truth).</summary>
         public ICollection<string> LockedDoors = new HashSet<string>();
+
+        /// <summary>Doors that are shut right now, locked or not. Drones cannot open doors, so these block routes.</summary>
+        public ICollection<string> ClosedDoors = new HashSet<string>();
 
         /// <summary>The node the player is heading for when healthy, or -1 if unknown.</summary>
         public int ExitNode = -1;
@@ -61,5 +72,14 @@ namespace LabLockdown.AI.DroneStalker
 
         /// <summary>True if the player can see the given node right now.</summary>
         public bool IsSeenByPlayer(int nodeId) => PlayerVisibleNodes != null && PlayerVisibleNodes.Contains(nodeId);
+
+        /// <summary>Every door the drone cannot pass right now: closed or locked.</summary>
+        public HashSet<string> BlockedDoors()
+        {
+            var blocked = new HashSet<string>();
+            if (LockedDoors != null) blocked.UnionWith(LockedDoors);
+            if (ClosedDoors != null) blocked.UnionWith(ClosedDoors);
+            return blocked;
+        }
     }
 }

@@ -30,11 +30,15 @@ namespace LabLockdown.AI.DroneStalker
     /// <summary>
     /// The Drone Stalker's brain: a utility-based agent that plans with A* over a visibility cost.
     ///
-    /// Each decision it (1) updates its memory (when it was last seen, when it last struck), (2) builds the
-    /// situation (walking distance, light where it is, the best ambush spot on the player's predicted route),
-    /// (3) scores the five tactics and picks the best, with hysteresis so it does not flip-flop, (4) picks a
-    /// target node for that tactic, and (5) plans a route there with A*. Between decisions it only replans
-    /// the current route, and does so at once if a door on it gets locked.
+    /// It only acts on what it perceives. It knows where the player is only while it can see the player with its
+    /// own sight (walls and closed doors block it), plus a short grace period after losing sight. Otherwise it
+    /// patrols, preferring dark tiles; after losing the player it first patrols away from where it lost them.
+    ///
+    /// While aware of the player, each decision it (1) updates its memory (when it was last seen, when it last
+    /// struck), (2) builds the situation (walking distance, light where it is, the best ambush spot on the player's
+    /// predicted route), (3) scores the five tactics and picks the best, with hysteresis so it does not flip-flop,
+    /// (4) picks a target node for that tactic, and (5) plans a route there with A*. Between decisions it only
+    /// replans the current route, and does so at once if a door on it is closed or locked.
     ///
     /// Pure C#: no UnityEngine, so every behaviour is unit tested in EditMode.
     /// </summary>
@@ -45,6 +49,7 @@ namespace LabLockdown.AI.DroneStalker
         readonly VisibilityCostModel costs;
         readonly AStarPathfinder search;
         readonly UtilityScorer scorer;
+        readonly PatrolPlanner patrol;
 
         StalkerDecision current = new StalkerDecision();
         bool hasDecided;
@@ -54,6 +59,12 @@ namespace LabLockdown.AI.DroneStalker
         double lastSpotted = double.NegativeInfinity;
         double lastStrike = double.NegativeInfinity;
 
+        // Awareness: the drone's memory of the player, built only from its own sight.
+        int lastSeenNode = -1;
+        double lastSeenTime = double.NegativeInfinity;
+        int lastSelfNode = -1;
+        int patrolAwayFrom = -1;
+
         public StalkerBrain(LevelGraph graph, StalkerSettings settings)
         {
             this.graph = graph ?? throw new ArgumentNullException(nameof(graph));
@@ -61,6 +72,7 @@ namespace LabLockdown.AI.DroneStalker
             costs = new VisibilityCostModel(graph, s);
             search = new AStarPathfinder(costs, s);
             scorer = new UtilityScorer(s);
+            patrol = new PatrolPlanner(graph, s);
         }
 
         /// <summary>The latest decision (also kept between decisions).</summary>
@@ -68,50 +80,118 @@ namespace LabLockdown.AI.DroneStalker
 
         public StalkerSettings Settings => s;
 
+        /// <summary>True while the drone knows where the player is (in sight, or lost within the grace period).</summary>
+        public bool IsAwareOfPlayer { get; private set; }
+
+        /// <summary>The tile the player was last seen on, or -1 if never seen.</summary>
+        public int LastSeenPlayerNode => lastSeenNode;
+
         /// <summary>Main entry point. Call every frame (or less); the brain throttles itself.</summary>
         public StalkerDecision Think(StalkerPercepts p)
         {
             if (p == null) return current;
             s.Validate();
-            costs.SetPercepts(p);
 
-            if (!IsValid(p.SelfNode) || !IsValid(p.PlayerNode))
+            if (!IsValid(p.SelfNode))
             {
-                current = Hold(current.Action, IsValid(p.SelfNode) ? p.SelfNode : -1, "position unknown");
+                current = Hold(current.Action, -1, "position unknown");
                 return current;
             }
 
+            if (p.SelfNode != lastSelfNode)
+            {
+                patrol.MarkVisited(p.SelfNode);
+                lastSelfNode = p.SelfNode;
+            }
+
+            // Awareness comes only from the drone's own sight; after losing sight it keeps the last known tile for a grace period.
+            bool seesPlayer = p.PlayerInSight && IsValid(p.PlayerNode);
+            if (seesPlayer)
+            {
+                lastSeenNode = p.PlayerNode;
+                lastSeenTime = p.Time;
+            }
+            IsAwareOfPlayer = seesPlayer || (IsValid(lastSeenNode) && p.Time - lastSeenTime <= s.LostSightGraceSeconds);
+            costs.SetPercepts(p, seesPlayer);
+
+            if (!IsAwareOfPlayer)
+            {
+                Patrol(p);
+                return current;
+            }
+
+            int playerNode = seesPlayer ? p.PlayerNode : lastSeenNode;
             if (p.PlayerSeesMe) lastSpotted = p.Time;
 
-            // Being seen is urgent: react at once instead of waiting for the next decision tick.
-            bool urgent = p.PlayerSeesMe && current.Action != StalkerAction.Hide && current.Action != StalkerAction.Retreat;
+            // Spotting the player, or being seen, is urgent: react at once instead of waiting for the next decision tick.
+            bool urgent = current.Action == StalkerAction.Patrol ||
+                          (p.PlayerSeesMe && current.Action != StalkerAction.Hide && current.Action != StalkerAction.Retreat);
             bool due = !hasDecided || urgent || p.Time - lastDecision >= s.DecisionIntervalSeconds;
             if (!due)
             {
-                MaybeReplan(p);
+                if (MaybeReplan(p)) Decide(p, playerNode, seesPlayer);
                 return current;
             }
 
-            Decide(p);
+            Decide(p, playerNode, seesPlayer);
             return current;
         }
 
-        void Decide(StalkerPercepts p)
+        // ---------------- patrol (no player in sight) ----------------
+
+        void Patrol(StalkerPercepts p)
+        {
+            bool starting = current.Action != StalkerAction.Patrol || !hasDecided;
+            if (starting)
+            {
+                actionSince = p.Time;
+                patrolAwayFrom = lastSeenNode;   // -1 if the player was never seen
+            }
+
+            bool arrived = current.TargetNode == p.SelfNode;
+            bool needLeg = starting || !IsValid(current.TargetNode) || arrived;
+            if (!needLeg && !MaybeReplan(p)) return;
+
+            int target = patrol.ChooseNext(p.SelfNode, p, costs.BlockedDoors, patrolAwayFrom);
+            StalkerPath route = target >= 0 ? search.FindPath(p.SelfNode, target) : null;
+            bool found = route != null && route.Found;
+
+            string note = IsValid(patrolAwayFrom) ? "Patrol: lost the player, moving away" : "Patrol: no player in sight";
+            if (!found) note = "Patrol: no open route, holding";
+
+            current = new StalkerDecision
+            {
+                Action = StalkerAction.Patrol,
+                TargetNode = found ? target : p.SelfNode,
+                Path = found ? route.Nodes : new[] { p.SelfNode },
+                Note = note,
+            };
+            hasDecided = true;
+            lastDecision = p.Time;
+            lastReplan = p.Time;
+            if (!starting) patrolAwayFrom = -1;   // only the first leg after losing the player is pushed away
+        }
+
+        // ---------------- tactics (player in sight or just lost) ----------------
+
+        void Decide(StalkerPercepts p, int playerNode, bool seesPlayer)
         {
             lastDecision = p.Time;
+            ICollection<string> blocked = costs.BlockedDoors;
 
-            float[] fromPlayer = graph.ShortestDistances(p.PlayerNode, p.LockedDoors);   // walking metres
-            float[] fromSelf = graph.ShortestDistances(p.SelfNode, p.LockedDoors);       // walking metres
-            float[] sneakCost = search.CostsFrom(p.SelfNode);                           // visibility cost
+            float[] fromPlayer = graph.ShortestDistances(playerNode, blocked);   // walking metres
+            float[] fromSelf = graph.ShortestDistances(p.SelfNode, blocked);     // walking metres
+            float[] sneakCost = search.CostsFrom(p.SelfNode);                  // visibility cost
 
-            int ambushNode = FindAmbushSpot(p, fromSelf, sneakCost, out float ambushQuality);
+            int ambushNode = FindAmbushSpot(p, playerNode, fromSelf, sneakCost, out float ambushQuality);
 
             var situation = new StalkerSituation
             {
                 WalkDistanceToPlayer = fromPlayer[p.SelfNode],
-                StraightDistanceToPlayer = p.DistanceToPlayerMetres,
+                StraightDistanceToPlayer = seesPlayer ? p.DistanceToPlayerMetres : float.PositiveInfinity,
                 PlayerHealth01 = p.PlayerHealth01,
                 SeenNow = p.PlayerSeesMe,
+                PlayerInSight = seesPlayer,
                 LightHere = p.LightAt(p.SelfNode),
                 SecondsSinceSpotted = Since(p.Time, lastSpotted),
                 SecondsSinceStrike = Since(p.Time, lastStrike),
@@ -124,11 +204,11 @@ namespace LabLockdown.AI.DroneStalker
             int target;
             switch (choice)
             {
-                case StalkerAction.Hide: target = HideTarget(p, fromSelf, sneakCost); break;
+                case StalkerAction.Hide: target = HideTarget(p, playerNode, fromSelf, sneakCost); break;
                 case StalkerAction.Ambush: target = ambushNode; break;
-                case StalkerAction.Strike: target = p.PlayerNode; break;
-                case StalkerAction.Retreat: target = RetreatTarget(p, fromPlayer, sneakCost); break;
-                default: target = StalkTarget(p, fromPlayer, sneakCost); break;
+                case StalkerAction.Strike: target = playerNode; break;
+                case StalkerAction.Retreat: target = RetreatTarget(fromPlayer, sneakCost); break;
+                default: target = StalkTarget(p, playerNode, fromPlayer, sneakCost); break;
             }
 
             bool strikeNow = false;
@@ -142,8 +222,8 @@ namespace LabLockdown.AI.DroneStalker
             StalkerPath route = target >= 0 ? search.FindPath(p.SelfNode, target) : null;
             if (route == null || !route.Found)
             {
-                // The chosen target is unreachable (e.g. sealed off by locked doors): fall back to hiding nearby.
-                int fallback = HideTarget(p, fromSelf, sneakCost);
+                // The chosen target is unreachable (e.g. behind a closed door): fall back to hiding nearby.
+                int fallback = HideTarget(p, playerNode, fromSelf, sneakCost);
                 route = fallback >= 0 ? search.FindPath(p.SelfNode, fallback) : null;
                 target = route != null && route.Found ? fallback : p.SelfNode;
                 note += " (target unreachable, hiding nearby)";
@@ -176,6 +256,7 @@ namespace LabLockdown.AI.DroneStalker
             bool urgent = best == StalkerAction.Strike ||
                           (p.PlayerSeesMe && (best == StalkerAction.Hide || best == StalkerAction.Retreat));
             bool currentImpossible = current.Action == StalkerAction.Strike ||
+                                     current.Action == StalkerAction.Patrol ||
                                      (current.Action == StalkerAction.Ambush && ambushQuality <= 0f);
             if (urgent || currentImpossible) return best;
 
@@ -189,13 +270,13 @@ namespace LabLockdown.AI.DroneStalker
         bool IsDark(StalkerPercepts p, int node) => p.LightAt(node) <= s.DarkLightLevel;
 
         /// <summary>Nearest dark node the player cannot see, within the hide search radius; otherwise the least exposed reachable node.</summary>
-        int HideTarget(StalkerPercepts p, float[] fromSelf, float[] sneakCost)
+        int HideTarget(StalkerPercepts p, int playerNode, float[] fromSelf, float[] sneakCost)
         {
             int best = -1; float bestCost = float.PositiveInfinity;
             for (int i = 0; i < graph.NodeCount; i++)
             {
-                if (i == p.PlayerNode || float.IsPositiveInfinity(sneakCost[i]) || fromSelf[i] > s.HideSearchMetres) continue;
-                if (!IsDark(p, i) || p.IsSeenByPlayer(i)) continue;
+                if (i == playerNode || float.IsPositiveInfinity(sneakCost[i]) || fromSelf[i] > s.HideSearchMetres) continue;
+                if (!IsDark(p, i) || costs.IsSeen(i)) continue;
                 if (sneakCost[i] < bestCost) { bestCost = sneakCost[i]; best = i; }
             }
             if (best >= 0) return best;
@@ -204,7 +285,7 @@ namespace LabLockdown.AI.DroneStalker
             float bestScore = float.PositiveInfinity;
             for (int i = 0; i < graph.NodeCount; i++)
             {
-                if (i == p.PlayerNode || float.IsPositiveInfinity(sneakCost[i])) continue;
+                if (i == playerNode || float.IsPositiveInfinity(sneakCost[i])) continue;
                 float score = costs.Exposure(i) * 100f + sneakCost[i];
                 if (score < bestScore) { bestScore = score; best = i; }
             }
@@ -215,16 +296,16 @@ namespace LabLockdown.AI.DroneStalker
         /// A dark, unseen node at the follow distance from the player (a quarter of the way from "near" to "far"),
         /// preferring nodes that are cheap to reach.
         /// </summary>
-        int StalkTarget(StalkerPercepts p, float[] fromPlayer, float[] sneakCost)
+        int StalkTarget(StalkerPercepts p, int playerNode, float[] fromPlayer, float[] sneakCost)
         {
             float follow = s.NearDistanceMetres + 0.25f * (s.FarDistanceMetres - s.NearDistanceMetres);
             int best = -1; float bestScore = float.PositiveInfinity;
             for (int i = 0; i < graph.NodeCount; i++)
             {
-                if (i == p.PlayerNode || float.IsPositiveInfinity(sneakCost[i]) || float.IsPositiveInfinity(fromPlayer[i])) continue;
+                if (i == playerNode || float.IsPositiveInfinity(sneakCost[i]) || float.IsPositiveInfinity(fromPlayer[i])) continue;
                 float score = Math.Abs(fromPlayer[i] - follow)
                               + s.LightCostWeight * p.LightAt(i)
-                              + (p.IsSeenByPlayer(i) ? s.SeenCostWeight : 0f)
+                              + (costs.IsSeen(i) ? s.SeenCostWeight : 0f)
                               + 0.25f * sneakCost[i];
                 if (score < bestScore) { bestScore = score; best = i; }
             }
@@ -232,7 +313,7 @@ namespace LabLockdown.AI.DroneStalker
         }
 
         /// <summary>A reachable node at least the retreat distance from the player, as dark and unseen as possible; else the farthest one.</summary>
-        int RetreatTarget(StalkerPercepts p, float[] fromPlayer, float[] sneakCost)
+        int RetreatTarget(float[] fromPlayer, float[] sneakCost)
         {
             int best = -1; float bestScore = float.PositiveInfinity;
             for (int i = 0; i < graph.NodeCount; i++)
@@ -257,13 +338,13 @@ namespace LabLockdown.AI.DroneStalker
         /// on or beside the next few steps of it. Quality = (1 - exposure) / (1 + walk distance / 40 m), so a dark spot
         /// the Stalker can reach quickly scores close to 1. Returns -1 (quality 0) when no route can be predicted.
         /// </summary>
-        int FindAmbushSpot(StalkerPercepts p, float[] fromSelf, float[] sneakCost, out float quality)
+        int FindAmbushSpot(StalkerPercepts p, int playerNode, float[] fromSelf, float[] sneakCost, out float quality)
         {
             quality = 0f;
-            int goal = PredictPlayerGoal(p);
-            if (goal < 0 || goal == p.PlayerNode) return -1;
+            int goal = PredictPlayerGoal(p, playerNode);
+            if (goal < 0 || goal == playerNode) return -1;
 
-            int[] route = graph.ShortestPath(p.PlayerNode, goal, p.LockedDoors);
+            int[] route = graph.ShortestPath(playerNode, goal, costs.BlockedDoors);
             if (route == null || route.Length < 2) return -1;
 
             var candidates = new HashSet<int>();
@@ -278,20 +359,20 @@ namespace LabLockdown.AI.DroneStalker
             int best = -1;
             foreach (int c in candidates)
             {
-                if (c < 0 || c == p.PlayerNode || float.IsPositiveInfinity(sneakCost[c])) continue;
-                if (!IsDark(p, c) || p.IsSeenByPlayer(c)) continue;
+                if (c < 0 || c == playerNode || float.IsPositiveInfinity(sneakCost[c])) continue;
+                if (!IsDark(p, c) || costs.IsSeen(c)) continue;
                 float q = (1f - costs.Exposure(c)) / (1f + fromSelf[c] / 40f);
                 if (q > quality) { quality = q; best = c; }
             }
             return best;
         }
 
-        int PredictPlayerGoal(StalkerPercepts p)
+        int PredictPlayerGoal(StalkerPercepts p, int playerNode)
         {
             bool hurt = p.PlayerHealth01 < 0.5f;
             if (hurt && p.HealNodes != null && p.HealNodes.Count > 0)
             {
-                float[] fromPlayer = graph.ShortestDistances(p.PlayerNode, p.LockedDoors);
+                float[] fromPlayer = graph.ShortestDistances(playerNode, costs.BlockedDoors);
                 int nearest = -1; float d = float.PositiveInfinity;
                 foreach (int h in p.HealNodes)
                     if (IsValid(h) && fromPlayer[h] < d) { d = fromPlayer[h]; nearest = h; }
@@ -302,23 +383,21 @@ namespace LabLockdown.AI.DroneStalker
 
         // ---------------- replanning between decisions ----------------
 
-        void MaybeReplan(StalkerPercepts p)
+        /// <summary>
+        /// Refreshes the current route if it is due or a door on it was closed. Returns true when the target can no
+        /// longer be reached, so the caller should make a fresh decision (or pick a new patrol leg) right away.
+        /// </summary>
+        bool MaybeReplan(StalkerPercepts p)
         {
-            if (!IsValid(current.TargetNode)) return;
+            if (!IsValid(current.TargetNode)) return true;
             bool blocked = RouteBlocked(current.Path);
-            if (!blocked && p.Time - lastReplan < s.ReplanIntervalSeconds) return;
+            if (!blocked && p.Time - lastReplan < s.ReplanIntervalSeconds) return false;
 
             lastReplan = p.Time;
             StalkerPath route = search.FindPath(p.SelfNode, current.TargetNode);
-            if (route.Found)
-            {
-                current.Path = route.Nodes;
-            }
-            else
-            {
-                // The target got cut off (a door was locked): decide again right away.
-                Decide(p);
-            }
+            if (!route.Found) return true;
+            current.Path = route.Nodes;
+            return false;
         }
 
         bool RouteBlocked(int[] path)

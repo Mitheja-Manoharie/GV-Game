@@ -115,6 +115,46 @@ namespace LabLockdown.AI.DroneStalker
         /// <summary>A retreat must end at least this far from the player.</summary>
         public float RetreatMinDistanceMetres = 20f;
 
+        // ---------- Sight (used by the sensor) and losing track ----------
+
+        /// <summary>How far the drone can see the player, in metres. Night vision: light does not change it.</summary>
+        public float SightRangeMetres = 20f;
+
+        /// <summary>Width of the drone's field of view, in degrees.</summary>
+        public float FieldOfViewDegrees = 120f;
+
+        /// <summary>
+        /// After losing sight of the player, keep acting on the last place it was seen for this long before patrolling.
+        /// Stops the drone giving up every time a pillar or door frame blocks its view for a moment.
+        /// </summary>
+        public float LostSightGraceSeconds = 1.5f;
+
+        // ---------- Patrol (no player in sight) ----------
+
+        /// <summary>
+        /// How strongly patrol prefers dark tiles. A tile's chance of being picked is proportional to
+        /// 1 + PatrolDarkWeight * (1 - light), so with 3 a pitch-dark tile is four times as likely as a fully lit one.
+        /// </summary>
+        public float PatrolDarkWeight = 3f;
+
+        /// <summary>Shortest patrol leg, in metres of walking, so the drone does not dither between neighbouring tiles.</summary>
+        public float PatrolMinLegMetres = 8f;
+
+        /// <summary>Longest patrol leg, in metres of walking.</summary>
+        public float PatrolMaxLegMetres = 24f;
+
+        /// <summary>How many recently visited tiles patrol avoids picking again.</summary>
+        public int PatrolRecentTiles = 8;
+
+        /// <summary>
+        /// After losing the player, tiles that do not lead away from where the player was last seen keep only this
+        /// fraction of their chance, so the drone patrols away from the closed door instead of waiting at it.
+        /// </summary>
+        public float PatrolTowardLastSeenFactor = 0.15f;
+
+        /// <summary>Seed for the patrol's random choices. Give each drone its own seed so they spread out.</summary>
+        public int PatrolSeed = 1;
+
         // ---------- Decision stability ----------
 
         /// <summary>How often the brain re-scores its actions.</summary>
@@ -149,6 +189,15 @@ namespace LabLockdown.AI.DroneStalker
             HideSearchMetres = Math.Max(0f, HideSearchMetres);
             AmbushLookaheadNodes = Math.Max(1, AmbushLookaheadNodes);
             RetreatMinDistanceMetres = Math.Max(0f, RetreatMinDistanceMetres);
+
+            SightRangeMetres = Math.Max(0f, SightRangeMetres);
+            FieldOfViewDegrees = Math.Min(360f, Math.Max(1f, FieldOfViewDegrees));
+            LostSightGraceSeconds = Math.Max(0f, LostSightGraceSeconds);
+            PatrolDarkWeight = Math.Max(0f, PatrolDarkWeight);
+            PatrolMinLegMetres = Math.Max(0f, PatrolMinLegMetres);
+            PatrolMaxLegMetres = Math.Max(PatrolMinLegMetres, PatrolMaxLegMetres);
+            PatrolRecentTiles = Math.Max(0, PatrolRecentTiles);
+            PatrolTowardLastSeenFactor = Math.Min(1f, Math.Max(0f, PatrolTowardLastSeenFactor));
 
             DecisionIntervalSeconds = Math.Max(0.02f, DecisionIntervalSeconds);
             ReplanIntervalSeconds = Math.Max(0.02f, ReplanIntervalSeconds);

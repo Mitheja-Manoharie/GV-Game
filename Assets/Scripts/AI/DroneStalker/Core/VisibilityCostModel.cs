@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using LabLockdown.AI.Facility;
 
 namespace LabLockdown.AI.DroneStalker
@@ -14,13 +15,14 @@ namespace LabLockdown.AI.DroneStalker
     /// Both penalties are never negative, so every edge costs at least its length. The straight-line
     /// distance is therefore never more than the true remaining cost, which keeps the A* heuristic
     /// admissible (the found route is optimal under this cost).
-    /// Locked doors are impassable (infinite cost), so a route never goes through them.
+    /// Closed and locked doors are impassable (infinite cost): drones cannot open doors.
     /// </summary>
     public sealed class VisibilityCostModel
     {
         readonly LevelGraph graph;
         readonly StalkerSettings settings;
         StalkerPercepts percepts;
+        bool playerKnown = true;
 
         public VisibilityCostModel(LevelGraph graph, StalkerSettings settings)
         {
@@ -31,21 +33,33 @@ namespace LabLockdown.AI.DroneStalker
         /// <summary>The graph the costs are computed on.</summary>
         public LevelGraph Graph => graph;
 
-        /// <summary>Uses the latest percepts for light, line of sight and locked doors. Null means "nothing known".</summary>
-        public void SetPercepts(StalkerPercepts latest) => percepts = latest;
+        /// <summary>
+        /// Uses the latest percepts for light, the player's view and door states. Null means "nothing known".
+        /// When <paramref name="isPlayerKnown"/> is false the drone does not know where the player is, so it cannot
+        /// know what the player sees either, and the "seen" penalty is ignored.
+        /// </summary>
+        public void SetPercepts(StalkerPercepts latest, bool isPlayerKnown = true)
+        {
+            percepts = latest;
+            playerKnown = isPlayerKnown;
+        }
 
-        /// <summary>True if the edge can be used right now (not a locked door).</summary>
+        /// <summary>The doors the drone cannot pass right now (closed or locked), read live from the percepts.</summary>
+        public ICollection<string> BlockedDoors => percepts != null ? percepts.BlockedDoors() : new HashSet<string>();
+
+        /// <summary>True if the edge can be used right now (not a closed or locked door). Reads the door states live.</summary>
         public bool IsPassable(GraphEdge edge)
         {
             if (edge == null) return false;
-            return LevelGraph.IsPassable(edge, percepts?.LockedDoors);
+            if (percepts == null) return true;
+            return LevelGraph.IsPassable(edge, percepts.LockedDoors) && LevelGraph.IsPassable(edge, percepts.ClosedDoors);
         }
 
         /// <summary>Light level of a node, 0 to 1 (neutral when no light data is known).</summary>
         public float LightAt(int nodeId) => percepts != null ? percepts.LightAt(nodeId) : StalkerPercepts.NeutralLight;
 
-        /// <summary>True if the player can see the node right now.</summary>
-        public bool IsSeen(int nodeId) => percepts != null && percepts.IsSeenByPlayer(nodeId);
+        /// <summary>True if the player can see the node right now (always false while the player's position is unknown).</summary>
+        public bool IsSeen(int nodeId) => playerKnown && percepts != null && percepts.IsSeenByPlayer(nodeId);
 
         /// <summary>Extra cost, in metres, for standing in a node: its light plus whether the player sees it.</summary>
         public float NodePenalty(int nodeId)
