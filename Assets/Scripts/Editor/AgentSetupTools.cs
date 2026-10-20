@@ -3,8 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using GVGame.Agents;
+using GVGame.Interaction;
+using LabLockdown.AI.DroneStalker.Runtime;
+using LabLockdown.AI.Facility.Integration;
 using LabLockdown.AI.Facility.Runtime;
 using LabLockdown.AI.Flanker.Runtime;
+using LabLockdown.AI.Hunter.Runtime;
 using UnityEditor;
 using UnityEditor.Animations;
 using UnityEditor.SceneManagement;
@@ -18,9 +22,13 @@ namespace GVGame.EditorTools
     ///   1. Configure Android Rig      - Humanoid avatar with the Core Developer's bone mapping (DEF-* Rigify bones)
     ///   2. Configure Robot Clips      - Mixamo clips in Assets/Art/Animations/Robot: Humanoid, in place, looping where needed
     ///   3. Build Robot Animator       - Robot.controller: idle/walk/run blend on Speed, Shoot, Hit, Death
-    ///   4. Build Robot Prefabs        - Robot_Base (body: agent, collider, health, gun, follower, animator)
-    ///                                   and Robot_Flanker (base + Tactical Flanker brain)
-    ///   5. Add Robot Spawner To Scene - RobotSpawner under FacilityAI, assigned as the Director's Spawn Service
+    ///   4. Build Robot Prefabs        - Robot_Base (body: agent, collider, health, gun, follower, animator),
+    ///                                   Robot_Flanker (base + Tactical Flanker brain),
+    ///                                   Robot_Hunter (same body, with the Security Hunter's own legs, gun and health)
+    ///                                   and Robot_Drone (Eye Drone body + Drone Stalker brain)
+    ///   5. Add Robot Spawner To Scene - RobotSpawner under FacilityAI, assigned as the Director's Spawn Service;
+    ///                                   removes the Facility AI's test RobotSpawnService
+    ///   6. Add Drone Stalker To Scene - DroneStalkerSpawn in the maintenance bay (optional)
     /// Every step can be run again; it rebuilds what it made.
     /// </summary>
     public static class AgentSetupTools
@@ -32,6 +40,11 @@ namespace GVGame.EditorTools
         const string BasePrefabPath = PrefabFolder + "/Robot_Base.prefab";
         const string FlankerPrefabPath = PrefabFolder + "/Robot_Flanker.prefab";
         const string HunterPrefabPath = PrefabFolder + "/Robot_Hunter.prefab";
+        const string DronePrefabPath = PrefabFolder + "/Robot_Drone.prefab";
+        const string DroneModelPath = "Assets/ThirdParty/Quaternius/Essentials/FBX (Unity)/Enemy_EyeDrone.fbx";
+        const float DroneHoverHeight = 1.4f; // the StalkerSensor samples light and sight at this height
+        static readonly Vector3 DroneStart = new Vector3(-2f, 0f, 18f);     // maintenance bay, away from the safe areas
+        static readonly Vector3 InfirmaryCentre = new Vector3(-12f, 0f, 16f);
         const string RiflePath = "Assets/ThirdParty/Quaternius/Essentials/FBX (Unity)/Gun_Rifle.fbx";
         const string TracerMaterialPath = "Assets/Art/Materials/Tracer.mat";
         const string RightHandBone = "DEF-hand.R";
@@ -318,7 +331,8 @@ namespace GVGame.EditorTools
             }
 
             if (File.Exists(BasePrefabPath) && !EditorUtility.DisplayDialog("Rebuild robot prefabs?",
-                    "Robot_Base and Robot_Flanker will be rebuilt. Manual changes to them (e.g. gun position) are lost.", "Rebuild", "Cancel"))
+                    "Robot_Base, Robot_Flanker, Robot_Hunter and Robot_Drone will be rebuilt. Manual changes to them " +
+                    "(e.g. gun position) are lost.", "Rebuild", "Cancel"))
                 return;
 
             EnsureFolder(PrefabFolder);
@@ -328,31 +342,7 @@ namespace GVGame.EditorTools
             var root = new GameObject("Robot_Base");
             try
             {
-                var body = (GameObject)PrefabUtility.InstantiatePrefab(model);
-                body.name = "Model";
-                body.transform.SetParent(root.transform, false);
-
-                // Not "??": a missing component can be Unity's fake null in the editor.
-                var animator = body.GetComponent<Animator>();
-                if (animator == null) animator = body.AddComponent<Animator>();
-                animator.runtimeAnimatorController = controller;
-                animator.avatar = AssetDatabase.LoadAllAssetsAtPath(AndroidModelPath).OfType<Avatar>().FirstOrDefault();
-                animator.applyRootMotion = false;
-                animator.cullingMode = AnimatorCullingMode.CullUpdateTransforms;
-
-                float height = MeasureHeight(body);
-
-                // Solid, not a trigger: the rifle's raycasts and the Director's spawn/doorway overlaps ignore triggers.
-                var capsule = root.AddComponent<CapsuleCollider>();
-                capsule.isTrigger = false;
-                capsule.height = height;
-                capsule.radius = 0.35f;
-                capsule.center = new Vector3(0f, height * 0.5f, 0f);
-
-                // Kinematic: moved by the agent, but still fires triggers (DoorAutoOpenTrigger).
-                var rigidbody = root.AddComponent<Rigidbody>();
-                rigidbody.isKinematic = true;
-                rigidbody.useGravity = false;
+                float height = AddAndroidBody(root, model, controller);
 
                 var agent = root.AddComponent<NavMeshAgent>();
                 agent.speed = 3f;
@@ -368,8 +358,6 @@ namespace GVGame.EditorTools
                 var gun = root.AddComponent<RobotGun>();
                 gun.blockers = LayerMask.GetMask("Default", "Doors");
                 root.AddComponent<RobotPathFollower>();
-                var robotAnimator = root.AddComponent<RobotAnimator>();
-                robotAnimator.animator = animator;
 
                 var muzzle = new GameObject("Muzzle").transform;
                 muzzle.SetParent(root.transform, false);
@@ -384,8 +372,6 @@ namespace GVGame.EditorTools
                 tracer.sharedMaterial = AssetDatabase.LoadAssetAtPath<Material>(TracerMaterialPath);
                 tracer.enabled = false;
                 gun.tracer = tracer;
-
-                AttachRifle(body);
 
                 PrefabUtility.SaveAsPrefabAsset(root, BasePrefabPath);
             }
@@ -408,8 +394,165 @@ namespace GVGame.EditorTools
                 Object.DestroyImmediate(flanker);
             }
 
-            Debug.Log($"[Agent Setup] Built {BasePrefabPath} and {FlankerPrefabPath}. For the Security Hunter, make a prefab variant " +
-                      $"of Robot_Base named Robot_Hunter with the Hunter brain. Check the rifle's position in the right hand.");
+            BuildHunter(model, controller);
+            BuildDrone();
+
+            Debug.Log($"[Agent Setup] Built {BasePrefabPath}, {FlankerPrefabPath} and {HunterPrefabPath}" +
+                      $"{(File.Exists(DronePrefabPath) ? $" and {DronePrefabPath}" : "")}. " +
+                      "Check the rifle's position in the right hand.");
+        }
+
+        /// <summary>
+        /// The Android body every humanoid robot shares: model with its Animator, solid capsule, kinematic Rigidbody,
+        /// RobotAnimator and the rifle in the right hand. Returns the model's height.
+        /// </summary>
+        static float AddAndroidBody(GameObject root, GameObject model, RuntimeAnimatorController controller)
+        {
+            var body = (GameObject)PrefabUtility.InstantiatePrefab(model);
+            body.name = "Model";
+            body.transform.SetParent(root.transform, false);
+
+            // Not "??": a missing component can be Unity's fake null in the editor.
+            var animator = body.GetComponent<Animator>();
+            if (animator == null) animator = body.AddComponent<Animator>();
+            animator.runtimeAnimatorController = controller;
+            animator.avatar = AssetDatabase.LoadAllAssetsAtPath(AndroidModelPath).OfType<Avatar>().FirstOrDefault();
+            animator.applyRootMotion = false;
+            animator.cullingMode = AnimatorCullingMode.CullUpdateTransforms;
+
+            float height = MeasureHeight(body);
+
+            // Solid, not a trigger: the rifle's raycasts and the Director's spawn/doorway overlaps ignore triggers.
+            var capsule = root.AddComponent<CapsuleCollider>();
+            capsule.isTrigger = false;
+            capsule.height = height;
+            capsule.radius = 0.35f;
+            capsule.center = new Vector3(0f, height * 0.5f, 0f);
+
+            // Kinematic: moved by script, but still fires triggers (DoorAutoOpenTrigger).
+            var rigidbody = root.AddComponent<Rigidbody>();
+            rigidbody.isKinematic = true;
+            rigidbody.useGravity = false;
+
+            var robotAnimator = root.AddComponent<RobotAnimator>();
+            robotAnimator.animator = animator;
+
+            AttachRifle(body);
+            return height;
+        }
+
+        /// <summary>
+        /// Robot_Hunter: the Android body with Viduna's Security Hunter. The Hunter moves, shoots and takes damage with
+        /// its own components (HunterMover, HunterShooter, HunterHealth), so it is built beside Robot_Base rather than
+        /// as a variant: Robot_Base's NavMeshAgent would fight HunterMover, and RobotHealth would be a second health.
+        /// </summary>
+        static void BuildHunter(GameObject model, RuntimeAnimatorController controller)
+        {
+            var root = new GameObject("Robot_Hunter");
+            try
+            {
+                AddAndroidBody(root, model, controller);
+
+                root.AddComponent<HunterAgent>(); // RequireComponent adds HunterHealth, HunterMover and HunterShooter
+                root.GetComponent<HunterShooter>().tracerMaterial = AssetDatabase.LoadAssetAtPath<Material>(TracerMaterialPath);
+                root.GetComponent<HunterHealth>().destroyDelay = 6f; // time for the death animation, as RobotHealth
+                root.AddComponent<HunterBody>();
+
+                PrefabUtility.SaveAsPrefabAsset(root, HunterPrefabPath);
+            }
+            finally
+            {
+                Object.DestroyImmediate(root);
+            }
+        }
+
+        /// <summary>
+        /// Robot_Drone: Ravindu's Drone Stalker in the Eye Drone body. The root walks the NavMesh with the same
+        /// RobotPathFollower as the robots; only the model and the eye sit at the hover height.
+        /// </summary>
+        static void BuildDrone()
+        {
+            var model = AssetDatabase.LoadAssetAtPath<GameObject>(DroneModelPath);
+            if (model == null)
+            {
+                Debug.LogWarning($"[Agent Setup] No drone model at {DroneModelPath}; Robot_Drone not built.");
+                return;
+            }
+
+            var root = new GameObject("Robot_Drone");
+            try
+            {
+                var body = (GameObject)PrefabUtility.InstantiatePrefab(model);
+                body.name = "Model";
+                body.transform.SetParent(root.transform, false);
+                CentreDroneModel(body);
+
+                // The sensor looks along the eye's forward, so it is a plain child facing the same way as the root.
+                var eye = new GameObject("Eye").transform;
+                eye.SetParent(root.transform, false);
+                eye.localPosition = new Vector3(0f, DroneHoverHeight, 0f);
+
+                var sphere = root.AddComponent<SphereCollider>();
+                sphere.isTrigger = false;
+                sphere.center = new Vector3(0f, DroneHoverHeight, 0f);
+                sphere.radius = 0.45f;
+
+                var agent = root.AddComponent<NavMeshAgent>();
+                agent.speed = 3f;
+                agent.acceleration = 12f;
+                agent.angularSpeed = 720f;
+                agent.stoppingDistance = 0f;
+                agent.autoBraking = false;
+                agent.radius = 0.5f;
+                agent.height = 2f;
+                agent.obstacleAvoidanceType = ObstacleAvoidanceType.MedQualityObstacleAvoidance;
+
+                var health = root.AddComponent<RobotHealth>();
+                health.maxHealth = 75f; // three rifle hits: it relies on not being seen, not on armour
+                health.removeAfter = 3f;
+                root.AddComponent<RobotPathFollower>();
+
+                root.AddComponent<StalkerAgent>(); // RequireComponent adds the StalkerSensor
+                var sensor = new SerializedObject(root.GetComponent<StalkerSensor>());
+                sensor.FindProperty("eye").objectReferenceValue = eye;
+                sensor.FindProperty("hoverHeight").floatValue = DroneHoverHeight;
+                sensor.ApplyModifiedPropertiesWithoutUndo();
+
+                var droneBody = root.AddComponent<DroneBody>();
+                droneBody.model = body.transform;
+                droneBody.hoverHeight = DroneHoverHeight;
+
+                PrefabUtility.SaveAsPrefabAsset(root, DronePrefabPath);
+            }
+            finally
+            {
+                Object.DestroyImmediate(root);
+            }
+        }
+
+        /// <summary>Scales the drone mesh to about 0.8 m across (whatever its import scale) and centres it at the hover height.</summary>
+        static void CentreDroneModel(GameObject body)
+        {
+            var renderers = body.GetComponentsInChildren<Renderer>();
+            if (renderers.Length == 0) return;
+
+            Bounds Measure()
+            {
+                var b = renderers[0].bounds;
+                foreach (var r in renderers) b.Encapsulate(r.bounds);
+                return b;
+            }
+
+            var bounds = Measure();
+            float size = Mathf.Max(bounds.size.x, bounds.size.y, bounds.size.z);
+            if (size > 0.01f && (size < 0.4f || size > 1.5f))
+            {
+                body.transform.localScale *= 0.8f / size;
+                bounds = Measure();
+            }
+
+            // The root is at the origin while building, so world bounds are root-local.
+            body.transform.localPosition += new Vector3(0f, DroneHoverHeight, 0f) - bounds.center;
         }
 
         static float MeasureHeight(GameObject model)
@@ -476,11 +619,73 @@ namespace GVGame.EditorTools
             serialized.FindProperty("spawnService").objectReferenceValue = spawner;
             serialized.ApplyModifiedProperties();
 
+            // One spawner only: the Facility AI's test spawner (red capsules) goes.
+            int removed = 0;
+            foreach (var old in Object.FindObjectsByType<RobotSpawnService>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                Undo.DestroyObjectImmediate(old);
+                removed++;
+            }
+
             EditorSceneManager.MarkSceneDirty(runner.gameObject.scene);
             Selection.activeGameObject = spawner.gameObject;
             Debug.Log($"[Agent Setup] RobotSpawner assigned to {runner.name} (flanker: {(spawner.flankerPrefab != null ? "yes" : "MISSING")}, " +
-                      $"hunter: {(spawner.hunterPrefab != null ? "yes" : "none yet, flankers only")}). " +
+                      $"hunter: {(spawner.hunterPrefab != null ? "yes" : "none yet, flankers only")})" +
+                      $"{(removed > 0 ? $"; removed {removed} RobotSpawnService" : "")}. " +
                       $"{(runner.gameObject.activeInHierarchy ? "" : "FacilityAI is disabled in this scene; enable it to run the Director.")}");
+        }
+
+        // ---------- 6. Drone ----------
+
+        [MenuItem("GV Game/Agent Setup/6. Add Drone Stalker To Scene (optional)")]
+        static void AddDrone()
+        {
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(DronePrefabPath);
+            if (prefab == null)
+            {
+                Debug.LogError($"[Agent Setup] No {DronePrefabPath}. Run step 4 first.");
+                return;
+            }
+
+            var spawn = Object.FindAnyObjectByType<DroneStalkerSpawn>(FindObjectsInactive.Include);
+            if (spawn == null)
+            {
+                var go = new GameObject("DroneStalkerSpawn");
+                Vector3 position = DroneStart;
+                if (NavMesh.SamplePosition(position, out var onMesh, 3f, NavMesh.AllAreas)) position = onMesh.position;
+                go.transform.position = position;
+                Undo.RegisterCreatedObjectUndo(go, "Add Drone Stalker");
+                spawn = Undo.AddComponent<DroneStalkerSpawn>(go);
+            }
+
+            Undo.RecordObject(spawn, "Assign drone");
+            spawn.dronePrefab = prefab;
+            spawn.healPoints = HealPoints(spawn.transform);
+
+            EditorSceneManager.MarkSceneDirty(spawn.gameObject.scene);
+            Selection.activeGameObject = spawn.gameObject;
+            Debug.Log($"[Agent Setup] {spawn.name} at {spawn.transform.position}: one Drone Stalker per run, " +
+                      $"{spawn.healPoints.Length} heal point(s). Move it to change where the drone starts.");
+        }
+
+        /// <summary>The infirmary (a marker made once under the spawn) and every medkit in the scene.</summary>
+        static Transform[] HealPoints(Transform parent)
+        {
+            var points = new List<Transform>();
+
+            var infirmary = parent.Find("HealPoint_Infirmary");
+            if (infirmary == null)
+            {
+                infirmary = new GameObject("HealPoint_Infirmary").transform;
+                infirmary.SetParent(parent, false);
+                infirmary.position = new Vector3(InfirmaryCentre.x, parent.position.y, InfirmaryCentre.z);
+                Undo.RegisterCreatedObjectUndo(infirmary.gameObject, "Add heal point");
+            }
+            points.Add(infirmary);
+
+            foreach (var pickup in Object.FindObjectsByType<HealthPickup>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
+                points.Add(pickup.transform);
+            return points.ToArray();
         }
 
         static void EnsureFolder(string path)

@@ -8,6 +8,8 @@ namespace GVGame.Agents
     /// Feeds the robot's Animator from what the body is doing. Movement comes from the NavMeshAgent, never from
     /// the animation (root motion off), so the robot stays exactly on its path; the animation is matched to the
     /// real speed instead, which keeps the feet from sliding.
+    /// A body without a NavMeshAgent (the Security Hunter moves itself) gets its speed from how far it moved,
+    /// and its events through <see cref="PlayShoot"/>, <see cref="PlayHit"/> and <see cref="PlayDeath"/>.
     ///
     /// Animator parameters (built by GV Game > Agent Setup):
     ///   Speed  (float, m/s)  idle 0 / walk 1.5 / run 3 blend
@@ -33,6 +35,7 @@ namespace GVGame.Agents
         RobotPathFollower _follower;
         RobotGun _gun;
         RobotHealth _health;
+        Vector3 _lastPosition;
 
         void Awake()
         {
@@ -47,6 +50,8 @@ namespace GVGame.Agents
                 animator.applyRootMotion = false;
                 animator.cullingMode = AnimatorCullingMode.CullUpdateTransforms; // off-screen robots skip bone updates
             }
+
+            _lastPosition = transform.position;
         }
 
         void OnEnable()
@@ -73,6 +78,9 @@ namespace GVGame.Agents
         {
             if (animator == null || (_health != null && !_health.IsAlive)) return;
 
+            Vector3 moved = transform.position - _lastPosition;
+            _lastPosition = transform.position;
+
             float speed = 0f;
             if (_agent != null && _agent.isActiveAndEnabled)
             {
@@ -80,26 +88,40 @@ namespace GVGame.Agents
                 v.y = 0f;
                 speed = v.magnitude;
             }
+            else if (_agent == null && Time.deltaTime > 0f)
+            {
+                moved.y = 0f;
+                speed = moved.magnitude / Time.deltaTime;
+            }
 
             animator.SetFloat(SpeedId, speed, speedDamping, Time.deltaTime);
             animator.SetBool(AimingId, _follower != null && _follower.FacingTarget != null);
         }
 
-        void OnFired(bool hit)
+        public void PlayShoot()
         {
             if (animator != null) animator.SetTrigger(ShootId);
         }
 
-        void OnDamaged(DamageInfo info)
+        public void PlayHit()
         {
-            if (animator != null && _health.IsAlive) animator.SetTrigger(HitId);
+            if (animator != null) animator.SetTrigger(HitId);
         }
 
-        void OnDied()
+        public void PlayDeath()
         {
             if (animator == null) return;
             animator.SetFloat(SpeedId, 0f);
             animator.SetBool(DeadId, true);
         }
+
+        void OnFired(bool hit) => PlayShoot();
+
+        void OnDamaged(DamageInfo info)
+        {
+            if (_health.IsAlive) PlayHit();
+        }
+
+        void OnDied() => PlayDeath();
     }
 }

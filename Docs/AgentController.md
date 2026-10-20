@@ -85,9 +85,10 @@ The agent's own rotation is off (`updateRotation = false`); the follower turns t
    check every bone is green (Pose > Enforce T-Pose if needed). Commit only `Android.fbx.meta`.
 3. **2. Configure Robot Clips**: Humanoid, in place, idle/walk/run looping.
 4. **3. Build Robot Animator**: `Assets/Art/Animations/Robot/Robot.controller`.
-5. **4. Build Robot Prefabs**: `Assets/Prefabs/Robots/Robot_Base` and `Robot_Flanker` (a variant with the Flanker brain).
-   Open `Robot_Base` and adjust the rifle under the right hand (`DEF-hand.R`) so it sits in the palm.
-   The Security Hunter is another variant of `Robot_Base` named `Robot_Hunter` (Hunter owner).
+5. **4. Build Robot Prefabs**: `Assets/Prefabs/Robots/Robot_Base`, `Robot_Flanker` (a variant with the Flanker brain),
+   `Robot_Hunter` and `Robot_Drone` (see below).
+   Open `Robot_Base` and adjust the rifle under the right hand (`DEF-hand.R`) so it sits in the palm (and the same in
+   `Robot_Hunter`).
    **Every robot prefab needs** a script implementing `IDamageable` on its root (`RobotHealth`) and a solid
    (non-trigger) collider. Without them it cannot be shot or counted as dead, and the Facility AI cannot see it standing
    on a spawn point or in a doorway (both its overlaps ignore triggers). A variant of `Robot_Base` has both;
@@ -95,7 +96,17 @@ The agent's own rotation is off (`updateRotation = false`); the follower turns t
 6. Open your dev scene (or `Main.unity` in your turn) > **5. Add Robot Spawner To Scene**: creates `RobotSpawner` under
    `FacilityAI` and assigns it as the Director's Spawn Service. Enable `FacilityAI` to run the Director.
    When the player respawns (`PlayerHealth.Respawned`), `RobotSpawner` removes every robot, dying ones included, and
-   calls `FacilityDirectorRunner.ResetDirector()`.
+   calls `FacilityDirectorRunner.ResetDirector()`. The Facility AI's test `RobotSpawnService` (red capsules) is removed,
+   so there is one spawner.
+7. Optional, **6. Add Drone Stalker To Scene**: `DroneStalkerSpawn` in the maintenance bay (-2, 18), with the infirmary
+   and every medkit as heal points. One drone per run, re-created when the player respawns; not part of the Director's waves.
+
+## Security Hunter and Drone Stalker bodies
+
+| Prefab | Brain (owner) | Body |
+|---|---|---|
+| `Robot_Hunter` | `HunterAgent` (Viduna) | The Android body (model, Animator, capsule, kinematic Rigidbody, `RobotAnimator`, rifle) with the Hunter's own `HunterMover`, `HunterShooter`, `HunterHealth`. Built beside `Robot_Base`, not as a variant: the base's NavMeshAgent would fight `HunterMover` and `RobotHealth` would be a second health. `HunterBody` passes the Hunter's shot, hit and death events to `RobotAnimator`; `RobotAnimator` takes the speed from how far the body moved when there is no NavMeshAgent. |
+| `Robot_Drone` | `StalkerAgent` + `StalkerSensor` (Ravindu) | `Enemy_EyeDrone` model and `Eye` at 1.4 m; the root walks the NavMesh with the same `RobotPathFollower`. `DroneBody` maps `PathChanged` to `SetPath` (`StalkerMoveSpeed` → `MoveSpeed`, Stop stops), faces the player while `LookTarget` is set, and on `StrikeRequested` lunges and deals 15 damage within 3 m. No walk animation: the model hovers and bobs, and sinks to the floor on death. 75 HP (three rifle hits). |
 
 ## Play-mode checklist
 
