@@ -35,19 +35,23 @@ use and which doors to lock.
 |---|---|---|
 | `LabLockdown.AI.Facility.Core` | `LevelGraph`, `LevelGraphBuilder`, `LabLockdownLayout`, `Csp/` solver, `Director/` (intensity model, facility CSP, director, `Simulation/` pacing simulator) | **None** (`noEngineReferences`) |
 | `LabLockdown.AI.Facility.Runtime` | `LevelGraphProvider`, `SpawnPointMarker`, `FacilityDirectorRunner`, `FacilityEvents`, service interfaces and placeholders | Yes |
-| Assembly-CSharp (`AI/FacilityIntegration`) | `DoorControllerDoorService`: adapter to the Systems Engineer's `DoorController` | Yes |
+| Assembly-CSharp (`AI/FacilityIntegration`) | `DoorControllerDoorService` (adapter to the Systems Engineer's `DoorController`), `RobotSpawnService`, `TestRobot` | Yes |
 | `LabLockdown.AI.Facility.Tests` | EditMode unit and pacing tests for the core | Test runner only |
 
 The decision logic ("brain") cannot reference Unity, which enforces the separation of AI logic
 from visuals and lets every algorithm be unit tested.
 
-## Week 1: level graph
+## Level graph
 
 - **45 nodes** (one per 4 m floor tile), **55 edges**, **5 door edges**.
 - Tiles one grid step apart are connected; on this layout every such pair has an opening or a door.
 - **BFS** (`IsReachable`) answers yes/no reachability for the route constraints.
 - **Dijkstra** (`ShortestDistances`, O(V²) array version) gives real walking distance for the
   distance-window constraint. With 45 nodes this is a few microseconds and needs no priority queue.
+- **`ShortestPath`** returns the route itself (Dijkstra with predecessors), and
+  `LevelGraphProvider.FindPath(from, to, lockedDoors)` turns it into world-space waypoints for robot
+  movement. Both use the same `IsPassable` rule as the CSP, so robots and the Director always agree on
+  which routes are open.
 
 **Why a tile graph rather than Unity's NavMesh:** the Facility AI reasons about rooms and doors,
 not exact footsteps. Constraint checks run graph searches many times per decision, so a small graph
@@ -64,9 +68,9 @@ validates the graph against the scene (door markers, spawn markers, NavMesh cove
 | Lock both route doors, or both control room doors | exit unreachable → must be rejected by the CSP |
 | Lock `Door_ArmouryNorth` | player confined to 9 tiles (the safe area) |
 
-## Week 2: generic CSP solver
+## Generic CSP solver
 
-`Core/Csp/` holds a problem-independent solver, so the Facility constraints (Week 3) are just data.
+`Core/Csp/` holds a problem-independent solver, so the Facility constraints (see *The Director*) are just data.
 
 | Part | Implementation | Lecture 11 term |
 |---|---|---|
@@ -74,7 +78,7 @@ validates the graph against the scene (door markers, spawn markers, NavMesh cove
 | Node consistency | unary constraints (e.g. "spawn not visible") prune domains once, before search | — |
 | `BacktrackingSolver` | recursive backtracking, undo through a trail of pruned values | Algorithm 1 |
 | Variable ordering | **MRV** (fewest legal values), ties broken by the **degree heuristic** | fail-first / most constraining variable |
-| Value ordering | domain order, **LCV**, or a custom `ValueScore` (Week 3: utility) | succeed-first |
+| Value ordering | domain order, **LCV**, or a custom `ValueScore` (the Director's utility) | succeed-first |
 | Inference | **forward checking** on every constraint left with one unassigned variable | forward checking |
 | Safety | `MaxNodes` budget → `NodeLimitReached`, so a decision can never stall a frame | — |
 
@@ -113,7 +117,7 @@ validates the graph against the scene (door markers, spawn markers, NavMesh cove
 colours, impossible global sum), node consistency, forward checking detecting a dead end early, the node
 budget, and **200 random problems checked against brute force for every combination of options**.
 
-## Week 3: the Director
+## The Director
 
 ### Decision loop
 
@@ -125,7 +129,8 @@ budget, and **200 random problems checked against brute force for every combinat
 2. **Utility: how much** – `IntensityModel`:
    `intensity = clamp01(0.15 + 0.35·health + 0.25·progress + 0.30·calm − 0.50·damage − 0.40·enemies/max)`.
    It sets the phase, the spawn budget k, whether doors may lock (≥ 0.55) and how many (1 in build-up,
-   2 at a peak).
+   2 at a peak). Only four doors are lockable (`LockableDoors`): `Door_InfirmaryNorth`, `Door_LabSouth`,
+   `Door_ControlWest` and `Door_ControlEast`. `Door_ArmouryNorth` is never locked.
 3. **CSP: where** – `FacilityProblem` builds the constraints below; `BacktrackingSolver.SolveBest`
    (branch and bound) returns the highest-utility valid configuration.
 4. **Degrade** – if k spawns cannot be placed fairly, try k−1 … 0; if nothing is valid, open every door.
@@ -144,10 +149,10 @@ budget, and **200 random problems checked against brute force for every combinat
 | Kind | Constraint |
 |---|---|
 | unary | spawn hidden from the player (line of sight) |
-| unary | spawn point free: nothing already standing on it *(Week 4)* |
+| unary | spawn point free: nothing already standing on it |
 | unary | spawn not in the player's area |
 | unary | spawn 12–40 m walking distance from the player |
-| unary | door open if the player is at it / something is in the doorway *(Week 4)* / it has been locked ≥ 25 s / the player is hurt |
+| unary | door open if the player is at it / something is in the doorway / it has been locked ≥ 25 s / the player is hurt |
 | unary | door keeps its state for 10 s after changing (cooldown) |
 | unary | door open when locking is not allowed |
 | binary | Spawn_i < Spawn_i+1 (all-different plus symmetry breaking) |
@@ -174,12 +179,13 @@ Ordering the slots removes k! duplicate branches.
   and adds a carving `NavMeshObstacle` while locked, because doors are excluded from the NavMesh bake.
   It sits in Assembly-CSharp because the Facility assemblies must not depend on teammates' scripts.
 - `PlaceholderSpawnService` (red capsules that disappear after 20 s) and `PlaceholderDoorService`
-  (solid red barrier) let the Director run before robots and doors exist.
-- `IPlayerStatusSource` connects the human player's health script (issue #25); until then a Debug Health slider is used.
+  (solid red barrier) are fallbacks: the runner adds them itself when no spawn or door service is assigned.
+- `PlayerHealth` implements `IPlayerStatusSource` and is assigned to the runner in `Main.unity`. The
+  Debug Health slider is only used when no status source is assigned.
 
-### Verification
+### Testing the Director
 
-61 unit tests. The key one plays 25 random games of 20 decisions (random positions, health, damage,
+The key test plays 25 random games of 20 decisions (random positions, health, damage,
 visibility, enemy counts) and checks after every decision that the exit is reachable, no locked door is
 next to the player, at most 2 doors are locked, and every spawn is hidden, outside the safe areas and
 the player's area, within 12–40 m and able to reach the player – while still spawning and locking regularly.
@@ -199,7 +205,7 @@ The simulation caught two pacing problems that every test passed: robots spawnin
 still choosing gear, and a 40 % health player receiving a full wave. Hence the safe-area rule and wave
 sizes that grow with intensity. Decisions take about 1 ms (.NET 8): 4–120 search nodes, always proven optimal.
 
-## Week 4: edge cases, tuning, integration
+## Edge cases, tuning, integration
 
 ### Edge cases
 
@@ -298,7 +304,9 @@ reach for everyone. Raising the progress weight cost weak players too much.
 ### Integration for teammates
 
 `FacilityEvents` (namespace `LabLockdown.AI.Facility.Runtime`) announces what the Facility AI does.
-Teammates' scripts in Assembly-CSharp can subscribe without referencing the runner.
+Teammates' scripts in Assembly-CSharp can subscribe without referencing the runner. A robot that moves
+on the level graph can route around locked doors with
+`LevelGraphProvider.FindPath(from, to, FacilityEvents.LockedDoors)`.
 
 | Event / property | Typical use |
 |---|---|
@@ -348,11 +356,23 @@ The Director decides when, where and how many; the spawner decides which prefab 
 
 With no prefabs assigned it spawns `TestRobot` capsules (test only): they walk to the player at 3 m/s,
 deal 1.2 health per second within 2 m and have 100 health, matching the pacing simulator, so the full
-loop can be checked in `Main.unity` before the real robots are merged.
+loop can be checked in Play mode. Both robot lists are currently empty in `Main.unity`, so the scene spawns
+test robots until the robot prefabs are assigned.
 
 ### Verification
 
-There are now 77 tests (16 new).
+**82 EditMode tests** in `LabLockdown.AI.Facility.Tests`:
+
+| File | Tests | Covers |
+|---|---|---|
+| `LevelGraphTests` | 18 | graph building, BFS/Dijkstra, the layout's routes and door scenarios |
+| `ShortestPathTests` | 5 | `ShortestPath` routes, locked doors, and agreement with Dijkstra for every pair of nodes |
+| `BacktrackingSolverTests` | 17 | the generic CSP solver (see above) |
+| `BranchAndBoundTests` | 3 | `SolveBest` optimality, pruning and the node budget |
+| `IntensityModelTests` | 9 | phases, wave size and decision interval |
+| `FacilityDirectorTests` | 14 | constraints, door rules, relief, variety, flanking, random games |
+| `FacilityEdgeCaseTests` | 8 | see below |
+| `PacingTests` | 8 | see below |
 
 **Edge-case tests (8):**
 
@@ -383,13 +403,3 @@ The runtime code compiles against Unity API stubs. Behaviour in the scene still 
 Eight candidates spread over both routes; none in the quarantine cell, armoury or control room:
 MaintenanceBay, Crossroads, ServiceCorridor, LabCorridor, ResearchLab, Infirmary,
 InfirmaryNorth, WestCorridor.
-
-## Plan
-
-| Week | Work |
-|---|---|
-| 1 | Level graph, BFS/Dijkstra, gizmos, spawn markers, tests ✅ |
-| 2 | Generic CSP solver (backtracking, MRV + degree, LCV, forward checking) + tests ✅ |
-| 3 | Facility constraints, intensity model, branch and bound, director, spawn/door services ✅ |
-| 4 | Edge cases, pacing simulator and tuning, live intensity graph, events for teammates ✅ |
-| 5 | Performance checks, viva preparation |

@@ -79,6 +79,75 @@ U(n) = b[n] / (pathCost(hunter, n) + epsilon)       target = argmax U
 Patrol is not a separate algorithm: with a flat belief, searched nodes stay low and stale nodes
 recover, so the Hunter sweeps the level by itself.
 
+## Decision layer (HunterBrain)
+
+Pure C#. Each tick the Unity side reports what the Hunter's sensors saw; the brain returns a command
+(state, gait, target node, hold position, attack result). Noise and being shot arrive as events.
+
+| State | When | Behaviour |
+|---|---|---|
+| Attack | Player visible and within attack range | Stand still, face the player, wind up, shoot |
+| Chase | Player visible but out of range, or seen less than `chaseMemory` ago | Walk to the player's node at chase speed |
+| Investigate | Belief peak is at least `investigateEnterRatio` times the flat level (falls back below `investigateExitRatio`) | Walk to the likeliest place at investigate speed |
+| Patrol | Belief is flat | Walk to the best-utility node at patrol speed |
+| Dead | No health | Stop |
+
+The state follows from the belief, not from a script. Investigate and Patrol use hysteresis (enter at a higher
+peak than exit) so the Hunter cannot flap at the boundary. The target is re-evaluated at most every
+`reselectInterval` unless something new was perceived, and a new target must beat the current one's utility by
+`switchMargin` before the Hunter switches.
+
+Patrol is not a separate algorithm. Entering a node without seeing the player lowers that node's probability;
+time raises every node back toward flat. With a flat belief the target rule picks the nearest node not
+searched recently, so the Hunter sweeps the whole level (tested: all reachable nodes visited, no scripted route).
+
+Being shot is evidence about the shooter. A noise belief is spread over walking distance with every door treated
+as open, because sound passes a locked door and the player may be anywhere on its far side.
+
+## Blocked-door memory
+
+The door scripts report no lasting "blocked by a barricade" signal. When the Hunter orders a door open and it
+stays shut, the Unity side calls `BlockedDoorMemory.MarkBlocked(doorId)`. For the next 20 s that door reports
+Blocked (impassable) to the planner, which routes around it; afterwards the real door is trusted again, because a
+barricade can be dragged away. This is the model-based part in the strict sense: a belief about the world that the
+sensors do not report directly, which expires.
+
+## Measured: how a noise moves the belief
+
+Real 45-node level, Hunter on a central tile, all doors open. "Peak ratio" = highest node probability divided by the
+flat level (1 / 45). Produced by the exploration used to choose the Investigate thresholds.
+
+| Noise | Source distance | Heard level | Peak ratio |
+|---|---|---|---|
+| Gunshot (30) | 0 m | 30 | 11.9 |
+| Gunshot (30) | 8 m | 22 | 4.25 |
+| Gunshot (30) | 16 m | 14 | 2.5 |
+| Gunshot (30) | 24 m | 6 | 1.9 |
+| Gunshot (30) | 32 m | inaudible | 1.0 |
+| Thrown prop (12) | 8 m | 4 | 2.8 |
+| Thrown prop (8) / door opening (6) | 8 m | inaudible | 1.0 |
+| 20 sprint footsteps (8) in a row, 4 m away | 4 m | 4 | 9.4 (never certainty) |
+
+After a gunshot 8 m away the peak decays from 4.25 to 2.6 after 10 s, 1.8 after 20 s, and 1.4 after 30 s.
+
+## Unity adapters (Assets/Scripts/AI/Hunter/Runtime)
+
+Plain scripts, no asmdef, so they can use the GV types (`DoorController`, `InteractionNoise`, `PlayerHealth`).
+`HunterAgent` is the only class that talks to both worlds:
+
+| Class | Job |
+|---|---|
+| `HunterAgent` | Subscribes to `InteractionNoise`, reads line of sight, asks `HunterBrain.Think`, plans with `AStar`, drives the mover and the shooter, opens doors, detects jammed doors |
+| `HunterMover` | Walks the body along the waypoints A* produced. It never chooses a route. Same shape as the shared follower the group agreed (SetPath, Stop, FaceTarget, HasArrived, PathEnded) |
+| `HunterShooter` | Casts the hitscan ray and applies damage through `PlayerHealth.TakeDamage`. A shot the model rolled as a miss is aimed visibly to the side |
+| `HunterHealth` | 125 health, implements `IDamageable`, so the player's weapon hurts it with no extra code |
+| `DoorSceneStates` | Reads each door's live state from the `DoorController` called `Door_*`; a graph door with no `DoorController` counts as open |
+
+Line of sight is a field of view plus a ray that must reach the player's collider before any wall or closed door.
+The brain only ever sees the player through this: it never reads the player's real position.
+Door waypoints sit on the middle of a door edge. The body waits one metre before a door waypoint until the door
+is 60% open; a door that stays shut for 2 s (or reports blocked) is written into `BlockedDoorMemory`.
+
 ## Ranged hitscan attack
 
 Hitscan = the shot lands instantly along a ray (the same mechanism as the player's weapon), no projectile.
@@ -109,7 +178,8 @@ Replans happen on events (door changed on the current path, target changed), nev
 
 | Case | Handling |
 |---|---|
-| Hunter hears its own door-opening noise | Ignore noise from a door while the Hunter is within `dSelf` of it |
+| Hunter hears its own door-opening noise | Ignore noise whose source is the Hunter's own hierarchy (`DoorController.Open` passes the opener as the source) |
+| A noise caused by another robot | Ignore noise whose source is an `IDamageable` that is not the player |
 | Barricade behind a door (no API for it) | Door commanded open but still Closed after `tBlock`: mark edge blocked for `tForget` |
 | Facility AI locks a door on the current path | Event triggers replan; locked = infinite cost |
 | No path to best target | Take next-best target by U; if none, fall back to Patrol |

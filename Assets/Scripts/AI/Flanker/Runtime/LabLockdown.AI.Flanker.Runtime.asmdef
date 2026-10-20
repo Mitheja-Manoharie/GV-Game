@@ -1,0 +1,19 @@
+{
+    "name": "LabLockdown.AI.Flanker.Runtime",
+    "rootNamespace": "LabLockdown.AI.Flanker.Runtime",
+    "references": [
+        "LabLockdown.AI.Flanker.Core",
+        "LabLockdown.AI.Facility.Core",
+        "LabLockdown.AI.Facility.Runtime",
+        "LabLockdown.AI.Agents"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
