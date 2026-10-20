@@ -42,6 +42,17 @@ Loudness is the open-air audible radius in metres. Tiles are 4 m, so one open ed
 | locked, blocked | Edge cost | infinity | Cannot be walked through | Test | Fixed |
 | h | Heuristic | Euclidean | Admissible: every edge cost >= Euclidean distance | A* vs Dijkstra test | Fixed |
 
+## Decision layer
+
+| Symbol | Meaning | Value | Justification | Check | Status |
+|---|---|---|---|---|---|
+| chaseMemory | Keeps chasing after losing sight | 4 s | About 12 m at 3 m/s, three tiles: enough to follow the player round a corner | Unit test | Initial |
+| investigateEnterRatio | Peak / flat level needed to start investigating | 2.0 | A gunshot heard 16 m away gives 2.5 and must trigger it; one 24 m away gives 1.9 and only biases the patrol (measured, see HunterAI.md) | Unit test | Initial |
+| investigateExitRatio | Peak / flat level below which investigating ends | 1.5 | Below the enter ratio so the state cannot flap. A gunshot 8 m away decays to 1.5 in about 30 s | Unit test: hysteresis | Initial |
+| reselectInterval | Minimum time between target re-evaluations | 0.5 s | A 45-node cost field is cheap; reselecting every frame would cause jitter | Unit test: no flip-flop | Initial |
+| switchMargin | A new target must beat the current utility by this fraction | 0.25 | Stops the Hunter dithering between two similar targets | Unit test: no flip-flop | Initial |
+| forgetSeconds | How long a jammed door is remembered (tForget) | 20 s | A barricade can be dragged away; roughly the belief's own time constant (1 / 0.05 per s) | Unit test | Initial |
+
 ## Attack and movement (calibrated to the group balance agreed with the Facility AI and Flanker owners)
 
 | Symbol | Meaning | Value | Justification | Check | Status |
