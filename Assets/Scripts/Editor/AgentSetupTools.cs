@@ -41,6 +41,7 @@ namespace GVGame.EditorTools
         const string FlankerPrefabPath = PrefabFolder + "/Robot_Flanker.prefab";
         const string HunterPrefabPath = PrefabFolder + "/Robot_Hunter.prefab";
         const string DronePrefabPath = PrefabFolder + "/Robot_Drone.prefab";
+        const string MainScenePath = "Assets/Scenes/Main.unity";
         const string DroneModelPath = "Assets/ThirdParty/Quaternius/Essentials/FBX (Unity)/Enemy_EyeDrone.fbx";
         const float DroneHoverHeight = 1.4f; // the StalkerSensor samples light and sight at this height
         static readonly Vector3 DroneStart = new Vector3(-2f, 0f, 18f);     // maintenance bay, away from the safe areas
@@ -330,7 +331,7 @@ namespace GVGame.EditorTools
                 return;
             }
 
-            if (File.Exists(BasePrefabPath) && !EditorUtility.DisplayDialog("Rebuild robot prefabs?",
+            if (File.Exists(BasePrefabPath) && !Application.isBatchMode && !EditorUtility.DisplayDialog("Rebuild robot prefabs?",
                     "Robot_Base, Robot_Flanker, Robot_Hunter and Robot_Drone will be rebuilt. Manual changes to them " +
                     "(e.g. gun position) are lost.", "Rebuild", "Cancel"))
                 return;
@@ -686,6 +687,37 @@ namespace GVGame.EditorTools
             foreach (var pickup in Object.FindObjectsByType<HealthPickup>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
                 points.Add(pickup.transform);
             return points.ToArray();
+        }
+
+        // ---------- All steps from the command line ----------
+
+        /// <summary>
+        /// Steps 1 to 6 without opening the Unity window, then saves Main.unity:
+        ///   Unity.exe -batchmode -quit -projectPath &lt;project&gt; -executeMethod GVGame.EditorTools.AgentSetupTools.RunAll -logFile agent-setup.log
+        /// Throws (exit code 1) when something the robots need is missing, so a failed run is obvious.
+        /// </summary>
+        public static void RunAll()
+        {
+            ConfigureAndroidRig();
+            var avatar = AssetDatabase.LoadAllAssetsAtPath(AndroidModelPath).OfType<Avatar>().FirstOrDefault();
+            if (avatar == null || !avatar.isValid || !avatar.isHuman)
+                throw new System.InvalidOperationException("[Agent Setup] Android Humanoid avatar is not valid (step 1).");
+
+            ConfigureClips();
+            if (FindClip("Idle") == null || FindClip("Walk") == null || FindClip("Run") == null)
+                throw new System.InvalidOperationException($"[Agent Setup] Idle, Walk and Run clips are missing from {ClipsFolder} (step 2).");
+
+            BuildAnimator();
+            BuildPrefabs();
+            if (!File.Exists(FlankerPrefabPath) || !File.Exists(HunterPrefabPath))
+                throw new System.InvalidOperationException("[Agent Setup] Robot prefabs were not built (step 4).");
+
+            var scene = EditorSceneManager.OpenScene(MainScenePath);
+            AddSpawner();
+            AddDrone();
+            EditorSceneManager.SaveScene(scene);
+            AssetDatabase.SaveAssets();
+            Debug.Log("[Agent Setup] Steps 1 to 6 done; Main.unity saved.");
         }
 
         static void EnsureFolder(string path)
