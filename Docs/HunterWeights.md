@@ -70,11 +70,24 @@ Loudness is the open-air audible radius in metres. Tiles are 4 m, so one open ed
 | patrolSpeedFactor | Patrol speed / base | 0.5 (1.5 m/s) | A patrolling robot listening for noise moves slowly | Playtest | Initial |
 | investigateSpeedFactor | Investigate speed / base | 0.75 (2.25 m/s) | Between patrol and chase | Playtest | Initial |
 
+## Unity adapter (senses and doors)
+
+| Symbol | Meaning | Value | Justification | Check | Status |
+|---|---|---|---|---|---|
+| viewDistance | Furthest the Hunter can see the player | 30 m | About the width of the facility: it can see across a long room but not through the whole map | Playtest | Initial |
+| fieldOfView | Vision cone | 140 degrees | Wide, like a sensor array, but not 360 so the player can approach from behind | Playtest | Initial |
+| closeSenseDistance | Noticed regardless of facing | 3 m | Within one tile a robot would notice a body next to it | Playtest | Initial |
+| thinkInterval | Time between decisions | 0.1 s | 10 decisions a second is faster than a player can react and costs almost nothing | Profiler | Initial |
+| doorOpenDistance | Start opening a closed door this far away | 2.5 m | Opening takes about 1 s; at the 3 m/s chase speed the door is open on arrival | Playtest | Initial |
+| doorPassFraction | A door counts as passable once this open | 0.6 | About 60 of 100 degrees: wide enough for the body to clear it | Playtest | Initial |
+| tBlock | Waiting at a shut door before calling it jammed | 2 s | Longer than the opening animation | Playtest with a barricade | Initial |
+| missOffset | How far a missed shot is aimed to the side | 1.0 m | Wider than the player's body, so a miss visibly misses | Playtest | Initial |
+
 ## Edge cases
 
 | Symbol | Meaning | Value | Justification | Check | Status |
 |---|---|---|---|---|---|
-| dSelf | Radius for ignoring own door noise | 4 m | One tile: the Hunter opens doors it is standing at | Test: no self-trigger | Initial |
+| (own noise) | The Hunter's own door noise | filtered by source | `DoorController.Open` reports the opener as the source, so no distance constant is needed | Playtest | Derived |
 | tBlock | Door still Closed after open command | 2 s | Open animation should finish well within this | Test with barricaded door | Initial |
 | tForget | How long a learned blocked edge is remembered | 20 s | A barricade can be dragged away; matches delta's time scale | Playtest | Initial |
 | habituation (stretch) | Credibility factor for repeat noise near an earlier one | 0.5 per repeat within r and T | Stops throw-spam from pinning the Hunter | Only if time allows | Deferred |
