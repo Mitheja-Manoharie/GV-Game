@@ -130,6 +130,24 @@ flat level (1 / 45). Produced by the exploration used to choose the Investigate 
 
 After a gunshot 8 m away the peak decays from 4.25 to 2.6 after 10 s, 1.8 after 20 s, and 1.4 after 30 s.
 
+## Unity adapters (Assets/Scripts/AI/Hunter/Runtime)
+
+Plain scripts, no asmdef, so they can use the GV types (`DoorController`, `InteractionNoise`, `PlayerHealth`).
+`HunterAgent` is the only class that talks to both worlds:
+
+| Class | Job |
+|---|---|
+| `HunterAgent` | Subscribes to `InteractionNoise`, reads line of sight, asks `HunterBrain.Think`, plans with `AStar`, drives the mover and the shooter, opens doors, detects jammed doors |
+| `HunterMover` | Walks the body along the waypoints A* produced. It never chooses a route. Same shape as the shared follower the group agreed (SetPath, Stop, FaceTarget, HasArrived, PathEnded) |
+| `HunterShooter` | Casts the hitscan ray and applies damage through `PlayerHealth.TakeDamage`. A shot the model rolled as a miss is aimed visibly to the side |
+| `HunterHealth` | 125 health, implements `IDamageable`, so the player's weapon hurts it with no extra code |
+| `DoorSceneStates` | Reads each door's live state from the `DoorController` called `Door_*`; a graph door with no `DoorController` counts as open |
+
+Line of sight is a field of view plus a ray that must reach the player's collider before any wall or closed door.
+The brain only ever sees the player through this: it never reads the player's real position.
+Door waypoints sit on the middle of a door edge. The body waits one metre before a door waypoint until the door
+is 60% open; a door that stays shut for 2 s (or reports blocked) is written into `BlockedDoorMemory`.
+
 ## Ranged hitscan attack
 
 Hitscan = the shot lands instantly along a ray (the same mechanism as the player's weapon), no projectile.
@@ -160,7 +178,8 @@ Replans happen on events (door changed on the current path, target changed), nev
 
 | Case | Handling |
 |---|---|
-| Hunter hears its own door-opening noise | Ignore noise from a door while the Hunter is within `dSelf` of it |
+| Hunter hears its own door-opening noise | Ignore noise whose source is the Hunter's own hierarchy (`DoorController.Open` passes the opener as the source) |
+| A noise caused by another robot | Ignore noise whose source is an `IDamageable` that is not the player |
 | Barricade behind a door (no API for it) | Door commanded open but still Closed after `tBlock`: mark edge blocked for `tForget` |
 | Facility AI locks a door on the current path | Event triggers replan; locked = infinite cost |
 | No path to best target | Take next-best target by U; if none, fall back to Patrol |
