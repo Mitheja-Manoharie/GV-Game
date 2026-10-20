@@ -100,6 +100,14 @@ The agent's own rotation is off (`updateRotation = false`); the follower turns t
    so there is one spawner.
 7. Optional, **6. Add Drone Stalker To Scene**: `DroneStalkerSpawn` in the maintenance bay (-2, 18), with the infirmary
    and every medkit as heal points. One drone per run, re-created when the player respawns; not part of the Director's waves.
+8. **7. Set Up Player Body (Alien)**: the Alien (same Rigify rig as the Android, so the same bone map) becomes Humanoid,
+   and the Alien under the Player root (placed by the World Builder; added Shadows Only if missing) gets `Robot.controller`,
+   the rifle in `DEF-hand.R` (shown once the weapon is picked up) and `PlayerBodyAnimator`: speed from the
+   CharacterController (clips sped up above 3 m/s), Shoot from `WeaponController.Fired`, Hit, Death, and idle on respawn.
+
+Steps 1 and 7 keep the World Builder's import scale and URP material remap (Character Setup) and log both.
+**All steps without the Unity window:** `Unity.exe -batchmode -quit -projectPath <project> -executeMethod
+GVGame.EditorTools.AgentSetupTools.RunAll -logFile agent-setup.log` (exit code 1 if anything is missing).
 
 ## Security Hunter and Drone Stalker bodies
 

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using GVGame.Agents;
 using GVGame.Interaction;
+using GVGame.Player;
 using LabLockdown.AI.DroneStalker.Runtime;
 using LabLockdown.AI.Facility.Integration;
 using LabLockdown.AI.Facility.Runtime;
@@ -29,6 +30,7 @@ namespace GVGame.EditorTools
     ///   5. Add Robot Spawner To Scene - RobotSpawner under FacilityAI, assigned as the Director's Spawn Service;
     ///                                   removes the Facility AI's test RobotSpawnService
     ///   6. Add Drone Stalker To Scene - DroneStalkerSpawn in the maintenance bay (optional)
+    ///   7. Set Up Player Body         - Alien Humanoid rig, Animator, rifle in the hand and PlayerBodyAnimator in Player.prefab
     /// Every step can be run again; it rebuilds what it made.
     /// </summary>
     public static class AgentSetupTools
@@ -42,6 +44,8 @@ namespace GVGame.EditorTools
         const string HunterPrefabPath = PrefabFolder + "/Robot_Hunter.prefab";
         const string DronePrefabPath = PrefabFolder + "/Robot_Drone.prefab";
         const string MainScenePath = "Assets/Scenes/Main.unity";
+        const string AlienModelPath = "Assets/Models/Characters/Alien/Alien.fbx";
+        const string PlayerPrefabPath = "Assets/Prefabs/Player/Player.prefab";
         const string DroneModelPath = "Assets/ThirdParty/Quaternius/Essentials/FBX (Unity)/Enemy_EyeDrone.fbx";
         const float DroneHoverHeight = 1.4f; // the StalkerSensor samples light and sight at this height
         static readonly Vector3 DroneStart = new Vector3(-2f, 0f, 18f);     // maintenance bay, away from the safe areas
@@ -148,10 +152,24 @@ namespace GVGame.EditorTools
             description.feetSpacing = 0f;
             description.hasTranslationDoF = false;
 
+            // The World Builder's import settings (Character Setup: size and URP material remap) must survive this step.
+            float scale = importer.globalScale;
+            var remaps = importer.GetExternalObjectMap();
+
             importer.animationType = ModelImporterAnimationType.Human;
             importer.avatarSetup = ModelImporterAvatarSetup.CreateFromThisModel;
             importer.humanDescription = description;
             importer.SaveAndReimport();
+
+            bool kept = Mathf.Approximately(importer.globalScale, scale) && importer.GetExternalObjectMap().Count == remaps.Count;
+            if (!kept)
+            {
+                importer.globalScale = scale;
+                foreach (var remap in remaps) importer.AddRemap(remap.Key, remap.Value);
+                importer.SaveAndReimport();
+                Debug.LogWarning($"[Agent Setup] {model.name}: import scale or material remap changed; restored.");
+            }
+            Debug.Log($"[Agent Setup] {model.name}: import scale {importer.globalScale} and {importer.GetExternalObjectMap().Count} material remap(s) kept.");
 
             var avatar = AssetDatabase.LoadAllAssetsAtPath(modelPath).OfType<Avatar>().FirstOrDefault();
             if (avatar != null && avatar.isValid && avatar.isHuman)
@@ -573,14 +591,14 @@ namespace GVGame.EditorTools
             return height;
         }
 
-        static void AttachRifle(GameObject body)
+        static GameObject AttachRifle(GameObject body)
         {
             var hand = body.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == RightHandBone);
             var rifle = AssetDatabase.LoadAssetAtPath<GameObject>(RiflePath);
             if (hand == null || rifle == null)
             {
                 Debug.LogWarning($"[Agent Setup] Rifle not attached (bone {RightHandBone} or {RiflePath} missing).");
-                return;
+                return null;
             }
 
             var gun = (GameObject)PrefabUtility.InstantiatePrefab(rifle);
@@ -589,6 +607,7 @@ namespace GVGame.EditorTools
             gun.transform.localPosition = Vector3.zero;
             gun.transform.localRotation = Quaternion.identity;
             foreach (var c in gun.GetComponentsInChildren<Collider>()) Object.DestroyImmediate(c);
+            return gun;
         }
 
         // ---------- 5. Scene ----------
@@ -689,6 +708,84 @@ namespace GVGame.EditorTools
             return points.ToArray();
         }
 
+        // ---------- 7. Player body ----------
+
+        [MenuItem("GV Game/Agent Setup/7. Set Up Player Body (Alien)")]
+        static void SetUpPlayerBodyMenu() => SetUpPlayerBody();
+
+        /// <summary>
+        /// The Alien in Player.prefab gets the robots' animator, the rifle in its right hand (shown once the weapon is
+        /// picked up) and PlayerBodyAnimator on the Player root. Uses the Alien the World Builder placed under the
+        /// Player; if there is none, adds one at the capsule's feet, casting shadows only (first-person view).
+        /// </summary>
+        static bool SetUpPlayerBody()
+        {
+            ConfigureHumanoidRig(AlienModelPath);
+            var alienModel = AssetDatabase.LoadAssetAtPath<GameObject>(AlienModelPath);
+            var controller = AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(ControllerPath);
+            if (alienModel == null || controller == null)
+            {
+                Debug.LogError($"[Agent Setup] Player body needs {AlienModelPath} and {ControllerPath} (step 3).");
+                return false;
+            }
+
+            var root = PrefabUtility.LoadPrefabContents(PlayerPrefabPath);
+            try
+            {
+                GameObject body = null;
+                foreach (var t in root.GetComponentsInChildren<Transform>(true))
+                {
+                    if (!PrefabUtility.IsAnyPrefabInstanceRoot(t.gameObject)) continue;
+                    var source = PrefabUtility.GetCorrespondingObjectFromOriginalSource(t.gameObject);
+                    if (source != null && AssetDatabase.GetAssetPath(source) == AlienModelPath) { body = t.gameObject; break; }
+                }
+
+                if (body == null)
+                {
+                    body = (GameObject)PrefabUtility.InstantiatePrefab(alienModel);
+                    body.name = "Body";
+                    body.transform.SetParent(root.transform, false);
+                    var capsule = root.GetComponent<CharacterController>();
+                    body.transform.localPosition = capsule != null ? capsule.center - Vector3.up * capsule.height * 0.5f : Vector3.zero;
+                    foreach (var r in body.GetComponentsInChildren<Renderer>())
+                        r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly;
+                    Debug.Log("[Agent Setup] No Alien under the Player; added one (Shadows Only).");
+                }
+
+                var animator = body.GetComponent<Animator>();
+                if (animator == null) animator = body.AddComponent<Animator>();
+                animator.runtimeAnimatorController = controller;
+                animator.avatar = AssetDatabase.LoadAllAssetsAtPath(AlienModelPath).OfType<Avatar>().FirstOrDefault();
+                animator.applyRootMotion = false;
+                animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
+
+                // Run again safely: replace the rifle this step added last time.
+                var hand = body.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == RightHandBone);
+                var oldRifle = hand != null ? hand.Find("Rifle") : null;
+                if (oldRifle != null) Object.DestroyImmediate(oldRifle.gameObject);
+
+                var rifle = AttachRifle(body);
+                var bodyRenderer = body.GetComponentInChildren<SkinnedMeshRenderer>();
+                if (rifle != null && bodyRenderer != null)
+                    foreach (var r in rifle.GetComponentsInChildren<Renderer>())
+                        r.shadowCastingMode = bodyRenderer.shadowCastingMode; // the rifle shows the same way as the body
+
+                var bodyAnimator = root.GetComponent<PlayerBodyAnimator>();
+                if (bodyAnimator == null) bodyAnimator = root.AddComponent<PlayerBodyAnimator>();
+                bodyAnimator.animator = animator;
+                bodyAnimator.rifle = rifle;
+
+                PrefabUtility.SaveAsPrefabAsset(root, PlayerPrefabPath);
+                Debug.Log($"[Agent Setup] {PlayerPrefabPath}: Alien animated, rifle in {RightHandBone}. " +
+                          "Open the prefab and check the rifle sits in the palm.");
+                return true;
+            }
+            finally
+            {
+                PrefabUtility.UnloadPrefabContents(root);
+            }
+        }
+
         // ---------- All steps from the command line ----------
 
         /// <summary>
@@ -711,6 +808,8 @@ namespace GVGame.EditorTools
             BuildPrefabs();
             if (!File.Exists(FlankerPrefabPath) || !File.Exists(HunterPrefabPath))
                 throw new System.InvalidOperationException("[Agent Setup] Robot prefabs were not built (step 4).");
+            if (!SetUpPlayerBody())
+                throw new System.InvalidOperationException("[Agent Setup] Player body was not set up (step 7).");
 
             var scene = EditorSceneManager.OpenScene(MainScenePath);
             AddSpawner();
