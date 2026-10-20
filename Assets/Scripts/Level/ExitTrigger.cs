@@ -11,7 +11,11 @@ namespace GVGame.Level
     ///
     /// Put it on the ExitPoint marker (Environment/ControlRoom/ExitPoint). It adds and sizes its own trigger box.
     /// On escape the game is paused (Time.timeScale = 0), so robots stop and the Facility AI makes no more
-    /// decisions, and the cursor is released. Q quits a build; in the Editor, stop Play mode.
+    /// decisions, and the cursor is released.
+    ///
+    /// R plays again without reloading the scene: it uses the player's normal respawn, which already moves the
+    /// player to the start, refills health and ammo, removes the robots and resets the Facility AI.
+    /// Q quits a build; in the Editor, stop Play mode.
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class ExitTrigger : MonoBehaviour
@@ -22,7 +26,7 @@ namespace GVGame.Level
         private PlayerHealth player;
         private WeaponController weapon;
         private bool escaped;
-        private float escapeTime;
+        private float escapeTime, runStartTime;
         private int robotsDefeated;
         private GUIStyle big, small;
 
@@ -73,7 +77,7 @@ namespace GVGame.Level
             if (other.GetComponentInParent<PlayerHealth>() != player || !player.IsAlive) return;
 
             escaped = true;
-            escapeTime = Time.timeSinceLevelLoad;
+            escapeTime = Time.timeSinceLevelLoad - runStartTime;
             Time.timeScale = 0f;
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
@@ -82,7 +86,19 @@ namespace GVGame.Level
 
         private void Update()
         {
-            if (escaped && Keyboard.current != null && Keyboard.current.qKey.wasPressedThisFrame) Application.Quit();
+            if (!escaped || Keyboard.current == null) return;
+            if (Keyboard.current.rKey.wasPressedThisFrame) PlayAgain();
+            else if (Keyboard.current.qKey.wasPressedThisFrame) Application.Quit();
+        }
+
+        /// <summary>Starts a new run from the quarantine cell.</summary>
+        public void PlayAgain()
+        {
+            escaped = false;
+            robotsDefeated = 0;
+            Time.timeScale = 1f;
+            runStartTime = Time.timeSinceLevelLoad;
+            player.Respawn(); // teleports to the start; robots are cleared and the Director resets on Respawned
         }
 
         private void OnGUI()
@@ -106,7 +122,7 @@ namespace GVGame.Level
             int minutes = Mathf.FloorToInt(escapeTime / 60f), seconds = Mathf.FloorToInt(escapeTime % 60f);
             GUI.Label(new Rect(0, h * 0.38f, w, 60), "YOU ESCAPED", big);
             GUI.Label(new Rect(0, h * 0.38f + 64, w, 30), $"Time {minutes}:{seconds:00}    Robots defeated {robotsDefeated}", small);
-            GUI.Label(new Rect(0, h * 0.38f + 100, w, 30), "Press Q to quit", small);
+            GUI.Label(new Rect(0, h * 0.38f + 100, w, 30), "Press R to play again    Q to quit", small);
         }
 
         private void OnDrawGizmos()
