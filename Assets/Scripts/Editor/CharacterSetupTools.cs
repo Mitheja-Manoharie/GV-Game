@@ -1,6 +1,7 @@
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace GVGame.EditorTools
 {
@@ -12,6 +13,11 @@ namespace GVGame.EditorTools
     ///   - one URP Lit material per model, remapped onto the FBX, with the painted textures,
     ///   - no animation import (the models carry no clips) and no colliders.
     /// The rig (Humanoid avatar) is left to the Agent Setup tool. Safe to run again.
+    ///
+    /// GV Game > Character Setup > Place Alien In Player.
+    /// Puts the Alien under the Player root as the player's body: facing the player's forward direction, feet on the
+    /// bottom of the capsule, no colliders, root motion off, Shadows Only (the first-person camera never draws it).
+    /// The Agent Setup tool then adds its rig, animation and rifle. Safe to run again: it replaces the body it made.
     /// </summary>
     public static class CharacterSetupTools
     {
@@ -20,6 +26,9 @@ namespace GVGame.EditorTools
         const string AlienTextures = "Assets/Textures/Characters/Alien/";
         const string AndroidTextures = "Assets/Textures/Characters/Android/";
         const string MaterialFolder = "Assets/Materials/Characters";
+
+        const string PlayerPrefab = "Assets/Prefabs/Player/Player.prefab";
+        const string BodyName = "AlienBody";
 
         const float AlienHeight = 1.8f;
         const float AndroidHeight = 2.0f;
@@ -34,6 +43,94 @@ namespace GVGame.EditorTools
 
         /// <summary>Entry point for batch mode (-executeMethod); exits with 0 on success, 1 on failure.</summary>
         public static void ConfigureCharacterImportsBatch() => EditorApplication.Exit(Run() ? 0 : 1);
+
+        [MenuItem("GV Game/Character Setup/Place Alien In Player")]
+        public static void PlaceAlienInPlayer() => PlaceAlien();
+
+        /// <summary>Entry point for batch mode (-executeMethod); exits with 0 on success, 1 on failure.</summary>
+        public static void PlaceAlienInPlayerBatch() => EditorApplication.Exit(PlaceAlien() ? 0 : 1);
+
+        static bool PlaceAlien()
+        {
+            var model = AssetDatabase.LoadAssetAtPath<GameObject>(AlienModel);
+            if (model == null) { Debug.LogError($"[CharacterSetup] Model not found: {AlienModel}"); return false; }
+
+            GameObject root = PrefabUtility.LoadPrefabContents(PlayerPrefab);
+            try
+            {
+                Transform old = root.transform.Find(BodyName);
+                if (old != null) Object.DestroyImmediate(old.gameObject);
+
+                var body = (GameObject)PrefabUtility.InstantiatePrefab(model, root.transform);
+                body.name = BodyName;
+                body.transform.localPosition = Vector3.zero;
+                body.transform.localRotation = Quaternion.identity;
+                body.transform.localScale = Vector3.one;   // the import scale already makes it 1.80 m
+
+                // Face the player's forward direction: the toes must be ahead of the ankle.
+                Transform ankle = FindDeep(body.transform, "DEF-foot.L");
+                Transform toe = FindDeep(body.transform, "DEF-toe.L");
+                if (ankle != null && toe != null &&
+                    root.transform.InverseTransformPoint(toe.position).z < root.transform.InverseTransformPoint(ankle.position).z)
+                    body.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
+
+                // Feet on the bottom of the capsule.
+                var capsule = root.GetComponent<CharacterController>();
+                float footY = capsule != null ? capsule.center.y - capsule.height * 0.5f : 0f;
+                (float minY, float maxY) = VertexRange(body, root.transform);
+                body.transform.localPosition = new Vector3(0f, footY - minY, 0f);
+
+                foreach (Collider c in body.GetComponentsInChildren<Collider>(true)) Object.DestroyImmediate(c);
+
+                Animator animator = body.GetComponent<Animator>();
+                if (animator != null) animator.applyRootMotion = false;
+
+                foreach (Renderer r in body.GetComponentsInChildren<Renderer>(true))
+                {
+                    r.shadowCastingMode = ShadowCastingMode.ShadowsOnly;
+                    r.receiveShadows = false;
+                }
+
+                PrefabUtility.SaveAsPrefabAsset(root, PlayerPrefab);
+                bool turned = body.transform.localEulerAngles.y > 90f;
+                Debug.Log($"[CharacterSetup] Alien placed in Player.prefab: height {maxY - minY:0.00} m, feet at {footY:0.00}, " +
+                          $"{(turned ? "turned 180 degrees to face forward" : "facing forward")}, Shadows Only, no colliders.");
+                return true;
+            }
+            finally
+            {
+                PrefabUtility.UnloadPrefabContents(root);
+            }
+        }
+
+        static Transform FindDeep(Transform parent, string name) =>
+            parent.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == name);
+
+        /// <summary>Lowest and highest vertex of <paramref name="go"/>, in the space of <paramref name="space"/>.</summary>
+        static (float min, float max) VertexRange(GameObject go, Transform space)
+        {
+            float min = float.PositiveInfinity, max = float.NegativeInfinity;
+            var baked = new Mesh();
+            try
+            {
+                foreach (SkinnedMeshRenderer smr in go.GetComponentsInChildren<SkinnedMeshRenderer>(true))
+                {
+                    smr.BakeMesh(baked, true);
+                    Matrix4x4 toWorld = Matrix4x4.TRS(smr.transform.position, smr.transform.rotation, Vector3.one);
+                    foreach (Vector3 v in baked.vertices)
+                    {
+                        float y = space.InverseTransformPoint(toWorld.MultiplyPoint3x4(v)).y;
+                        if (y < min) min = y;
+                        if (y > max) max = y;
+                    }
+                }
+            }
+            finally
+            {
+                Object.DestroyImmediate(baked);
+            }
+            return (min, max);
+        }
 
         static bool Run()
         {
