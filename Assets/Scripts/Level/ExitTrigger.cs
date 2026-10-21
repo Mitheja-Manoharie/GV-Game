@@ -49,12 +49,21 @@ namespace GVGame.Level
         private void OnEnable()
         {
             if (weapon != null) weapon.HitConfirmed += OnHitConfirmed;
+            if (player != null) player.Respawned += OnPlayerRespawned;
         }
 
         private void OnDisable()
         {
             if (weapon != null) weapon.HitConfirmed -= OnHitConfirmed;
+            if (player != null) player.Respawned -= OnPlayerRespawned;
             if (escaped) Time.timeScale = 1f; // never leave the Editor paused
+        }
+
+        // A new life is a new run: the escape time and robot count start again after death too.
+        private void OnPlayerRespawned()
+        {
+            runStartTime = Time.timeSinceLevelLoad;
+            robotsDefeated = 0;
         }
 
         private void OnHitConfirmed(bool killed)

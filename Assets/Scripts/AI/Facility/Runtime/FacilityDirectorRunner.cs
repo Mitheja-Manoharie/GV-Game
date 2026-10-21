@@ -50,7 +50,7 @@ namespace LabLockdown.AI.Facility.Runtime
         [SerializeField] private float spawnClearance = 0.75f;
 
         [Tooltip("Depth of the doorway checked before a door is locked (width and height follow the door).")]
-        [SerializeField] private float doorwayDepth = 1.5f;
+        [SerializeField] private float doorwayDepth = 1f;
 
         [Tooltip("Further than this from every graph node, the player is off the level (falling, out of bounds) " +
                  "and decisions wait.")]
