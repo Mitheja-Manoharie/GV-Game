@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 982746171676691150}
   - component: {fileID: 7125713607150381756}
   - component: {fileID: 3727674728260062377}
+  - component: {fileID: 5570088201401145875}
   m_Layer: 0
   m_Name: Robot_Base
   m_TagString: Untagged
@@ -184,6 +185,24 @@ MonoBehaviour:
   stuckSeconds: 2.5
   minProgress: 0.3
   doorSearchRadius: 2.5
+--- !u!114 &5570088201401145875
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1937596434671805432}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 90d2b765496f64edd9cf03d462a37945, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GVGame.Audio.GunshotAudio
+  shots:
+  - {fileID: 8300000, guid: b76027b601db44b3db421f56f008c8ad, type: 3}
+  volume: 0.5
+  pitchRange: {x: 0.93, y: 1.07}
+  maxDistance: 40
+  output: {fileID: 0}
 --- !u!1 &9070641726635784987
 GameObject:
   m_ObjectHideFlags: 0
