@@ -60,7 +60,7 @@ SphereCollider:
   m_Enabled: 1
   serializedVersion: 3
   m_Radius: 0.45
-  m_Center: {x: 0, y: 1.4, z: 0}
+  m_Center: {x: 0, y: 2.2, z: 0}
 --- !u!195 &2451311897708617313
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -137,7 +137,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 9
   playerEyeHeight: 1.6
-  hoverHeight: 1.4
+  hoverHeight: 2.2
   playerNoticeRange: 30
   darkNoticeDistance: 5
   visibleTilesInterval: 0.25
@@ -162,10 +162,10 @@ MonoBehaviour:
     SearchNodeBudget: 2000
     NearDistanceMetres: 8
     FarDistanceMetres: 28
-    StrikeRangeMetres: 2.5
+    StrikeRangeMetres: 3.5
     SpottedMemorySeconds: 5
     StrikeRetreatSeconds: 6
-    StrikeCooldownSeconds: 12
+    StrikeCooldownSeconds: 6
     StalkBase: 0.35
     StalkDistanceWeight: 0.25
     StalkSeenPenalty: 0.4
@@ -175,7 +175,7 @@ MonoBehaviour:
     AmbushWeakWeight: 0.4
     AmbushSpotWeight: 0.35
     AmbushNearWeight: 0.15
-    StrikeBase: 0.45
+    StrikeBase: 0.8
     StrikeWeakWeight: 0.5
     RetreatStrikeWeight: 0.9
     RetreatSpottedNearWeight: 0.6
@@ -210,11 +210,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GVGame.Agents.DroneBody
   model: {fileID: 2775626619133574270}
-  hoverHeight: 1.4
+  hoverHeight: 2.2
   bobAmplitude: 0.08
   bobSpeed: 2
-  strikeDamage: 15
-  strikeReach: 3
+  strikeDamage: 8
+  strikeReach: 4
   lungeDistance: 0.6
   laserMaterial: {fileID: 2100000, guid: f30699c6dd5e5d74fa0fc1ccd5b124a4, type: 2}
   laserColor: {r: 1, g: 0.15, b: 0.1, a: 1}
@@ -245,7 +245,7 @@ Transform:
   m_GameObject: {fileID: 4517568560066846514}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.4, z: 0}
+  m_LocalPosition: {x: 0, y: 2.2, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -265,7 +265,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 8303e72838e384b4ab5c42e7e9bb4aa5, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.4004827
+      value: 2.2004827
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 8303e72838e384b4ab5c42e7e9bb4aa5, type: 3}
       propertyPath: m_LocalPosition.z

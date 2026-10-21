@@ -30,7 +30,7 @@ namespace GVGame.EditorTools
     ///                                   and Robot_Drone (Eye Drone body + Drone Stalker brain)
     ///   5. Add Robot Spawner To Scene - RobotSpawner under FacilityAI, assigned as the Director's Spawn Service;
     ///                                   removes the Facility AI's test RobotSpawnService
-    ///   6. Add Drone Stalker To Scene - DroneStalkerSpawn in the maintenance bay (optional)
+    ///   6. Add Drone Stalker To Scene - DroneStalkerSpawn: 4 drones (maintenance bay, infirmary, research lab, west corridor)
     ///   7. Set Up Player Body         - Alien Humanoid rig, Animator, rifle in the hand and PlayerBodyAnimator in Player.prefab
     ///   8. Add Third-Person View      - PlayerViewToggle in Player.prefab (V shows the Alien body); also part of step 7
     ///   9. Update Existing Assets     - upper-body shooting layer, HeldRifle on every hand rifle, the rifle as the
@@ -52,7 +52,7 @@ namespace GVGame.EditorTools
         const string AlienModelPath = "Assets/Models/Characters/Alien/Alien.fbx";
         const string PlayerPrefabPath = "Assets/Prefabs/Player/Player.prefab";
         const string DroneModelPath = "Assets/ThirdParty/Quaternius/Essentials/FBX (Unity)/Enemy_EyeDrone.fbx";
-        const float DroneHoverHeight = 1.4f; // the StalkerSensor samples light and sight at this height
+        const float DroneHoverHeight = 2.2f; // above head height, below door frames; the StalkerSensor samples light and sight here
         static readonly Vector3 DroneStart = new Vector3(-2f, 0f, 18f);     // maintenance bay, away from the safe areas
         static readonly Vector3 InfirmaryCentre = new Vector3(-12f, 0f, 16f);
         const string RiflePath = "Assets/ThirdParty/Quaternius/Essentials/FBX (Unity)/Gun_Rifle.fbx";
@@ -613,6 +613,7 @@ namespace GVGame.EditorTools
                 droneBody.model = body.transform;
                 droneBody.hoverHeight = DroneHoverHeight;
                 droneBody.laserMaterial = AssetDatabase.LoadAssetAtPath<Material>(TracerMaterialPath);
+                TuneDroneAttack(root);
 
                 PrefabUtility.SaveAsPrefabAsset(root, DronePrefabPath);
             }
@@ -804,11 +805,47 @@ namespace GVGame.EditorTools
             Undo.RecordObject(spawn, "Assign drone");
             spawn.dronePrefab = prefab;
             spawn.healPoints = HealPoints(spawn.transform);
+            spawn.extraStarts = DroneExtraStarts(spawn.transform);
 
             EditorSceneManager.MarkSceneDirty(spawn.gameObject.scene);
             Selection.activeGameObject = spawn.gameObject;
-            Debug.Log($"[Agent Setup] {spawn.name} at {spawn.transform.position}: one Drone Stalker per run, " +
-                      $"{spawn.healPoints.Length} heal point(s). Move it to change where the drone starts.");
+            Debug.Log($"[Agent Setup] {spawn.name} at {spawn.transform.position}: {1 + spawn.extraStarts.Length} Drone Stalkers, " +
+                      $"{spawn.healPoints.Length} heal point(s). Move it or its DroneStart_* children to change where they start.");
+        }
+
+        /// <summary>
+        /// Start markers for the other drones, made once under the spawn (kept if they exist, so moved ones stay put):
+        /// one on each route besides the maintenance bay, away from the safe start and the exit room.
+        /// </summary>
+        static Transform[] DroneExtraStarts(Transform parent)
+        {
+            var starts = new List<Transform>();
+            foreach (var (name, x, z) in new[] { ("DroneStart_Infirmary", -10f, 18f), ("DroneStart_ResearchLab", 18f, 26f), ("DroneStart_WestCorridor", -6f, 30f) })
+            {
+                var start = parent.Find(name);
+                if (start == null)
+                {
+                    start = new GameObject(name).transform;
+                    start.SetParent(parent, false);
+                    Vector3 position = new Vector3(x, parent.position.y, z);
+                    if (NavMesh.SamplePosition(position, out var onMesh, 3f, NavMesh.AllAreas)) position = onMesh.position;
+                    start.position = position;
+                    Undo.RegisterCreatedObjectUndo(start.gameObject, "Add drone start");
+                }
+                starts.Add(start);
+            }
+            return starts.ToArray();
+        }
+
+        /// <summary>
+        /// Step 6 on Main.unity from the command line, then saves the scene:
+        ///   Unity.exe -batchmode -quit -projectPath &lt;project&gt; -executeMethod GVGame.EditorTools.AgentSetupTools.AddDronesToMain
+        /// </summary>
+        public static void AddDronesToMain()
+        {
+            var scene = EditorSceneManager.OpenScene(MainScenePath);
+            AddDrone();
+            EditorSceneManager.SaveScene(scene);
         }
 
         /// <summary>The infirmary (a marker made once under the spawn) and every medkit in the scene.</summary>
@@ -943,6 +980,25 @@ namespace GVGame.EditorTools
         }
 
         /// <summary>
+        /// The drone attacks more often than the Drone Stalker's defaults (play tests: it almost never struck). Only the
+        /// prefab's values change; the brain's code, defaults and unit tests stay as they are, and it still strikes only
+        /// while unseen. Strike always wins once possible (0.45 → 0.8 + 0.5 × weak; unseen, the others reach at most
+        /// Ambush 0.5 + 0.4 × weak, Stalk 0.6, Retreat 0.6 and Hide 0.45 outside the 6 s just after a strike), from 3.5 m
+        /// instead of 2.5, every 6 s instead of 12; 8 damage per strike keeps about the agreed 1.2 HP/s (8 / 6 s). The body's reach
+        /// is above the brain's range so every strike it starts lands.
+        /// </summary>
+        static void TuneDroneAttack(GameObject drone)
+        {
+            var settings = drone.GetComponent<StalkerAgent>().Settings;
+            settings.StrikeBase = 0.8f;
+            settings.StrikeRangeMetres = 3.5f;
+            settings.StrikeCooldownSeconds = 6f;
+            var body = drone.GetComponent<DroneBody>();
+            body.strikeDamage = 8f;
+            body.strikeReach = 4f;
+        }
+
+        /// <summary>
         /// Brings the existing animator and prefabs up to date without rebuilding them (steps 3, 4 and 7 do the same
         /// when they rebuild): shooting on the upper-body layer of Robot.controller, HeldRifle on the hand rifle of
         /// Robot_Base (and so Robot_Flanker), Robot_Hunter and the player's Alien, the rifle model as the first-person
@@ -966,8 +1022,9 @@ namespace GVGame.EditorTools
                 var body = drone.GetComponent<DroneBody>();
                 if (body == null) throw new System.InvalidOperationException($"[Agent Setup] {DronePrefabPath} has no DroneBody (step 4).");
                 body.laserMaterial = AssetDatabase.LoadAssetAtPath<Material>(TracerMaterialPath);
+                TuneDroneAttack(drone);
                 PrefabUtility.SaveAsPrefabAsset(drone, DronePrefabPath);
-                Debug.Log($"[Agent Setup] {DronePrefabPath}: strike laser.");
+                Debug.Log($"[Agent Setup] {DronePrefabPath}: strike laser and attack tuning.");
             }
             finally
             {

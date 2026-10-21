@@ -105,9 +105,9 @@ The agent's own rotation is off (`updateRotation = false`); the follower turns t
    so there is one spawner.
    At most **one Flanker** is alive (`maxFlankersAlive` 1). With 2 allowed, play tests often had only 2 robots alive,
    both Flankers, so the Hunter rarely appeared. Now the second robot alive is always a Hunter.
-7. Optional, **6. Add Drone Stalker To Scene**: `DroneStalkerSpawn` in the maintenance bay (-2, 18), with the infirmary
-   and every medkit as heal points. One drone at a time: re-created when the player respawns, and a new one comes 5 s
-   after it is destroyed (`respawnDelay`). Not part of the Director's waves.
+7. **6. Add Drone Stalker To Scene**: `DroneStalkerSpawn` in the maintenance bay (-2, 18) with three `DroneStart_*` markers (infirmary (-10, 18), research lab (18, 26), west corridor (-6, 30)), one drone each, hovering at 2.2 m (was 1.4: it now flies above head height and still clears the door frames), with the infirmary
+   and every medkit as heal points. Each drone is re-created when the player respawns, and a new one comes 5 s
+   after it is destroyed, from its own start (`respawnDelay`). Not part of the Director's waves.
 8. **7. Set Up Player Body (Alien)**: the Alien (same Rigify rig as the Android, so the same bone map) becomes Humanoid,
    and the Alien under the Player root (placed by the World Builder; added Shadows Only if missing) gets `Robot.controller`,
    the rifle in `DEF-hand.R` (with `HeldRifle`, shown while the player has the weapon) and `PlayerBodyAnimator`: speed from the
@@ -131,7 +131,7 @@ GVGame.EditorTools.AgentSetupTools.RunAll -logFile agent-setup.log` (exit code 1
 | Prefab | Brain (owner) | Body |
 |---|---|---|
 | `Robot_Hunter` | `HunterAgent` (Viduna) | The Android body (model, Animator, capsule, kinematic Rigidbody, `RobotAnimator`, rifle) with the Hunter's own `HunterMover`, `HunterShooter`, `HunterHealth`. Built beside `Robot_Base`, not as a variant: the base's NavMeshAgent would fight `HunterMover` and `RobotHealth` would be a second health. `HunterBody` passes the Hunter's shot, hit and death events to `RobotAnimator`; `RobotAnimator` takes the speed from how far the body moved when there is no NavMeshAgent. |
-| `Robot_Drone` | `StalkerAgent` + `StalkerSensor` (Ravindu) | `Enemy_EyeDrone` model and `Eye` at 1.4 m; the root walks the NavMesh with the same `RobotPathFollower`. `DroneBody` maps `PathChanged` to `SetPath` (`StalkerMoveSpeed` → `MoveSpeed`, Stop stops), faces the player while `LookTarget` is set (the eye glows red and pulses within 6 m), and on `StrikeRequested` lunges, fires a red laser from the eye and deals 15 damage within 3 m. No walk animation: the model hovers and bobs, and sinks to the floor on death. 75 HP (three rifle hits). |
+| `Robot_Drone` | `StalkerAgent` + `StalkerSensor` (Ravindu) | `Enemy_EyeDrone` model and `Eye` at 1.4 m; the root walks the NavMesh with the same `RobotPathFollower`. `DroneBody` maps `PathChanged` to `SetPath` (`StalkerMoveSpeed` → `MoveSpeed`, Stop stops), faces the player while `LookTarget` is set (the eye glows red and pulses within 6 m), and on `StrikeRequested` lunges, fires a red laser from the eye and deals 8 damage within 4 m. **Attack tuning in the prefab** (play tests: the drone almost never struck): `StrikeBase` 0.45 → 0.8, `StrikeRangeMetres` 2.5 → 3.5, `StrikeCooldownSeconds` 12 → 6, damage 15 → 8 (about 1.3 HP/s, as agreed). It still strikes only while unseen; the brain's code, defaults and tests are unchanged. No walk animation: the model hovers and bobs, and sinks to the floor on death. 75 HP (three rifle hits). |
 
 ## Play-mode checklist
 
