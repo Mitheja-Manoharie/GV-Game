@@ -229,6 +229,9 @@ The command exits with code 1 if the build fails.
 |-------|--------|---------|----------|
 | Modular Sci-Fi MegaKit (Standard) by Quaternius | [quaternius.com](https://quaternius.com) | CC0 1.0 | Modular walls, columns, platforms, decals, props and alien models for the lab environment |
 | Sci-Fi Essentials Kit (Standard) by Quaternius | [quaternius.com](https://quaternius.com) | CC0 1.0 | Weapons, ammo, enemy models and props such as crates, barrels and desks |
+| Dark Sci-Fi Audio Pack by SRG774 | [opengameart.org](https://opengameart.org) | CC0 1.0 | Facility music: `sector` (calm) and `urgent` (tense) |
+| Impact Sounds by Kenney | [kenney.nl](https://kenney.nl/assets/impact-sounds) | CC0 1.0 | Player footsteps (`footstep_concrete_*`) |
+| Sci-fi Sounds by Kenney | [kenney.nl](https://kenney.nl/assets/sci-fi-sounds) | CC0 1.0 | Rifle shots (`laserRetro_*`, `laserSmall_*`) |
 
 ---
 
