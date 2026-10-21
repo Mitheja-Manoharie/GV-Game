@@ -212,7 +212,7 @@ sizes that grow with intensity. Decisions take about 1 ms (.NET 8): 4–120 sear
 | Situation | Risk | Handling |
 |---|---|---|
 | Something already on a spawn point (a robot that has not moved, a dragged canister) | robots spawn inside each other or inside props | The runner checks a 0.75 m sphere at each marker for enemies (`NavMeshAgent`), the player (`CharacterController`) and physics props (`Rigidbody`). New unary constraint: *spawn on a free spawn point*. |
-| Something in an open doorway | locking shuts the door on a robot or prop; a robot gets stuck in the carving obstacle | The runner checks a box covering the doorway (4 × 2 × 1.5 m, in the door's frame). New door rule: *must be open: something is in the doorway*. Only open doors are checked, so a robot waiting at a locked door does not unlock it. |
+| Something in an open doorway | locking shuts the door on a robot or prop; a robot gets stuck in the carving obstacle | The runner checks a box covering the doorway (4 × 2 × 1 m, in the door's frame). New door rule: *must be open: something is in the doorway*. Only open doors are checked, so a robot waiting at a locked door does not unlock it. |
 | Player off the level graph (falling, out of bounds, more than 3 m from any tile centre or below y = −2) | decisions made for the wrong room | The runner skips the decision, shows *Waiting: …* in the overlay and retries every second. The Director itself rejects invalid nodes. |
 | Time spent choosing gear counted as calm | the first fight after the armoury was always a peak | Calm time only counts from when the player leaves a safe area. |
 | Every spawn point blocked | – | Zero spawns: still a valid decision, not the fallback. |

@@ -9451,7 +9451,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   spawnClearance: 0.75
-  doorwayDepth: 1.5
+  doorwayDepth: 1
   offGraphDistance: 3
   minPlayerHeight: -2
   debugHealth: 1
