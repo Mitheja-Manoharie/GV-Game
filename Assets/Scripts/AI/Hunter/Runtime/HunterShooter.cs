@@ -26,6 +26,9 @@ namespace LabLockdown.AI.Hunter.Runtime
 
         private static readonly RaycastHit[] Buffer = new RaycastHit[16];
 
+        /// <summary>Raised after every shot (true when the player was hurt). The robot body plays the firing animation.</summary>
+        public event System.Action<bool> Fired;
+
         /// <summary>Returns true when the player was actually hurt.</summary>
         public bool Fire(PlayerHealth player, float damage, bool hit)
         {
@@ -54,6 +57,7 @@ namespace LabLockdown.AI.Hunter.Runtime
             }
 
             SpawnTracer(eye, end);
+            Fired?.Invoke(hurt);
             return hurt;
         }
 

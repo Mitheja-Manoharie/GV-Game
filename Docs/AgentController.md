@@ -53,7 +53,8 @@ The agent's own rotation is off (`updateRotation = false`); the follower turns t
 | Clips | Mixamo: idle, walk, run, firing, hit reaction, death, imported **in place** (root position and rotation baked into the pose) | The NavMeshAgent moves the robot; a clip that also moved it would make it drift off the path. |
 | Locomotion | 1D blend tree on `Speed` (m/s): idle 0, walk 1.5, run 3 | Thresholds equal the real speeds (Patrol 1.5, Chase 3), so the legs match the ground speed and the feet do not slide. `Speed` is damped (0.1 s) so the blend does not flicker. |
 | Root motion | Off | Movement follows the calculated path exactly. |
-| Events | `Shoot` and `Hit` triggers, `Dead` bool from the gun and health events | Animation reacts to gameplay, never the other way round. |
+| Events | `Shoot` and `Hit` triggers, `Aiming` and `Dead` bools from the gun, follower and health events | Animation reacts to gameplay, never the other way round. |
+| Shooting | On an **upper-body layer** (`RobotUpperBody` mask: spine, head, arms): `Shoot` or `Aiming` raises the rifle, the firing clip repeats while `Aiming` is on (a robot facing its target; the player for 0.5 s after each shot), and the layer lets go when it is off | The legs keep walking or running while the rifle is up. A full-body Shoot state froze the legs, and the player's 6 shots/s dropped the rifle to idle at the end of every 1.17 s clip. The empty state needs Write Defaults on, or the arms freeze in the aiming pose. |
 
 ## Combat numbers (agreed with the Facility AI and Security Hunter owners)
 
@@ -85,9 +86,14 @@ The agent's own rotation is off (`updateRotation = false`); the follower turns t
    check every bone is green (Pose > Enforce T-Pose if needed). Commit only `Android.fbx.meta`.
 3. **2. Configure Robot Clips**: Humanoid, in place, idle/walk/run looping.
 4. **3. Build Robot Animator**: `Assets/Art/Animations/Robot/Robot.controller`.
-5. **4. Build Robot Prefabs**: `Assets/Prefabs/Robots/Robot_Base` and `Robot_Flanker` (a variant with the Flanker brain).
-   Open `Robot_Base` and adjust the rifle under the right hand (`DEF-hand.R`) so it sits in the palm.
-   The Security Hunter is another variant of `Robot_Base` named `Robot_Hunter` (Hunter owner).
+5. **4. Build Robot Prefabs**: `Assets/Prefabs/Robots/Robot_Base`, `Robot_Flanker` (a variant with the Flanker brain),
+   `Robot_Hunter` and `Robot_Drone` (see below).
+   The rifle under the right hand (`DEF-hand.R`, scaled to 0.65: the Quaternius rifle is 1.06 m long) gets `HeldRifle`:
+   every frame after the Animator, the grip goes in the right palm and the barrel points from the right hand towards the
+   left hand, pulled halfway to where the body faces (`forwardBias`). The Mixamo rifle clips carry the rifle across the
+   chest with the hands close together, so following the hands exactly points it sideways. When the left hand is not near
+   the barrel (the plain Walking clip swings the arms), the barrel follows the body. No hand-placed offset is needed.
+   `Robot_Hunter` gets `RobotTint` (steel blue), so it is told apart from the white Flanker: both use the Android model.
    **Every robot prefab needs** a script implementing `IDamageable` on its root (`RobotHealth`) and a solid
    (non-trigger) collider. Without them it cannot be shot or counted as dead, and the Facility AI cannot see it standing
    on a spawn point or in a doorway (both its overlaps ignore triggers). A variant of `Robot_Base` has both;
@@ -95,7 +101,37 @@ The agent's own rotation is off (`updateRotation = false`); the follower turns t
 6. Open your dev scene (or `Main.unity` in your turn) > **5. Add Robot Spawner To Scene**: creates `RobotSpawner` under
    `FacilityAI` and assigns it as the Director's Spawn Service. Enable `FacilityAI` to run the Director.
    When the player respawns (`PlayerHealth.Respawned`), `RobotSpawner` removes every robot, dying ones included, and
-   calls `FacilityDirectorRunner.ResetDirector()`.
+   calls `FacilityDirectorRunner.ResetDirector()`. The Facility AI's test `RobotSpawnService` (red capsules) is removed,
+   so there is one spawner.
+   At most **one Flanker** is alive (`maxFlankersAlive` 1). With 2 allowed, play tests often had only 2 robots alive,
+   both Flankers, so the Hunter rarely appeared. Now the second robot alive is always a Hunter.
+7. Optional, **6. Add Drone Stalker To Scene**: `DroneStalkerSpawn` in the maintenance bay (-2, 18), with the infirmary
+   and every medkit as heal points. One drone at a time: re-created when the player respawns, and a new one comes 5 s
+   after it is destroyed (`respawnDelay`). Not part of the Director's waves.
+8. **7. Set Up Player Body (Alien)**: the Alien (same Rigify rig as the Android, so the same bone map) becomes Humanoid,
+   and the Alien under the Player root (placed by the World Builder; added Shadows Only if missing) gets `Robot.controller`,
+   the rifle in `DEF-hand.R` (with `HeldRifle`, shown while the player has the weapon) and `PlayerBodyAnimator`: speed from the
+   CharacterController (clips sped up above 3 m/s), Shoot from `WeaponController.Fired`, Hit, Death, and idle on respawn.
+   Step 7 also adds `PlayerViewToggle` (**8. Add Third-Person View To Player** adds only that): **V** switches to a
+   camera over the shoulder that renders the body and its rifle and hides the first-person gun. In first person the body
+   only casts shadows, and the level's lights are baked except the directional light, which the ceilings block, so
+   third person is the way to see the body in play.
+   Step 7 also replaces the Systems setup's placeholder cube under `GunViewModel` with the same rifle model (scale 0.65,
+   no shadows), so the first-person gun matches the one the body holds.
+9. **9. Update Existing Animator And Prefabs**: applies the upper-body shooting layer to `Robot.controller` in place
+   (its GUID, and so every prefab's reference, stays), and `HeldRifle`, the first-person rifle, the Hunter's tint and the
+   drone's laser material to the existing prefabs, without rebuilding them (steps 3, 4 and 7 do the same when they rebuild).
+
+Steps 1 and 7 keep the World Builder's import scale and URP material remap (Character Setup) and log both.
+**All steps without the Unity window:** `Unity.exe -batchmode -quit -projectPath <project> -executeMethod
+GVGame.EditorTools.AgentSetupTools.RunAll -logFile agent-setup.log` (exit code 1 if anything is missing).
+
+## Security Hunter and Drone Stalker bodies
+
+| Prefab | Brain (owner) | Body |
+|---|---|---|
+| `Robot_Hunter` | `HunterAgent` (Viduna) | The Android body (model, Animator, capsule, kinematic Rigidbody, `RobotAnimator`, rifle) with the Hunter's own `HunterMover`, `HunterShooter`, `HunterHealth`. Built beside `Robot_Base`, not as a variant: the base's NavMeshAgent would fight `HunterMover` and `RobotHealth` would be a second health. `HunterBody` passes the Hunter's shot, hit and death events to `RobotAnimator`; `RobotAnimator` takes the speed from how far the body moved when there is no NavMeshAgent. |
+| `Robot_Drone` | `StalkerAgent` + `StalkerSensor` (Ravindu) | `Enemy_EyeDrone` model and `Eye` at 1.4 m; the root walks the NavMesh with the same `RobotPathFollower`. `DroneBody` maps `PathChanged` to `SetPath` (`StalkerMoveSpeed` → `MoveSpeed`, Stop stops), faces the player while `LookTarget` is set (the eye glows red and pulses within 6 m), and on `StrikeRequested` lunges, fires a red laser from the eye and deals 15 damage within 3 m. No walk animation: the model hovers and bobs, and sinks to the floor on death. 75 HP (three rifle hits). |
 
 ## Play-mode checklist
 
@@ -109,7 +145,6 @@ The agent's own rotation is off (`updateRotation = false`); the follower turns t
 
 ## Known limits
 
-- Shooting is a full-body state, so a robot stops to shoot (the Flanker always does). An upper-body layer with an
-  avatar mask would allow shooting while walking.
-- The rifle's position in the hand is set by eye once in the prefab.
+- The aim does not follow the camera's pitch: the rifle points level whether the player looks up or down.
+- The rifle follows the hands, but the fingers are not posed around it (no hand IK), and in the Hit and Death clips it can pass through the body.
 - Robots do not open locked doors; they wait for the Director (by design: locked doors are the Director's tool).

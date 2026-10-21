@@ -5,7 +5,7 @@ An interactive 3D shooting game built in Unity for the **SE3032 – Graphics and
 > **Theme:** Lab Lockdown
 > **Status:** In development. The `Main` scene is integrated with the final lighting, occlusion and NavMesh bake, the player systems, physics doors and props, and the Facility AI director.
 
-You are trapped in a research facility in lockdown. Find a weapon, move barricades and throw objects to get past the facility's robots, and reach the exit while the facility decides where to send enemies and which doors to lock.
+You are trapped in a research facility in lockdown. Armed with a rifle, move barricades and throw objects to get past the facility's robots, and reach the exit while the facility decides where to send enemies and which doors to lock.
 
 ---
 
@@ -90,6 +90,7 @@ Open `Assets/Scenes/Main.unity` and press **Play**.
 | Move held prop nearer / further | Mouse wheel |
 | Restart after death | R |
 | Release / lock cursor | Esc / Left click |
+| First / third-person view (shows the Alien body) | V |
 
 ---
 
@@ -98,7 +99,7 @@ Open `Assets/Scenes/Main.unity` and press **Play**.
 | System | Scripts | Notes |
 |--------|---------|-------|
 | Player | `Player/PlayerController`, `PlayerHealth`, `PlayerHud` | First-person controller on a `CharacterController`, 100 HP, HUD and restart |
-| Weapon | `Combat/WeaponController`, `WeaponPickup`, `IDamageable` | Hitscan weapon picked up in the armoury, 25 damage, 12-round magazine |
+| Weapon | `Combat/WeaponController`, `WeaponPickup`, `IDamageable` | Hitscan rifle the player starts with (the armoury pickup adds ammo), 25 damage, 12-round magazine |
 | Doors | `Interaction/DoorController`, `DoorAutoOpenTrigger` | Two-panel kinematic doors with angle limits; open automatically for NavMesh agents; can be locked by the Facility AI |
 | Props | `Interaction/PhysicsProp`, `PlayerInteractor`, `PlayerRigidbodyPusher` | Barricades (heavy, carve the NavMesh) and throwables (mugs, ammo boxes) |
 | Pickups | `Interaction/HealthPickup` | Health packs heal 40 HP |
@@ -211,6 +212,14 @@ Models created from scratch by the team in Blender:
 1. Open **File > Build Profiles**.
 2. Select **Windows** or **macOS** and make sure `Main.unity` is the first scene in the list.
 3. Click **Build** and choose a folder **outside** the repo.
+
+For Windows there is also **GV Game > Build > Windows**, which builds to `../GV-Game-Build/Windows/LabLockdown.exe` next to the repo. Without the Unity window:
+
+```bash
+Unity.exe -batchmode -quit -projectPath <project> -executeMethod GVGame.EditorTools.BuildTools.BuildWindows -buildPath <folder> -logFile build.log
+```
+
+The command exits with code 1 if the build fails.
 
 ---
 

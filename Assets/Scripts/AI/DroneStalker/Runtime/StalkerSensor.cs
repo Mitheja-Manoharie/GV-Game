@@ -79,6 +79,15 @@ namespace LabLockdown.AI.DroneStalker.Runtime
             if (sightBlockers.value == 0) sightBlockers = LayerMask.GetMask("Default", "Doors");
         }
 
+        /// <summary>
+        /// Sets the heal points for a drone spawned at runtime (a prefab cannot reference scene objects).
+        /// Call before <see cref="Initialise"/>, i.e. straight after Instantiate.
+        /// </summary>
+        public void SetHealPoints(Transform[] points)
+        {
+            healPoints = points ?? new Transform[0];
+        }
+
         /// <summary>Finds the scene references, builds the light map and caches the doors. Safe to call again.</summary>
         public void Initialise()
         {
