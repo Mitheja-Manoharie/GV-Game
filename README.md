@@ -3,7 +3,7 @@
 An interactive 3D shooting game built in Unity for the **SE3032 – Graphics and Visualization** group assignment at SLIIT. The AI agents also serve as the team's **SE3062 – Intelligent Systems** project.
 
 > **Theme:** Lab Lockdown
-> **Status:** In development. The `Main` scene is integrated with the final lighting, occlusion and NavMesh bake, the player systems, physics doors and props, and the Facility AI director.
+> **Status:** Complete. The `Main` scene is integrated with the final lighting, occlusion and NavMesh bake, the player systems, physics doors and props, audio, all four AI agents and the Facility AI director.
 
 You are trapped in a research facility in lockdown. Armed with a rifle, move barricades and throw objects to get past the facility's robots, and reach the exit while the facility decides where to send enemies and which doors to lock.
 

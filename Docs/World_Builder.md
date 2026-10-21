@@ -60,8 +60,8 @@ Environment                 NavMeshSurface (bakes from physics colliders)
 Global Volume               post-processing
 ```
 
-The work was done in a personal scene (`Assets/Scenes/Dev/Mitheja.unity`) and then copied to
-`Main.unity` (#18), which now has its own bake data in `Assets/Scenes/Main/`.
+The work was done in a personal dev scene and then copied to `Main.unity` (#18), which has its own bake
+data in `Assets/Scenes/Main/`. The dev scene was removed once `Main` was final.
 
 ## Build process
 
@@ -199,8 +199,8 @@ the maintenance bay and one in the control room. In both, an L-shaped desk's sin
 also covered the empty inside of the L. Each `Prop_Desk_L` in `Main` now has two box colliders, one per arm.
 After the rebake the check passes.
 
-`Main.unity` still uses the lighting settings asset from the dev scene
-(`Assets/Scenes/Dev/Mitheja/Mitheja Lighting Settings.lighting`).
+`Main.unity` uses `Assets/Scenes/Main/Main Lighting Settings.lighting` and the post-processing profile
+`Assets/Scenes/Main/Global Volume Profile.asset`.
 
 ### Rebaking after a change
 
@@ -227,4 +227,4 @@ After changing level geometry or static props in `Main`:
 
 ## Known limits
 
-- The `Prop_Desk_L` collider fix was made only in `Main.unity`. The dev scene still has the single box.
+None known.
