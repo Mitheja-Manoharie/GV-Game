@@ -124,7 +124,7 @@ Prefabs live in `Assets/Prefabs/Props` and every copy in the scene comes from on
 
 | Type | Examples (count in `Main`) | Static | Collider | Layer |
 |---|---|---|---|---|
-| Cover, large decor | crates, desks, shelves, lockers, `Placeholder_Tank` (4) | yes | Box | Default |
+| Cover, large decor | crates, desks, shelves, lockers, `Prop_SpecimenTank` (4) | yes | Box (tanks: Capsule) | Default |
 | Small decor on surfaces | syringe, tubes, keyboard | yes | none | Default |
 | Barricades | `Barricade_Barrel` (4), `Barricade_CrateTarp` (1) | no | Box | DynamicProps |
 | Throwables | `Throwable_Mug` (8), `Throwable_AmmoSmall` (4), `Throwable_AmmoClosed` (4) | no | Box | DynamicProps |
@@ -136,12 +136,13 @@ Prefabs live in `Assets/Prefabs/Props` and every copy in the scene comes from on
 - Walkways are at least 2 m wide, and doorways and corridor openings are never blocked.
 - Corridors are only 3.12 m wide between wall faces. Cover there is small, crouch-height `Prop_Crate3`
   (1 m cube). Big crates are used only in open rooms (crossroads, maintenance bay).
-- Nothing clips into walls or other props. Scale is 1, except the placeholder tanks and the aliens inside them.
+- Nothing clips into walls or other props. Scale is 1, except the specimen tanks and the aliens inside them.
 
 **Room highlights**
 
 - **Armoury:** the six guns stand upright on a lit shelf. Their materials glow slightly (emission 0.5×) so the shelf reads as a pickup.
-- **Research lab:** four glass tanks with MegaKit aliens inside.
+- **Research lab:** four `Prop_SpecimenTank` glass tanks with MegaKit aliens inside. The tank is built from
+  primitives (glass cylinder, metal base, cap and pipe, green glow strip), so no extra model was needed.
 - **Control room:** consoles in the south corners, with screens facing the room. Low crates frame the exit.
 
 ## Lighting
@@ -226,6 +227,4 @@ After changing level geometry or static props in `Main`:
 
 ## Known limits
 
-- `Placeholder_Tank` is a glass cylinder standing in for the Core Developer's tank model. The lab's tank
-  lights need a review when the model is swapped in.
 - The `Prop_Desk_L` collider fix was made only in `Main.unity`. The dev scene still has the single box.

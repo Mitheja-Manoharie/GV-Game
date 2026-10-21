@@ -10748,7 +10748,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8284994891593946556, guid: a14664f3f6ccf4c3995f470f68611753, type: 3}
       propertyPath: m_Name
-      value: Placeholder_Tank
+      value: Prop_SpecimenTank
       objectReference: {fileID: 0}
     - target: {fileID: 8284994891593946556, guid: a14664f3f6ccf4c3995f470f68611753, type: 3}
       propertyPath: m_StaticEditorFlags
@@ -14213,7 +14213,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8284994891593946556, guid: a14664f3f6ccf4c3995f470f68611753, type: 3}
       propertyPath: m_Name
-      value: Placeholder_Tank
+      value: Prop_SpecimenTank
       objectReference: {fileID: 0}
     - target: {fileID: 8284994891593946556, guid: a14664f3f6ccf4c3995f470f68611753, type: 3}
       propertyPath: m_StaticEditorFlags
@@ -29384,7 +29384,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8284994891593946556, guid: a14664f3f6ccf4c3995f470f68611753, type: 3}
       propertyPath: m_Name
-      value: Placeholder_Tank
+      value: Prop_SpecimenTank
       objectReference: {fileID: 0}
     - target: {fileID: 8284994891593946556, guid: a14664f3f6ccf4c3995f470f68611753, type: 3}
       propertyPath: m_StaticEditorFlags
@@ -41712,7 +41712,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8284994891593946556, guid: a14664f3f6ccf4c3995f470f68611753, type: 3}
       propertyPath: m_Name
-      value: Placeholder_Tank
+      value: Prop_SpecimenTank
       objectReference: {fileID: 0}
     - target: {fileID: 8284994891593946556, guid: a14664f3f6ccf4c3995f470f68611753, type: 3}
       propertyPath: m_StaticEditorFlags
