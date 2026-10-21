@@ -9348,6 +9348,8 @@ GameObject:
   - component: {fileID: 489904357}
   - component: {fileID: 489904359}
   - component: {fileID: 489904360}
+  - component: {fileID: 489904361}
+  - component: {fileID: 489904362}
   m_Layer: 0
   m_Name: FacilityAI
   m_TagString: Untagged
@@ -9473,6 +9475,56 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LabLockdown.AI.Facility.Integration.DoorControllerDoorService
   doorMarkersRoot: {fileID: 307657419}
+--- !u!114 &489904361
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 489904356}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5d0e30e4e26646b3acdd35565ef808a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GVGame.Audio.FacilityAudio
+  ambientLoop: {fileID: 0}
+  calmMusic: {fileID: 8300000, guid: 2414f9f4d005841ff91501e08c74e6b0, type: 3}
+  tenseMusic: {fileID: 8300000, guid: 1507938ff98f74a78b8263388f86844b, type: 3}
+  alarm: {fileID: 0}
+  doorLock: {fileID: 0}
+  ambientVolume: 0.25
+  musicVolume: 0.2
+  tenseMusicVolume: 0.7
+  alarmVolume: 0.6
+  doorLockVolume: 0.9
+  doorLockPitch: 0.6
+  crossFadeSeconds: 2
+  buildUpTension: 0.6
+  combatHoldSeconds: 8
+  alarmCooldown: 8
+  endFadeSeconds: 1.5
+  output: {fileID: 0}
+  doorMarkersRoot: {fileID: 0}
+--- !u!114 &489904362
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 489904356}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 90d2b765496f64edd9cf03d462a37945, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GVGame.Audio.GunshotAudio
+  shots:
+  - {fileID: 8300000, guid: 8f158dc676b92410092c9d2ebb9b1fa5, type: 3}
+  - {fileID: 8300000, guid: 5d31cd4f5f8754d05b561f58b97564f8, type: 3}
+  - {fileID: 8300000, guid: 66ade79dcfb7a4acdaf86e8d87b43c3c, type: 3}
+  volume: 0.5
+  pitchRange: {x: 0.93, y: 1.07}
+  maxDistance: 40
+  output: {fileID: 0}
 --- !u!1 &502193763
 GameObject:
   m_ObjectHideFlags: 0
@@ -20751,6 +20803,11 @@ Transform:
   - {fileID: 1810497553}
   m_Father: {fileID: 466061016}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1115549605 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4053320980143655540, guid: ad6b711990230764a8411ff83ffa5c25, type: 3}
+  m_PrefabInstance: {fileID: 1793356605}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1128015545
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -34746,7 +34803,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4053320980143655540, guid: ad6b711990230764a8411ff83ffa5c25, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1851206468}
   m_SourcePrefab: {fileID: 100100000, guid: ad6b711990230764a8411ff83ffa5c25, type: 3}
 --- !u!1001 &1798537226
 PrefabInstance:
@@ -35726,7 +35786,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2053892259737060447, guid: ad6b711990230764a8411ff83ffa5c25, type: 3}
   m_PrefabInstance: {fileID: 1793356605}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 1115549605}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1333fed79ccffa84daed365fc59e195f, type: 3}
@@ -35737,6 +35797,28 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4698726052551913292, guid: ad6b711990230764a8411ff83ffa5c25, type: 3}
   m_PrefabInstance: {fileID: 1793356605}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1851206468
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1115549605}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c2298f0c84a1499bbd466227776328c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GVGame.Audio.PlayerFootsteps
+  steps:
+  - {fileID: 8300000, guid: e6f7572ff1d6f41b08f1711b62bbe939, type: 3}
+  - {fileID: 8300000, guid: af48dedb63d3d4466a7661839d0eb05f, type: 3}
+  - {fileID: 8300000, guid: fdd10274f244d4fda93fd9625cabc4d4, type: 3}
+  - {fileID: 8300000, guid: 5d40b1015d11045039093b67a305ccc5, type: 3}
+  walkVolume: 0.25
+  sprintVolume: 0.45
+  sprintLoudness: 5
+  pitchRange: {x: 0.9, y: 1.1}
+  output: {fileID: 0}
 --- !u!1001 &1855259946
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -37187,6 +37269,7 @@ MonoBehaviour:
   - {fileID: 389045127}
   - {fileID: 3981021066073244848}
   playerHealth: {fileID: 0}
+  respawnDelay: 5
 --- !u!4 &1939498504
 Transform:
   m_ObjectHideFlags: 0
