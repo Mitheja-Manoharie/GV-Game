@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: 7001692618150094450}
   - component: {fileID: 2127648028772728613}
   - component: {fileID: 4291495588932626869}
+  - component: {fileID: 7839754669055569568}
   m_Layer: 0
   m_Name: Robot_Hunter
   m_TagString: Untagged
@@ -191,6 +192,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 56ca3377d5364e609920694e38c8010f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GVGame.Agents.HunterBody
+--- !u!114 &7839754669055569568
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8188005392698508729}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e7e850f4f696e514e8f4302beb0ed353, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GVGame.Agents.RobotTint
+  renderers: []
+  tint: {r: 0.45, g: 0.62, b: 1, a: 1}
 --- !u!1001 &340641407144524371
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -199,6 +214,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8298913172118403752}
     m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: 08349fe3e5ded484d82c0d83fc37c20d, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.65
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 08349fe3e5ded484d82c0d83fc37c20d, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.65
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 08349fe3e5ded484d82c0d83fc37c20d, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.65
+      objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 08349fe3e5ded484d82c0d83fc37c20d, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -246,13 +273,42 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 08349fe3e5ded484d82c0d83fc37c20d, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2024945289427368784}
   m_SourcePrefab: {fileID: 100100000, guid: 08349fe3e5ded484d82c0d83fc37c20d, type: 3}
 --- !u!4 &229836359057939896 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 08349fe3e5ded484d82c0d83fc37c20d, type: 3}
   m_PrefabInstance: {fileID: 340641407144524371}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &611181542545180418 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 08349fe3e5ded484d82c0d83fc37c20d, type: 3}
+  m_PrefabInstance: {fileID: 340641407144524371}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2024945289427368784
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 611181542545180418}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 35f69533815596545afad25074e28f90, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GVGame.Agents.HeldRifle
+  rightHand: {fileID: 8298913172118403752}
+  leftHand: {fileID: 5732050048661076572}
+  body: {fileID: 3363213113129853102}
+  modelRotation: {x: 0, y: -90, z: 0}
+  gripPoint: {x: 0, y: -0.07, z: 0}
+  palmOffset: {x: 0, y: 0.08, z: 0}
+  supportDistance: {x: 0.15, y: 0.9}
+  minSupportForward: 0.3
+  forwardBias: 1
 --- !u!1001 &2965112365734364997
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -340,6 +396,11 @@ PrefabInstance:
 --- !u!4 &3363213113129853102 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: df164c26e49e00a4a8aef95f8093efe6, type: 3}
+  m_PrefabInstance: {fileID: 2965112365734364997}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &5732050048661076572 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7397836228990811417, guid: df164c26e49e00a4a8aef95f8093efe6, type: 3}
   m_PrefabInstance: {fileID: 2965112365734364997}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &8298913172118403752 stripped

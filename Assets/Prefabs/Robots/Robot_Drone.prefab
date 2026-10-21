@@ -216,6 +216,10 @@ MonoBehaviour:
   strikeDamage: 15
   strikeReach: 3
   lungeDistance: 0.6
+  laserMaterial: {fileID: 2100000, guid: f30699c6dd5e5d74fa0fc1ccd5b124a4, type: 2}
+  laserColor: {r: 1, g: 0.15, b: 0.1, a: 1}
+  laserTime: 0.15
+  warningRange: 6
 --- !u!1 &4517568560066846514
 GameObject:
   m_ObjectHideFlags: 0

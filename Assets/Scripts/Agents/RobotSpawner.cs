@@ -22,7 +22,8 @@ namespace GVGame.Agents
         public GameObject flankerPrefab;
         [Tooltip("Robot with the Security Hunter brain. If empty, only flankers are spawned.")]
         public GameObject hunterPrefab;
-        [Min(0)] public int maxFlankersAlive = 2;
+        [Tooltip("1: the second robot of every wave is already a Hunter, so both brains are met even in small waves.")]
+        [Min(0)] public int maxFlankersAlive = 1;
         [Tooltip("Parent for spawned robots, to keep the hierarchy tidy. Optional.")]
         public Transform container;
         [Tooltip("The player's health. Found by the Player tag if empty. On respawn, robots are removed and the Director resets.")]

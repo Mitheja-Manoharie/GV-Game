@@ -17108,7 +17108,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GVGame.Agents.RobotSpawner
   flankerPrefab: {fileID: 9203930722685052991, guid: d410c6659e2b3354bbe17c8363789af1, type: 3}
   hunterPrefab: {fileID: 8188005392698508729, guid: 959b718b445cad341871877f9a457495, type: 3}
-  maxFlankersAlive: 2
+  maxFlankersAlive: 1
   container: {fileID: 0}
   playerHealth: {fileID: 0}
 --- !u!4 &905695140
@@ -34741,7 +34741,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8293837634719199364, guid: ad6b711990230764a8411ff83ffa5c25, type: 3}
       propertyPath: startEquipped
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

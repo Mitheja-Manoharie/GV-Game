@@ -415,6 +415,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: df164c26e49e00a4a8aef95f8093efe6, type: 3}
   m_PrefabInstance: {fileID: 3239271714291781371}
   m_PrefabAsset: {fileID: 0}
+--- !u!4 &5358809310087754722 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7397836228990811417, guid: df164c26e49e00a4a8aef95f8093efe6, type: 3}
+  m_PrefabInstance: {fileID: 3239271714291781371}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &8573072506742600470 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6489010261613772269, guid: df164c26e49e00a4a8aef95f8093efe6, type: 3}
@@ -433,6 +438,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8573072506742600470}
     m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: 08349fe3e5ded484d82c0d83fc37c20d, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.65
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 08349fe3e5ded484d82c0d83fc37c20d, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.65
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 08349fe3e5ded484d82c0d83fc37c20d, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.65
+      objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 08349fe3e5ded484d82c0d83fc37c20d, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -480,10 +497,39 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 08349fe3e5ded484d82c0d83fc37c20d, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 340494700545358333}
   m_SourcePrefab: {fileID: 100100000, guid: 08349fe3e5ded484d82c0d83fc37c20d, type: 3}
 --- !u!4 &5003971658520316411 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 08349fe3e5ded484d82c0d83fc37c20d, type: 3}
   m_PrefabInstance: {fileID: 4826474289555615248}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &5636955436621599553 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 08349fe3e5ded484d82c0d83fc37c20d, type: 3}
+  m_PrefabInstance: {fileID: 4826474289555615248}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &340494700545358333
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5636955436621599553}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 35f69533815596545afad25074e28f90, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GVGame.Agents.HeldRifle
+  rightHand: {fileID: 8573072506742600470}
+  leftHand: {fileID: 5358809310087754722}
+  body: {fileID: 3134097470354123024}
+  modelRotation: {x: 0, y: -90, z: 0}
+  gripPoint: {x: 0, y: -0.07, z: 0}
+  palmOffset: {x: 0, y: 0.08, z: 0}
+  supportDistance: {x: 0.15, y: 0.9}
+  minSupportForward: 0.3
+  forwardBias: 1

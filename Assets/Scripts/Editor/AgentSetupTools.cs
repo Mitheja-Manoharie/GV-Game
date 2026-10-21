@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using GVGame.Agents;
+using GVGame.Combat;
 using GVGame.Interaction;
 using GVGame.Player;
 using LabLockdown.AI.DroneStalker.Runtime;
@@ -31,6 +32,10 @@ namespace GVGame.EditorTools
     ///                                   removes the Facility AI's test RobotSpawnService
     ///   6. Add Drone Stalker To Scene - DroneStalkerSpawn in the maintenance bay (optional)
     ///   7. Set Up Player Body         - Alien Humanoid rig, Animator, rifle in the hand and PlayerBodyAnimator in Player.prefab
+    ///   8. Add Third-Person View      - PlayerViewToggle in Player.prefab (V shows the Alien body); also part of step 7
+    ///   9. Update Existing Assets     - upper-body shooting layer, HeldRifle on every hand rifle, the rifle as the
+    ///                                   first-person gun, the drone laser and the Hunter's
+    ///                                   tint, in the existing assets (steps 3, 4 and 7 do this when they rebuild)
     /// Every step can be run again; it rebuilds what it made.
     /// </summary>
     public static class AgentSetupTools
@@ -53,6 +58,12 @@ namespace GVGame.EditorTools
         const string RiflePath = "Assets/ThirdParty/Quaternius/Essentials/FBX (Unity)/Gun_Rifle.fbx";
         const string TracerMaterialPath = "Assets/Art/Materials/Tracer.mat";
         const string RightHandBone = "DEF-hand.R";
+        const string LeftHandBone = "DEF-hand.L";
+        const string UpperBodyLayer = "UpperBody";
+        const string UpperBodyMaskPath = ClipsFolder + "/RobotUpperBody.mask";
+        static readonly Vector3 FirstPersonRiflePosition = new Vector3(0f, -0.08f, 0f); // grip, under GunViewModel
+        const float RifleScale = 0.65f; // Gun_Rifle is 1.06 m long; 0.69 m suits the 1.65 m Alien and Android
+        static readonly Color HunterTint = new Color(0.45f, 0.62f, 1f); // steel blue: the Hunter vs the white Flanker
 
         // Animation slots, in matching order (Death before Hit, so "Hit Death" style names land on Death).
         static readonly (string slot, string[] keywords, bool loop)[] Slots =
@@ -289,19 +300,7 @@ namespace GVGame.EditorTools
             root.defaultState = locomotion;
 
             var shootClip = FindClip("Shoot");
-            if (shootClip != null)
-            {
-                var shoot = root.AddState("Shoot");
-                shoot.motion = shootClip;
-                var toShoot = locomotion.AddTransition(shoot);
-                toShoot.AddCondition(AnimatorConditionMode.If, 0f, "Shoot");
-                toShoot.hasExitTime = false;
-                toShoot.duration = 0.05f;
-                var back = shoot.AddTransition(locomotion);
-                back.hasExitTime = true;
-                back.exitTime = 0.9f;
-                back.duration = 0.1f;
-            }
+            if (shootClip != null) AddUpperBodyShooting(controller, shootClip);
 
             var hitClip = FindClip("Hit");
             if (hitClip != null)
@@ -335,6 +334,78 @@ namespace GVGame.EditorTools
             AssetDatabase.SaveAssets();
             Debug.Log($"[Agent Setup] {ControllerPath} built" +
                       $"{(shootClip == null ? " (no Shoot clip)" : "")}{(hitClip == null ? " (no Hit clip)" : "")}{(deathClip == null ? " (no Death clip)" : "")}.");
+        }
+
+        /// <summary>
+        /// Shooting on an upper-body layer (arms, head and spine), so the legs keep walking or running while the rifle
+        /// is up, instead of a full-body state that froze the legs. Shoot (a shot) or Aiming (a robot facing its target,
+        /// the player firing) raises the rifle; while Aiming stays true the firing clip repeats, and the layer lets go
+        /// once Aiming is false and the clip is nearly over, or at once on death. Replaces an older full-body Shoot state.
+        /// </summary>
+        static void AddUpperBodyShooting(AnimatorController controller, AnimationClip shootClip)
+        {
+            var baseMachine = controller.layers[0].stateMachine;
+            foreach (var old in baseMachine.states.Where(s => s.state.name == "Shoot").ToArray())
+                baseMachine.RemoveState(old.state);
+            for (int i = controller.layers.Length - 1; i >= 1; i--)
+                if (controller.layers[i].name == UpperBodyLayer) controller.RemoveLayer(i);
+            foreach (var p in new[] { "Shoot", "Aiming", "Dead" })
+                if (controller.parameters.All(x => x.name != p))
+                    controller.AddParameter(p, p == "Shoot" ? AnimatorControllerParameterType.Trigger : AnimatorControllerParameterType.Bool);
+
+            var mask = AssetDatabase.LoadAssetAtPath<AvatarMask>(UpperBodyMaskPath);
+            if (mask == null)
+            {
+                mask = new AvatarMask();
+                AssetDatabase.CreateAsset(mask, UpperBodyMaskPath);
+            }
+            for (var part = AvatarMaskBodyPart.Root; part < AvatarMaskBodyPart.LastBodyPart; part++)
+                mask.SetHumanoidBodyPartActive(part, part == AvatarMaskBodyPart.Body || part == AvatarMaskBodyPart.Head ||
+                                                     part == AvatarMaskBodyPart.LeftArm || part == AvatarMaskBodyPart.RightArm ||
+                                                     part == AvatarMaskBodyPart.LeftFingers || part == AvatarMaskBodyPart.RightFingers ||
+                                                     part == AvatarMaskBodyPart.LeftHandIK || part == AvatarMaskBodyPart.RightHandIK);
+            EditorUtility.SetDirty(mask);
+
+            controller.AddLayer(UpperBodyLayer);
+            var layers = controller.layers; // a copy: changes are written back below
+            var layer = layers[layers.Length - 1];
+            layer.avatarMask = mask;
+            layer.defaultWeight = 1f;
+            layer.blendingMode = AnimatorLayerBlendingMode.Override;
+            controller.layers = layers;
+
+            var machine = layer.stateMachine;
+            var empty = machine.AddState("Empty"); // no motion and Write Defaults on: the base layer shows through
+            empty.writeDefaultValues = true; // off, an empty state freezes the arms in the last aiming pose
+            machine.defaultState = empty;
+            var shoot = machine.AddState("Shoot");
+            shoot.motion = shootClip;
+
+            foreach (string trigger in new[] { "Shoot", "Aiming" })
+            {
+                var up = empty.AddTransition(shoot);
+                up.AddCondition(AnimatorConditionMode.If, 0f, trigger);
+                up.AddCondition(AnimatorConditionMode.IfNot, 0f, "Dead");
+                up.hasExitTime = false;
+                up.duration = 0.1f;
+            }
+
+            var again = shoot.AddTransition(shoot); // keep firing while aiming
+            again.AddCondition(AnimatorConditionMode.If, 0f, "Aiming");
+            again.hasExitTime = true;
+            again.exitTime = 0.95f;
+            again.duration = 0.05f;
+
+            var down = shoot.AddTransition(empty);
+            down.AddCondition(AnimatorConditionMode.IfNot, 0f, "Aiming");
+            down.hasExitTime = true;
+            down.exitTime = 0.9f;
+            down.duration = 0.2f;
+
+            var dead = shoot.AddTransition(empty);
+            dead.AddCondition(AnimatorConditionMode.If, 0f, "Dead");
+            dead.hasExitTime = false;
+            dead.duration = 0.1f;
         }
 
         // ---------- 4. Prefabs ----------
@@ -476,6 +547,7 @@ namespace GVGame.EditorTools
                 root.GetComponent<HunterShooter>().tracerMaterial = AssetDatabase.LoadAssetAtPath<Material>(TracerMaterialPath);
                 root.GetComponent<HunterHealth>().destroyDelay = 6f; // time for the death animation, as RobotHealth
                 root.AddComponent<HunterBody>();
+                root.AddComponent<RobotTint>().tint = HunterTint;
 
                 PrefabUtility.SaveAsPrefabAsset(root, HunterPrefabPath);
             }
@@ -540,6 +612,7 @@ namespace GVGame.EditorTools
                 var droneBody = root.AddComponent<DroneBody>();
                 droneBody.model = body.transform;
                 droneBody.hoverHeight = DroneHoverHeight;
+                droneBody.laserMaterial = AssetDatabase.LoadAssetAtPath<Material>(TracerMaterialPath);
 
                 PrefabUtility.SaveAsPrefabAsset(root, DronePrefabPath);
             }
@@ -607,7 +680,57 @@ namespace GVGame.EditorTools
             gun.transform.localPosition = Vector3.zero;
             gun.transform.localRotation = Quaternion.identity;
             foreach (var c in gun.GetComponentsInChildren<Collider>()) Object.DestroyImmediate(c);
+            HoldRifle(body, gun);
             return gun;
+        }
+
+        /// <summary>HeldRifle on the rifle: grip in the right palm, barrel towards the left hand, every frame.</summary>
+        static void HoldRifle(GameObject body, GameObject rifle)
+        {
+            var held = rifle.GetComponent<HeldRifle>();
+            if (held == null) held = rifle.AddComponent<HeldRifle>();
+            var bones = body.GetComponentsInChildren<Transform>(true);
+            held.rightHand = bones.FirstOrDefault(t => t.name == RightHandBone);
+            held.leftHand = bones.FirstOrDefault(t => t.name == LeftHandBone);
+            held.body = body.transform;
+            rifle.transform.localScale = Vector3.one * RifleScale;
+        }
+
+        /// <summary>
+        /// The first-person gun becomes the same rifle model the body holds, instead of the Systems setup's
+        /// placeholder cube. The GunViewModel transform stays (WeaponController kicks and shows it); only its cube
+        /// mesh is removed and the rifle is added under it, pointing at the crosshair.
+        /// </summary>
+        static bool SetUpFirstPersonRifle(GameObject playerRoot)
+        {
+            var weapon = playerRoot.GetComponentInChildren<WeaponController>(true);
+            var rifle = AssetDatabase.LoadAssetAtPath<GameObject>(RiflePath);
+            if (weapon == null || weapon.viewModel == null || rifle == null)
+            {
+                Debug.LogWarning("[Agent Setup] First-person rifle not set up (no WeaponController view model, or the rifle model is missing).");
+                return false;
+            }
+
+            Transform viewModel = weapon.viewModel;
+            var cube = viewModel.GetComponent<MeshRenderer>();
+            if (cube != null) Object.DestroyImmediate(cube);
+            var cubeMesh = viewModel.GetComponent<MeshFilter>();
+            if (cubeMesh != null) Object.DestroyImmediate(cubeMesh);
+            viewModel.localScale = Vector3.one;
+
+            var old = viewModel.Find("Rifle");
+            if (old != null) Object.DestroyImmediate(old.gameObject);
+
+            var gun = (GameObject)PrefabUtility.InstantiatePrefab(rifle);
+            gun.name = "Rifle";
+            gun.transform.SetParent(viewModel, false);
+            gun.transform.localPosition = FirstPersonRiflePosition;
+            gun.transform.localRotation = Quaternion.Euler(0f, -90f, 0f); // barrel (+X) to the camera's forward
+            gun.transform.localScale = Vector3.one * RifleScale; // the same size as the rifle in the body's hands
+            foreach (var c in gun.GetComponentsInChildren<Collider>()) Object.DestroyImmediate(c);
+            foreach (var r in gun.GetComponentsInChildren<Renderer>())
+                r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off; // the body's rifle casts the shadow
+            return true;
         }
 
         // ---------- 5. Scene ----------
@@ -775,6 +898,12 @@ namespace GVGame.EditorTools
                 bodyAnimator.animator = animator;
                 bodyAnimator.rifle = rifle;
 
+                var view = root.GetComponent<PlayerViewToggle>();
+                if (view == null) view = root.AddComponent<PlayerViewToggle>();
+                view.body = animator;
+
+                SetUpFirstPersonRifle(root);
+
                 PrefabUtility.SaveAsPrefabAsset(root, PlayerPrefabPath);
                 Debug.Log($"[Agent Setup] {PlayerPrefabPath}: Alien animated, rifle in {RightHandBone}. " +
                           "Open the prefab and check the rifle sits in the palm.");
@@ -783,6 +912,97 @@ namespace GVGame.EditorTools
             finally
             {
                 PrefabUtility.UnloadPrefabContents(root);
+            }
+        }
+
+        /// <summary>
+        /// Only adds PlayerViewToggle to Player.prefab (step 7 does this too), without rebuilding the body or the rifle.
+        ///   Unity.exe -batchmode -quit -projectPath &lt;project&gt; -executeMethod GVGame.EditorTools.AgentSetupTools.AddPlayerViewToggle
+        /// </summary>
+        [MenuItem("GV Game/Agent Setup/8. Add Third-Person View To Player")]
+        public static void AddPlayerViewToggle()
+        {
+            var root = PrefabUtility.LoadPrefabContents(PlayerPrefabPath);
+            try
+            {
+                var bodyAnimator = root.GetComponent<PlayerBodyAnimator>();
+                if (bodyAnimator == null || bodyAnimator.animator == null)
+                    throw new System.InvalidOperationException("[Agent Setup] Player has no body yet: run step 7.");
+
+                var view = root.GetComponent<PlayerViewToggle>();
+                if (view == null) view = root.AddComponent<PlayerViewToggle>();
+                view.body = bodyAnimator.animator;
+
+                PrefabUtility.SaveAsPrefabAsset(root, PlayerPrefabPath);
+                Debug.Log($"[Agent Setup] {PlayerPrefabPath}: PlayerViewToggle added (V switches to third person).");
+            }
+            finally
+            {
+                PrefabUtility.UnloadPrefabContents(root);
+            }
+        }
+
+        /// <summary>
+        /// Brings the existing animator and prefabs up to date without rebuilding them (steps 3, 4 and 7 do the same
+        /// when they rebuild): shooting on the upper-body layer of Robot.controller, HeldRifle on the hand rifle of
+        /// Robot_Base (and so Robot_Flanker), Robot_Hunter and the player's Alien, the rifle model as the first-person
+        /// gun, the Hunter's tint and the drone's laser.
+        ///   Unity.exe -batchmode -quit -projectPath &lt;project&gt; -executeMethod GVGame.EditorTools.AgentSetupTools.UpdateExistingPrefabs
+        /// </summary>
+        [MenuItem("GV Game/Agent Setup/9. Update Existing Animator And Prefabs")]
+        public static void UpdateExistingPrefabs()
+        {
+            var controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(ControllerPath);
+            var shootClip = FindClip("Shoot");
+            if (controller == null || shootClip == null)
+                throw new System.InvalidOperationException($"[Agent Setup] {ControllerPath} or the Shoot clip is missing (steps 2 and 3).");
+            AddUpperBodyShooting(controller, shootClip);
+            EditorUtility.SetDirty(controller);
+            Debug.Log($"[Agent Setup] {ControllerPath}: shooting on the {UpperBodyLayer} layer.");
+
+            var drone = PrefabUtility.LoadPrefabContents(DronePrefabPath);
+            try
+            {
+                var body = drone.GetComponent<DroneBody>();
+                if (body == null) throw new System.InvalidOperationException($"[Agent Setup] {DronePrefabPath} has no DroneBody (step 4).");
+                body.laserMaterial = AssetDatabase.LoadAssetAtPath<Material>(TracerMaterialPath);
+                PrefabUtility.SaveAsPrefabAsset(drone, DronePrefabPath);
+                Debug.Log($"[Agent Setup] {DronePrefabPath}: strike laser.");
+            }
+            finally
+            {
+                PrefabUtility.UnloadPrefabContents(drone);
+            }
+
+            foreach (string path in new[] { BasePrefabPath, HunterPrefabPath, PlayerPrefabPath })
+            {
+                var root = PrefabUtility.LoadPrefabContents(path);
+                try
+                {
+                    var hand = root.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == RightHandBone);
+                    var rifle = hand != null ? hand.Find("Rifle") : null;
+                    var body = root.GetComponentInChildren<Animator>(true);
+                    if (rifle == null || body == null)
+                        throw new System.InvalidOperationException($"[Agent Setup] {path} has no rifle in {RightHandBone} (steps 4 and 7).");
+                    HoldRifle(body.gameObject, rifle.gameObject);
+
+                    if (path == HunterPrefabPath)
+                    {
+                        var tint = root.GetComponent<RobotTint>();
+                        if (tint == null) tint = root.AddComponent<RobotTint>();
+                        tint.tint = HunterTint;
+                    }
+                    if (path == PlayerPrefabPath && !SetUpFirstPersonRifle(root))
+                        throw new System.InvalidOperationException("[Agent Setup] First-person rifle not set up.");
+
+                    PrefabUtility.SaveAsPrefabAsset(root, path);
+                    Debug.Log($"[Agent Setup] {path}: rifle held in both hands" +
+                              (path == HunterPrefabPath ? ", Hunter tint" : path == PlayerPrefabPath ? ", first-person rifle" : "") + ".");
+                }
+                finally
+                {
+                    PrefabUtility.UnloadPrefabContents(root);
+                }
             }
         }
 

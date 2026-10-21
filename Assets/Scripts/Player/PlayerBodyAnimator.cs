@@ -5,16 +5,16 @@ namespace GVGame.Player
 {
     /// <summary>
     /// Animates the player's Alien body with the robots' animator (Robot.controller, built by GV Game > Agent Setup):
-    /// idle/walk/run from the CharacterController's ground speed, Shoot when the weapon fires, Hit when hurt,
-    /// Death on death, and back to idle on respawn. The rifle in the body's hand shows once the player has picked
-    /// up the weapon in the armoury. Movement never comes from the animation (root motion off).
+    /// idle/walk/run from the CharacterController's ground speed, the rifle up (Aiming, upper body) while firing, Hit when hurt,
+    /// Death on death, and back to idle on respawn. The rifle in the body's hand shows while the player has the
+    /// weapon (from the start in Main). Third person (V, PlayerViewToggle) shows the body. Movement never comes from the animation (root motion off).
     /// Set up by GV Game > Agent Setup > 7.
     /// </summary>
     [DisallowMultipleComponent]
     public class PlayerBodyAnimator : MonoBehaviour
     {
         static readonly int SpeedId = Animator.StringToHash("Speed");
-        static readonly int ShootId = Animator.StringToHash("Shoot");
+        static readonly int AimingId = Animator.StringToHash("Aiming");
         static readonly int HitId = Animator.StringToHash("Hit");
         static readonly int DeadId = Animator.StringToHash("Dead");
 
@@ -26,10 +26,13 @@ namespace GVGame.Player
         public float speedDamping = 0.1f;
         [Tooltip("Ground speed (m/s) of the run clip. Running faster plays the clips faster, so the feet keep up.")]
         public float runClipSpeed = 3f;
+        [Tooltip("The rifle stays up this long after the last shot (s), so holding the trigger keeps it aimed.")]
+        public float aimHoldTime = 0.5f;
 
         CharacterController _controller;
         PlayerHealth _health;
         WeaponController _weapon;
+        float _lastShot = float.NegativeInfinity;
 
         void Awake()
         {
@@ -84,12 +87,12 @@ namespace GVGame.Player
 
             animator.SetFloat(SpeedId, speed, speedDamping, Time.deltaTime);
             animator.speed = Mathf.Max(1f, speed / runClipSpeed);
+            // Aiming (not a Shoot trigger per shot): the upper-body layer holds the firing pose while the trigger is
+            // held, and the legs keep walking. A trigger per shot at 6 shots/s dropped the rifle every clip.
+            animator.SetBool(AimingId, Time.time - _lastShot < aimHoldTime);
         }
 
-        void OnFired()
-        {
-            if (animator != null) animator.SetTrigger(ShootId);
-        }
+        void OnFired() => _lastShot = Time.time;
 
         void OnDamaged(DamageInfo info)
         {
@@ -106,6 +109,7 @@ namespace GVGame.Player
 
         void OnRespawned()
         {
+            _lastShot = float.NegativeInfinity;
             if (animator == null) return;
             animator.Rebind(); // back to idle with every parameter reset (Death has no way out in the controller)
             animator.Update(0f);
