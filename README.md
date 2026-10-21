@@ -212,6 +212,14 @@ Models created from scratch by the team in Blender:
 2. Select **Windows** or **macOS** and make sure `Main.unity` is the first scene in the list.
 3. Click **Build** and choose a folder **outside** the repo.
 
+For Windows there is also **GV Game > Build > Windows**, which builds to `../GV-Game-Build/Windows/LabLockdown.exe` next to the repo. Without the Unity window:
+
+```bash
+Unity.exe -batchmode -quit -projectPath <project> -executeMethod GVGame.EditorTools.BuildTools.BuildWindows -buildPath <folder> -logFile build.log
+```
+
+The command exits with code 1 if the build fails.
+
 ---
 
 ## Third-Party Assets and Credits
