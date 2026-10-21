@@ -30,6 +30,9 @@ namespace GVGame.Level
         private int robotsDefeated;
         private GUIStyle big, small;
 
+        /// <summary>Raised when the player reaches the exit (e.g. the facility audio fades out).</summary>
+        public event System.Action Escaped;
+
         private void Reset() => ConfigureTrigger();
 
         private void Awake()
@@ -90,6 +93,7 @@ namespace GVGame.Level
             Time.timeScale = 0f;
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
+            Escaped?.Invoke();
             Debug.Log($"[ExitTrigger] Player escaped in {escapeTime:0} s, {robotsDefeated} robots defeated.", this);
         }
 
