@@ -312,7 +312,7 @@ on the level graph can route around locked doors with
 |---|---|
 | `DoorLockChanged(doorId, locked)` | robots re-plan their path (`NavMeshAgent.ResetPath` / `SetDestination`) |
 | `WaveSpawned(positions, phase)` | alarm sound, warning UI |
-| `PhaseChanged(previous, current)` | music and lighting intensity (e.g. red lights at Peak) |
+| `PhaseChanged(previous, current)` | music (`FacilityAudio`) and the rotating red `AlarmBeacon` lights at Peak |
 | `DecisionMade(decision)` | logging, analytics |
 | `Phase`, `Intensity`, `IsDoorLocked(id)`, `LockedDoors` | polling instead of events |
 

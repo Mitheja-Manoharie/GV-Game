@@ -168,6 +168,11 @@ Prefabs live in `Assets/Prefabs/Props` and every copy in the scene comes from on
 - **Light modes:** 44 lights are **Baked**. The only Realtime lights are the four `AlienGlow` lights, which
   have no shadows. The skinned aliens inside the tanks cannot be lightmapped, and no probes fit inside the
   glass, so a Baked light would not reach them.
+- **Alarm beacons:** `AlarmBeacon` (`Assets/Scripts/Level`) on the six red corridor door accents and the two
+  control room corner lights. While the Facility AI is at its **Peak** (`FacilityEvents.PhaseChanged`), each one
+  sweeps a rotating red spot light (Realtime, no shadows) and fades out again afterwards, or when the player dies
+  or escapes. The lights are created at runtime and disabled while off, so they cost nothing outside a peak and
+  never affect the bake.
 - **Emission:** coloured emission stays at 1×, so it does not clip to white. Cold white uses 4×, so the
   fixtures bloom.
 - **Probes:**
@@ -219,7 +224,7 @@ After changing level geometry or static props in `Main`:
 - **Walk on the greybox colliders, not the art:** the kit floors have no clean colliders. Keeping one box per
   floor slab gives the player and the NavMesh a flat, reliable surface.
 - **Almost everything Baked:** the target includes Macs, so lighting is precomputed. Only the four
-  shadowless `AlienGlow` lights run in real time.
+  shadowless `AlienGlow` lights run in real time, plus the alarm beacons during a peak.
 - **One ceiling collider:** a single box instead of one collider per tile is cheaper and leaves no seams.
 - **Occludee-only props:** small props would make poor occluders and only add bake time.
 - **Moving props out of the NavMesh:** barricades carve their own obstacle when they stop, so robots path
