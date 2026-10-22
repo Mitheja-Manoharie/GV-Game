@@ -143,6 +143,9 @@ Prefabs live in `Assets/Prefabs/Props` and every copy in the scene comes from on
 - **Armoury:** the six guns stand upright on a lit shelf. Their materials glow slightly (emission 0.5×) so the shelf reads as a pickup.
 - **Research lab:** four `Prop_SpecimenTank` glass tanks with MegaKit aliens inside. The tank is built from
   primitives (glass cylinder, metal base, cap and pipe, green glow strip), so no extra model was needed.
+  **Story:** a chair knocked onto its side in front of the tanks, syringes dropped on the floor and left on the
+  desk, as if the scientists left in a hurry. Placed by **Tools > World Builder > Place Lab Story** (`LabStoryPlacer.cs`) under `Props/Story`;
+  **Remove Lab Story** deletes them. They are not static and use light probes, so no rebake.
 - **Control room:** consoles in the south corners, with screens facing the room. Low crates frame the exit.
 
 ## Decals
