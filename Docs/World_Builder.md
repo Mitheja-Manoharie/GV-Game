@@ -145,6 +145,21 @@ Prefabs live in `Assets/Prefabs/Props` and every copy in the scene comes from on
   primitives (glass cylinder, metal base, cap and pipe, green glow strip), so no extra model was needed.
 - **Control room:** consoles in the south corners, with screens facing the room. Low crates frame the exit.
 
+## Decals
+
+Red hazard stripes (`Decal_Dashes`, 3 per door) on the approach side of the four doors the Facility AI can lock,
+so the player can tell which doors may trap them. They are placed by **Tools > World Builder > Place Decals**
+(`Assets/Scripts/Editor/DecalPlacer.cs`) under `Environment/Decals`; running the tool again rebuilds the group.
+
+- **Material** (`Assets/Materials/Decals/M_Decal_Red`, emergency red): the kit's `T_Decals.png` is white on black
+  with no alpha, and many kit walls, door frames and consoles use it too. So the decal uses its own copy,
+  `T_Decals_Cutout.png`, imported with *Alpha Source: From Gray Scale* at 1024 px, and the kit texture stays
+  untouched. The material uses alpha clipping (cutoff 0.5) instead of transparency: no sorting, depth writes
+  stay on, and it stays in the opaque pass. Mipmaps preserve coverage so thin stripes do not vanish at a
+  distance. The `Decal_Dashes` importer remaps the kit material to it.
+- **Cost:** flat quads 1.4 cm above the floor, not static, no shadows and no colliders. They need no lighting,
+  occlusion or NavMesh rebake; light probes light them.
+
 ## Lighting
 
 **Palette:** one cold white base in every room plus one accent colour per room.
