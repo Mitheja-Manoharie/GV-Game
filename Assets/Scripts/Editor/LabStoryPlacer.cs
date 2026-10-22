@@ -38,7 +38,9 @@ namespace GVGame.EditorTools
             var mess = new GameObject("Mess");
             mess.transform.SetParent(root.transform, false);
 
-            var chair = Model(mess.transform, "Prop_Chair", new Vector3(16.1f, 0f, 29.0f), Quaternion.Euler(0f, 35f, 90f));   // on its side, in front of the tanks
+            // On its side in front of the tanks, its back pointing east along the row (spans about x 15.6-17.2, z 28.4-29.6):
+            // clear of the front tank row (bases from z 30.1), the corner tank (base from x 18.1) and the desk (to z 27.7).
+            var chair = Model(mess.transform, "Prop_Chair", new Vector3(15.6f, 0f, 29.0f), Quaternion.Euler(0f, 180f, 90f));
             if (chair != null) AddBoxCollider(chair);
             Model(mess.transform, "Prop_Syringe", new Vector3(15.3f, 0f, 26.3f), Quaternion.Euler(0f, 20f, 90f));             // lying flat
             Model(mess.transform, "Prop_Syringe", new Vector3(17.4f, 0f, 27.6f), Quaternion.Euler(0f, 110f, 90f));
