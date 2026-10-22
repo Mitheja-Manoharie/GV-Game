@@ -160,6 +160,22 @@ so the player can tell which doors may trap them. They are placed by **Tools > W
 - **Cost:** flat quads 1.4 cm above the floor, not static, no shadows and no colliders. They need no lighting,
   occlusion or NavMesh rebake; light probes light them.
 
+## Particle effects
+
+Placed by **Tools > World Builder > Place Particle Effects** (`Assets/Scripts/Editor/ParticlePlacer.cs`) under
+`Environment/Effects`; running the tool again rebuilds the group.
+
+| Group | Where | Look | Max particles |
+|---|---|---|---|
+| Sparks | under a ceiling light in the service corridor and in the infirmary north corridor | irregular showers (30 % chance every 0.6 s), stretched streaks that fall and bounce off the floor | 60 each |
+| TankBubbles | inside every `Prop_SpecimenTank` | small green-tinted bubbles rising about 2 m | 30 each |
+
+- **Materials** (`Assets/Materials/Particles`): copies of URP's unlit particle material. Sparks are additive with an
+  HDR colour, so they bloom. Bubbles render at queue 3050, after the tank glass (3000), so they always draw
+  inside it instead of flickering with the glass's sort order.
+- **Cost:** about 240 particles in total; unlit, no shadows, no light or reflection probes, low-quality noise and
+  collision, and culled automatically when off screen. No rebake is needed.
+
 ## Lighting
 
 **Palette:** one cold white base in every room plus one accent colour per room.
