@@ -1851,10 +1851,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1166703424}
     m_Modifications:
-    - target: {fileID: 9051055535936377883, guid: 1f4f888c3735b4bcf8a93dfa1a771166, type: 3}
-      propertyPath: m_Intensity
-      value: 1.38
-      objectReference: {fileID: 0}
     - target: {fileID: 4737954647674865463, guid: 1f4f888c3735b4bcf8a93dfa1a771166, type: 3}
       propertyPath: m_LocalPosition.x
       value: -14
@@ -1894,6 +1890,10 @@ PrefabInstance:
     - target: {fileID: 4737954647674865463, guid: 1f4f888c3735b4bcf8a93dfa1a771166, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9051055535936377883, guid: 1f4f888c3735b4bcf8a93dfa1a771166, type: 3}
+      propertyPath: m_Intensity
+      value: 1.38
       objectReference: {fileID: 0}
     - target: {fileID: 9066399431506109751, guid: 1f4f888c3735b4bcf8a93dfa1a771166, type: 3}
       propertyPath: m_Name
@@ -1959,6 +1959,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 133967791}
+  - component: {fileID: 133967792}
   m_Layer: 0
   m_Name: ControlRoom
   m_TagString: Untagged
@@ -1990,6 +1991,28 @@ Transform:
   - {fileID: 665316513}
   m_Father: {fileID: 2084670217}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &133967792
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 133967790}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f7e851decee54de482a017997970c6b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GVGame.Level.AlarmBeacon
+  onDuringBuildUp: 0
+  color: {r: 1, g: 0.231, b: 0.188, a: 1}
+  intensity: 6
+  range: 9
+  spotAngle: 60
+  tilt: 35
+  offset: {x: 0, y: -0.4, z: 0}
+  twoBeams: 0
+  degreesPerSecond: 200
+  fadeSeconds: 0.4
 --- !u!1001 &134222747
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -11382,10 +11405,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1166703424}
     m_Modifications:
-    - target: {fileID: 9051055535936377883, guid: 1f4f888c3735b4bcf8a93dfa1a771166, type: 3}
-      propertyPath: m_Intensity
-      value: 1.38
-      objectReference: {fileID: 0}
     - target: {fileID: 4737954647674865463, guid: 1f4f888c3735b4bcf8a93dfa1a771166, type: 3}
       propertyPath: m_LocalPosition.x
       value: 9.2
@@ -11425,6 +11444,10 @@ PrefabInstance:
     - target: {fileID: 4737954647674865463, guid: 1f4f888c3735b4bcf8a93dfa1a771166, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9051055535936377883, guid: 1f4f888c3735b4bcf8a93dfa1a771166, type: 3}
+      propertyPath: m_Intensity
+      value: 1.38
       objectReference: {fileID: 0}
     - target: {fileID: 9066399431506109751, guid: 1f4f888c3735b4bcf8a93dfa1a771166, type: 3}
       propertyPath: m_Name
@@ -21715,6 +21738,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1166703424}
+  - component: {fileID: 1166703425}
   m_Layer: 0
   m_Name: Corridors
   m_TagString: Untagged
@@ -21752,6 +21776,28 @@ Transform:
   - {fileID: 564725292}
   m_Father: {fileID: 2084670217}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1166703425
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1166703423}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f7e851decee54de482a017997970c6b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GVGame.Level.AlarmBeacon
+  onDuringBuildUp: 0
+  color: {r: 1, g: 0.231, b: 0.188, a: 1}
+  intensity: 6
+  range: 9
+  spotAngle: 60
+  tilt: 35
+  offset: {x: 0, y: -0.4, z: 0}
+  twoBeams: 0
+  degreesPerSecond: 200
+  fadeSeconds: 0.4
 --- !u!1 &1174737232
 GameObject:
   m_ObjectHideFlags: 0
@@ -24541,6 +24587,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1310409082}
+  - component: {fileID: 1310409083}
   m_Layer: 0
   m_Name: ServiceCorridor
   m_TagString: Untagged
@@ -24573,6 +24620,28 @@ Transform:
   - {fileID: 1128015546}
   m_Father: {fileID: 2084670217}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1310409083
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1310409081}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f7e851decee54de482a017997970c6b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GVGame.Level.AlarmBeacon
+  onDuringBuildUp: 0
+  color: {r: 1, g: 0.231, b: 0.188, a: 1}
+  intensity: 6
+  range: 9
+  spotAngle: 60
+  tilt: 35
+  offset: {x: 0, y: -0.4, z: 0}
+  twoBeams: 0
+  degreesPerSecond: 200
+  fadeSeconds: 0.4
 --- !u!1001 &1316223598
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -26821,10 +26890,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1166703424}
     m_Modifications:
-    - target: {fileID: 9051055535936377883, guid: 1f4f888c3735b4bcf8a93dfa1a771166, type: 3}
-      propertyPath: m_Intensity
-      value: 1.38
-      objectReference: {fileID: 0}
     - target: {fileID: 4737954647674865463, guid: 1f4f888c3735b4bcf8a93dfa1a771166, type: 3}
       propertyPath: m_LocalPosition.x
       value: -5.2
@@ -26864,6 +26929,10 @@ PrefabInstance:
     - target: {fileID: 4737954647674865463, guid: 1f4f888c3735b4bcf8a93dfa1a771166, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9051055535936377883, guid: 1f4f888c3735b4bcf8a93dfa1a771166, type: 3}
+      propertyPath: m_Intensity
+      value: 1.38
       objectReference: {fileID: 0}
     - target: {fileID: 9066399431506109751, guid: 1f4f888c3735b4bcf8a93dfa1a771166, type: 3}
       propertyPath: m_Name
@@ -32132,10 +32201,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1310409082}
     m_Modifications:
-    - target: {fileID: 9051055535936377883, guid: 1f4f888c3735b4bcf8a93dfa1a771166, type: 3}
-      propertyPath: m_Intensity
-      value: 1.38
-      objectReference: {fileID: 0}
     - target: {fileID: 4737954647674865463, guid: 1f4f888c3735b4bcf8a93dfa1a771166, type: 3}
       propertyPath: m_LocalPosition.x
       value: 14
@@ -32175,6 +32240,10 @@ PrefabInstance:
     - target: {fileID: 4737954647674865463, guid: 1f4f888c3735b4bcf8a93dfa1a771166, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9051055535936377883, guid: 1f4f888c3735b4bcf8a93dfa1a771166, type: 3}
+      propertyPath: m_Intensity
+      value: 1.38
       objectReference: {fileID: 0}
     - target: {fileID: 9066399431506109751, guid: 1f4f888c3735b4bcf8a93dfa1a771166, type: 3}
       propertyPath: m_Name
@@ -32309,10 +32378,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1310409082}
     m_Modifications:
-    - target: {fileID: 9051055535936377883, guid: 1f4f888c3735b4bcf8a93dfa1a771166, type: 3}
-      propertyPath: m_Intensity
-      value: 1.38
-      objectReference: {fileID: 0}
     - target: {fileID: 4737954647674865463, guid: 1f4f888c3735b4bcf8a93dfa1a771166, type: 3}
       propertyPath: m_LocalPosition.x
       value: 14
@@ -32352,6 +32417,10 @@ PrefabInstance:
     - target: {fileID: 4737954647674865463, guid: 1f4f888c3735b4bcf8a93dfa1a771166, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9051055535936377883, guid: 1f4f888c3735b4bcf8a93dfa1a771166, type: 3}
+      propertyPath: m_Intensity
+      value: 1.38
       objectReference: {fileID: 0}
     - target: {fileID: 9066399431506109751, guid: 1f4f888c3735b4bcf8a93dfa1a771166, type: 3}
       propertyPath: m_Name
