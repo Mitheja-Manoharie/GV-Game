@@ -150,6 +150,10 @@ Prefabs live in `Assets/Prefabs/Props` and every copy in the scene comes from on
   desk, as if the scientists left in a hurry. Placed by **Tools > World Builder > Place Lab Story** (`LabStoryPlacer.cs`) under `Props/Story`;
   **Remove Lab Story** deletes them. They are not static and use light probes, so no rebake.
 - **Control room:** consoles in the south corners, with screens facing the room. Low crates frame the exit.
+  **Live screens:** `LiveScreen` (`Assets/Scripts/Level`) on the two `Prop_Computer`s and the `Prop_AccessPoint`
+  replaces each screen's texture (only the screen slot: the kit's `M_Decal_Screen`, imported as `T_Decals`, through a `MaterialPropertyBlock`) with a
+  generated 64 × 64 data texture: rows of "text" scrolling upwards in screen blue, a faint flicker and a short
+  refresh glitch every 3–9 s. Each screen has its own layout and speed; the shared kit material is untouched.
 
 ## Decals
 
