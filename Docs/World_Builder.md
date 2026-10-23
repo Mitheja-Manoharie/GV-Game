@@ -231,6 +231,12 @@ Placed by **Tools > World Builder > Place Particle Effects** (`Assets/Scripts/Ed
 **Post-processing** (`Global Volume`): Neutral tonemapping, Bloom (threshold 1, intensity 0.4),
 contrast +15, Vignette 0.25.
 
+**Low-health pulse:** `LowHealthPulse` (`Assets/Scripts/Level`, on `Global Volume`). Below 35 % health a red glow
+pulses in from the screen edges like a heartbeat, stronger and faster (70 → 120 bpm) as health falls, and a second
+global Volume (priority 100, Color Adjustments saturation −35) drains the colour. The red is a screen overlay, not
+a Vignette: URP's Vignette multiplies the image, so in this dark level it only made the edges blacker. Both are off
+while the player is healthy and fade out on death; the level's own profile is never changed.
+
 ## Bakes
 
 All bake output for `Main.unity` is in `Assets/Scenes/Main/` and tracked with Git LFS.
