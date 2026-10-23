@@ -6110,6 +6110,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 1c9664add5705422280dafd690da6a10, type: 3}
       insertIndex: -1
       addedObject: {fileID: 83915422}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 1c9664add5705422280dafd690da6a10, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 83915425}
   m_SourcePrefab: {fileID: 100100000, guid: 1c9664add5705422280dafd690da6a10, type: 3}
 --- !u!4 &83915420 stripped
 Transform:
@@ -6142,6 +6145,23 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.7433526, y: 1.5927559, z: 0.56245923}
   m_Center: {x: -0.000000059604645, y: 0.7951862, z: 0.06499912}
+--- !u!114 &83915425
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 83915421}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba963cb636f4d40e29d01be435832dd0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GVGame.Level.LiveScreen
+  screenMaterial: M_Decal_Screen
+  screenColor: {r: 0.353, g: 0.706, b: 1, a: 1}
+  emission: 1.6
+  tiling: {x: 3, y: 3}
+  scrollSpeed: 0.04
 --- !u!1 &84078237
 GameObject:
   m_ObjectHideFlags: 0
@@ -31883,6 +31903,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
       insertIndex: -1
       addedObject: {fileID: 877578906}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 877578909}
   m_SourcePrefab: {fileID: 100100000, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
 --- !u!4 &877578904 stripped
 Transform:
@@ -31915,6 +31938,23 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.44116926, y: 0.46789396, z: 1.2962623}
   m_Center: {x: -0.000000059604645, y: 1.3457189, z: -0.009164959}
+--- !u!114 &877578909
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 877578905}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba963cb636f4d40e29d01be435832dd0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GVGame.Level.LiveScreen
+  screenMaterial: M_Decal_Screen
+  screenColor: {r: 0.353, g: 0.706, b: 1, a: 1}
+  emission: 1.6
+  tiling: {x: 3, y: 3}
+  scrollSpeed: 0.04
 --- !u!1 &880837889
 GameObject:
   m_ObjectHideFlags: 0
@@ -42687,6 +42727,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 1c9664add5705422280dafd690da6a10, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1205344993}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 1c9664add5705422280dafd690da6a10, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1205344996}
   m_SourcePrefab: {fileID: 100100000, guid: 1c9664add5705422280dafd690da6a10, type: 3}
 --- !u!4 &1205344991 stripped
 Transform:
@@ -42719,6 +42762,23 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.7433526, y: 1.5927559, z: 0.56245923}
   m_Center: {x: -0.000000059604645, y: 0.7951862, z: 0.06499912}
+--- !u!114 &1205344996
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1205344992}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba963cb636f4d40e29d01be435832dd0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GVGame.Level.LiveScreen
+  screenMaterial: M_Decal_Screen
+  screenColor: {r: 0.353, g: 0.706, b: 1, a: 1}
+  emission: 1.6
+  tiling: {x: 3, y: 3}
+  scrollSpeed: 0.04
 --- !u!1 &1207243632
 GameObject:
   m_ObjectHideFlags: 0
@@ -63333,8 +63393,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GVGame.Level.LowHealthPulse
   threshold: 0.35
   color: {r: 0.6, g: 0, b: 0, a: 1}
-  vignetteIntensity: 0.5
-  vignetteSmoothness: 0.6
+  maxOpacity: 0.6
+  reach: 0.55
   saturation: -35
   beatsPerMinute: {x: 70, y: 120}
 --- !u!1001 &1703073217
