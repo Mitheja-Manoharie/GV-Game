@@ -51786,6 +51786,7 @@ GameObject:
   - component: {fileID: 1633169145}
   - component: {fileID: 1633169147}
   - component: {fileID: 1633169146}
+  - component: {fileID: 1633169148}
   m_Layer: 0
   m_Name: Sparks_InfirmaryNorth
   m_TagString: Untagged
@@ -52194,7 +52195,7 @@ ParticleSystem:
         m_RotationOrder: 4
     startSizeY:
       serializedVersion: 2
-      minMaxState: 0
+      minMaxState: 3
       scalar: 1
       minScalar: 1
       maxCurve:
@@ -52247,7 +52248,7 @@ ParticleSystem:
         m_RotationOrder: 4
     startSizeZ:
       serializedVersion: 2
-      minMaxState: 0
+      minMaxState: 3
       scalar: 1
       minScalar: 1
       maxCurve:
@@ -56669,6 +56670,27 @@ ParticleSystem:
         m_PostInfinity: 2
         m_RotationOrder: 4
     vectorLabel1_3: W
+--- !u!114 &1633169148
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1633169144}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02a15f504bce04967b52b7a518ff5fd6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GVGame.Level.FaultyLight
+  fixture: {fileID: 0}
+  interval: {x: 1.5, y: 5}
+  flickers: {x: 3, y: 7}
+  sparksPerFault: {x: 8, y: 18}
+  flashColor: {r: 1, g: 0.8, b: 0.55, a: 1}
+  flashIntensity: 4
+  flashRange: 3
+  crackle: {fileID: 0}
+  crackleVolume: 0.6
 --- !u!1001 &1638565034
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -56776,6 +56798,7 @@ GameObject:
   - component: {fileID: 1639249707}
   - component: {fileID: 1639249709}
   - component: {fileID: 1639249708}
+  - component: {fileID: 1639249710}
   m_Layer: 0
   m_Name: Sparks_ServiceCorridor
   m_TagString: Untagged
@@ -57184,7 +57207,7 @@ ParticleSystem:
         m_RotationOrder: 4
     startSizeY:
       serializedVersion: 2
-      minMaxState: 0
+      minMaxState: 3
       scalar: 1
       minScalar: 1
       maxCurve:
@@ -57237,7 +57260,7 @@ ParticleSystem:
         m_RotationOrder: 4
     startSizeZ:
       serializedVersion: 2
-      minMaxState: 0
+      minMaxState: 3
       scalar: 1
       minScalar: 1
       maxCurve:
@@ -61659,6 +61682,27 @@ ParticleSystem:
         m_PostInfinity: 2
         m_RotationOrder: 4
     vectorLabel1_3: W
+--- !u!114 &1639249710
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1639249706}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02a15f504bce04967b52b7a518ff5fd6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GVGame.Level.FaultyLight
+  fixture: {fileID: 0}
+  interval: {x: 1.5, y: 5}
+  flickers: {x: 3, y: 7}
+  sparksPerFault: {x: 8, y: 18}
+  flashColor: {r: 1, g: 0.8, b: 0.55, a: 1}
+  flashIntensity: 4
+  flashRange: 3
+  crackle: {fileID: 0}
+  crackleVolume: 0.6
 --- !u!1 &1639523845
 GameObject:
   m_ObjectHideFlags: 0
