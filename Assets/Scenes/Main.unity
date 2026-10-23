@@ -21087,6 +21087,11 @@ MonoBehaviour:
   m_ShadowLayerMask: 1
   m_RenderingLayers: 1
   m_ShadowRenderingLayers: 1
+--- !u!1 &288432247 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 689ce2ccc1f0c4a298242acf2dd6146c, type: 3}
+  m_PrefabInstance: {fileID: 1472370183}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &290675004
 GameObject:
   m_ObjectHideFlags: 0
@@ -23702,7 +23707,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 207822840640782889, guid: 24622944bf16a4d9285f331d732d8fe9, type: 3}
       propertyPath: m_StaticEditorFlags
-      value: 2147483645
+      value: 2147483641
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 24622944bf16a4d9285f331d732d8fe9, type: 3}
       propertyPath: m_Name
@@ -23710,16 +23715,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 24622944bf16a4d9285f331d732d8fe9, type: 3}
       propertyPath: m_StaticEditorFlags
-      value: 2147483645
+      value: 2147483641
       objectReference: {fileID: 0}
     - target: {fileID: 6657560127643677590, guid: 24622944bf16a4d9285f331d732d8fe9, type: 3}
       propertyPath: m_StaticEditorFlags
-      value: 2147483645
+      value: 2147483641
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 24622944bf16a4d9285f331d732d8fe9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1373406339}
   m_SourcePrefab: {fileID: 100100000, guid: 24622944bf16a4d9285f331d732d8fe9, type: 3}
 --- !u!4 &446543641 stripped
 Transform:
@@ -33971,6 +33979,11 @@ Transform:
   - {fileID: 196175659}
   m_Father: {fileID: 1833194290}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &975816208 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 689ce2ccc1f0c4a298242acf2dd6146c, type: 3}
+  m_PrefabInstance: {fileID: 1798537226}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &979267914
 GameObject:
   m_ObjectHideFlags: 0
@@ -34676,6 +34689,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c58214596822d41caa44444ae7cf0676, type: 3}
+--- !u!1 &1009207034 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: aee039cc210754ec9a49268e220e9c95, type: 3}
+  m_PrefabInstance: {fileID: 2129550153}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1012856362
 GameObject:
   m_ObjectHideFlags: 0
@@ -46101,6 +46119,28 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!1 &1373406338 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 24622944bf16a4d9285f331d732d8fe9, type: 3}
+  m_PrefabInstance: {fileID: 446543640}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1373406339
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1373406338}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c5f0a66637a0a4bcdb98d2c3cdf37e1e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GVGame.Level.SpecimenFloat
+  bobHeight: 0.06
+  bobPeriod: 5
+  turnAngle: 8
+  turnPeriod: 11
+  tiltAngle: 2
 --- !u!1001 &1374373620
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -48891,7 +48931,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -2258331314439107030, guid: 689ce2ccc1f0c4a298242acf2dd6146c, type: 3}
       propertyPath: m_StaticEditorFlags
-      value: 2147483645
+      value: 2147483641
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 689ce2ccc1f0c4a298242acf2dd6146c, type: 3}
       propertyPath: m_Name
@@ -48899,18 +48939,38 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 689ce2ccc1f0c4a298242acf2dd6146c, type: 3}
       propertyPath: m_StaticEditorFlags
-      value: 2147483645
+      value: 2147483641
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 689ce2ccc1f0c4a298242acf2dd6146c, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1472370185}
   m_SourcePrefab: {fileID: 100100000, guid: 689ce2ccc1f0c4a298242acf2dd6146c, type: 3}
 --- !u!4 &1472370184 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 689ce2ccc1f0c4a298242acf2dd6146c, type: 3}
   m_PrefabInstance: {fileID: 1472370183}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1472370185
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 288432247}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c5f0a66637a0a4bcdb98d2c3cdf37e1e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GVGame.Level.SpecimenFloat
+  bobHeight: 0.06
+  bobPeriod: 5
+  turnAngle: 8
+  turnPeriod: 11
+  tiltAngle: 2
 --- !u!1 &1475565014
 GameObject:
   m_ObjectHideFlags: 0
@@ -65346,7 +65406,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -2258331314439107030, guid: 689ce2ccc1f0c4a298242acf2dd6146c, type: 3}
       propertyPath: m_StaticEditorFlags
-      value: 2147483645
+      value: 2147483641
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 689ce2ccc1f0c4a298242acf2dd6146c, type: 3}
       propertyPath: m_Name
@@ -65358,18 +65418,38 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 689ce2ccc1f0c4a298242acf2dd6146c, type: 3}
       propertyPath: m_StaticEditorFlags
-      value: 2147483645
+      value: 2147483641
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 689ce2ccc1f0c4a298242acf2dd6146c, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1798537228}
   m_SourcePrefab: {fileID: 100100000, guid: 689ce2ccc1f0c4a298242acf2dd6146c, type: 3}
 --- !u!4 &1798537227 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 689ce2ccc1f0c4a298242acf2dd6146c, type: 3}
   m_PrefabInstance: {fileID: 1798537226}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1798537228
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 975816208}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c5f0a66637a0a4bcdb98d2c3cdf37e1e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GVGame.Level.SpecimenFloat
+  bobHeight: 0.06
+  bobPeriod: 5
+  turnAngle: 8
+  turnPeriod: 11
+  tiltAngle: 2
 --- !u!1001 &1800796337
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -71901,7 +71981,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8928142258166665514, guid: aee039cc210754ec9a49268e220e9c95, type: 3}
       propertyPath: m_StaticEditorFlags
-      value: 2147483645
+      value: 2147483641
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: aee039cc210754ec9a49268e220e9c95, type: 3}
       propertyPath: m_LocalScale.x
@@ -71957,15 +72037,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -7852401158360089604, guid: aee039cc210754ec9a49268e220e9c95, type: 3}
       propertyPath: m_StaticEditorFlags
-      value: 2147483645
+      value: 2147483641
       objectReference: {fileID: 0}
     - target: {fileID: -259972160606440404, guid: aee039cc210754ec9a49268e220e9c95, type: 3}
       propertyPath: m_StaticEditorFlags
-      value: 2147483645
+      value: 2147483641
       objectReference: {fileID: 0}
     - target: {fileID: 635547659545568360, guid: aee039cc210754ec9a49268e220e9c95, type: 3}
       propertyPath: m_StaticEditorFlags
-      value: 2147483645
+      value: 2147483641
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: aee039cc210754ec9a49268e220e9c95, type: 3}
       propertyPath: m_Name
@@ -71973,18 +72053,38 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: aee039cc210754ec9a49268e220e9c95, type: 3}
       propertyPath: m_StaticEditorFlags
-      value: 2147483645
+      value: 2147483641
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: aee039cc210754ec9a49268e220e9c95, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2129550155}
   m_SourcePrefab: {fileID: 100100000, guid: aee039cc210754ec9a49268e220e9c95, type: 3}
 --- !u!4 &2129550154 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: aee039cc210754ec9a49268e220e9c95, type: 3}
   m_PrefabInstance: {fileID: 2129550153}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &2129550155
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1009207034}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c5f0a66637a0a4bcdb98d2c3cdf37e1e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GVGame.Level.SpecimenFloat
+  bobHeight: 0.06
+  bobPeriod: 5
+  turnAngle: 8
+  turnPeriod: 11
+  tiltAngle: 2
 --- !u!1001 &2142708724
 PrefabInstance:
   m_ObjectHideFlags: 0
