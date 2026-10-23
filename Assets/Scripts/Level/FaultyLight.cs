@@ -8,6 +8,7 @@ namespace GVGame.Level
     /// A damaged ceiling light: every few seconds it shorts out. The fixture's glowing panel stutters, a shower of
     /// sparks falls and a brief warm flash lights the corridor, all at the same moment.
     ///
+    /// An electrical crackle plays at the fixture with each fault (a synthesized one unless a clip is assigned).
     /// Put it on a spark particle system (Environment/Effects/Sparks/Sparks_*). It takes over the system's emission
     /// (the sparks then only fall during a fault) and finds the light fixture above it by itself.
     /// The flash is a Realtime point light with no shadows, created at runtime and enabled only for a split second,
@@ -36,10 +37,14 @@ namespace GVGame.Level
         [SerializeField] private float flashIntensity = 4f;
         [SerializeField] private float flashRange = 3f;
 
-        [Header("Sound (optional)")]
-        [Tooltip("Crackle played at the fixture on each fault, in 3D.")]
+        [Header("Sound")]
+        [Tooltip("Crackle played at the fixture on each fault, in 3D. Empty: an electrical crackle is synthesized.")]
         [SerializeField] private AudioClip crackle = null;
+        [Tooltip("Synthesize the crackle when no clip is assigned.")]
+        [SerializeField] private bool synthesizeCrackle = true;
         [Range(0f, 1f)] [SerializeField] private float crackleVolume = 0.6f;
+        [Tooltip("Distance (m) at which the crackle can no longer be heard.")]
+        [SerializeField] private float crackleRange = 15f;
 
         private static readonly int EmissionColor = Shader.PropertyToID("_EmissionColor");
 
@@ -69,14 +74,14 @@ namespace GVGame.Level
             flash.shadows = LightShadows.None;
             flash.enabled = false;
 
-            if (crackle != null)
+            if (crackle != null || synthesizeCrackle)
             {
                 audioSource = gameObject.AddComponent<AudioSource>();
                 audioSource.playOnAwake = false;
                 audioSource.spatialBlend = 1f;
                 audioSource.rolloffMode = AudioRolloffMode.Linear;
                 audioSource.minDistance = 1.5f;
-                audioSource.maxDistance = 15f;
+                audioSource.maxDistance = crackleRange;
             }
 
             block = new MaterialPropertyBlock();
@@ -100,7 +105,11 @@ namespace GVGame.Level
                 // Fault: sparks, flash and crackle together, then the panel stutters.
                 sparks.Emit(Random.Range(sparksPerFault.x, sparksPerFault.y + 1));
                 flash.enabled = true;
-                if (audioSource != null) audioSource.PlayOneShot(crackle, crackleVolume);
+                if (audioSource != null)
+                {
+                    audioSource.pitch = Random.Range(0.9f, 1.12f);
+                    audioSource.PlayOneShot(crackle != null ? crackle : SynthCrackle(), crackleVolume);
+                }
 
                 int count = Random.Range(flickers.x, flickers.y + 1);
                 for (int i = 0; i < count; i++)
@@ -121,6 +130,82 @@ namespace GVGame.Level
 
                 yield return new WaitForSeconds(Random.Range(interval.x, interval.y));
             }
+        }
+
+        // ---------- Synthesized crackle ----------
+
+        private static AudioClip[] synthClips;
+
+        /// <summary>One of four electrical crackles, built once and shared by every faulty light.</summary>
+        private static AudioClip SynthCrackle()
+        {
+            if (synthClips == null || synthClips[0] == null)   // also after Play mode ends without a domain reload
+            {
+                synthClips = new AudioClip[4];
+                for (int i = 0; i < synthClips.Length; i++) synthClips[i] = BuildCrackle(1234 + i * 97);
+            }
+            return synthClips[Random.Range(0, synthClips.Length)];
+        }
+
+        /// <summary>
+        /// An electrical short: a dense run of sharp clicks (tiny high-passed noise bursts, most of them early),
+        /// over a short hiss and a decaying 120 Hz arc buzz. About 0.35-0.6 s, mono, 44.1 kHz.
+        /// </summary>
+        private static AudioClip BuildCrackle(int seed)
+        {
+            const int rate = 44100;
+            var rng = new System.Random(seed);
+            float length = 0.35f + (float)rng.NextDouble() * 0.25f;
+            int n = (int)(rate * length);
+            var s = new float[n];
+
+            // Arc buzz: 120 Hz with odd harmonics, a little detuned, fading over ~0.15 s.
+            for (int i = 0; i < n; i++)
+            {
+                float t = (float)i / rate;
+                float env = Mathf.Exp(-t / 0.06f);
+                float ph = 2f * Mathf.PI * 120f * t;
+                s[i] += 0.10f * env * (Mathf.Sin(ph) + 0.5f * Mathf.Sin(3f * ph + 0.3f) + 0.3f * Mathf.Sin(5f * ph + 1.1f));
+            }
+
+            // Hiss bed: white noise, fast decay.
+            for (int i = 0; i < n; i++)
+            {
+                float t = (float)i / rate;
+                s[i] += 0.12f * Mathf.Exp(-t / 0.07f) * ((float)rng.NextDouble() * 2f - 1f);
+            }
+
+            // Clicks: 20-40 short bursts, clustered at the start (exponential timing).
+            int clicks = 20 + rng.Next(21);
+            for (int c = 0; c < clicks; c++)
+            {
+                float t = -Mathf.Log(1f - (float)rng.NextDouble() * 0.98f) * length * 0.22f;
+                int start = (int)(t * rate);
+                int width = (int)(rate * (0.0006f + (float)rng.NextDouble() * 0.0025f));
+                float amp = (0.35f + 0.65f * (float)rng.NextDouble()) * Mathf.Exp(-t / (length * 0.5f));
+                float previous = 0f;
+                for (int k = 0; k < width && start + k < n; k++)
+                {
+                    float noise = (float)rng.NextDouble() * 2f - 1f;
+                    float hp = noise - previous;                     // first difference: crisp, high-frequency
+                    previous = noise;
+                    s[start + k] += amp * hp * (1f - (float)k / width);
+                }
+            }
+
+            // Normalise to -1 dBFS with a short fade-out so the end never clicks.
+            float peak = 0.0001f;
+            for (int i = 0; i < n; i++) peak = Mathf.Max(peak, Mathf.Abs(s[i]));
+            int fade = rate / 100;
+            for (int i = 0; i < n; i++)
+            {
+                s[i] *= 0.89f / peak;
+                if (i > n - fade) s[i] *= (float)(n - i) / fade;
+            }
+
+            var clip = AudioClip.Create("SparkCrackle_" + seed, n, 1, rate, false);
+            clip.SetData(s, 0);
+            return clip;
         }
 
         /// <summary>Scales the fixture's emission: 1 = normal, 0 = dark.</summary>

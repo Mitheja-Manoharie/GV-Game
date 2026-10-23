@@ -183,8 +183,9 @@ Placed by **Tools > World Builder > Place Particle Effects** (`Assets/Scripts/Ed
 - **Faulty lights:** `FaultyLight` (`Assets/Scripts/Level`) on each spark system makes the fixture above it short out
   every 1.5–5 s: the glowing panel stutters (a `MaterialPropertyBlock` on that fixture only), a shower of sparks
   falls and a warm Realtime point light (range 3 m, no shadows) flashes for a split second, all together. The flash
-  light is created at runtime and off between faults, so it never affects the bake. An optional crackle clip plays
-  in 3D.
+  light is created at runtime and off between faults, so it never affects the bake. An electrical crackle plays at
+  the fixture in 3D (heard within 15 m): four variants synthesized at startup (sharp clicks over a short hiss and a
+  120 Hz arc buzz, random pitch), so no audio files are needed; a clip can be assigned instead.
 - **Materials** (`Assets/Materials/Particles`): copies of URP's unlit particle material. Sparks are additive with an
   HDR colour, so they bloom. Bubbles render at queue 3050, after the tank glass (3000), so they always draw
   inside it instead of flickering with the glass's sort order.
