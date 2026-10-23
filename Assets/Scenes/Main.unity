@@ -56750,7 +56750,9 @@ MonoBehaviour:
   flashIntensity: 4
   flashRange: 3
   crackle: {fileID: 0}
-  crackleVolume: 0.6
+  synthesizeCrackle: 1
+  crackleVolume: 0.5
+  crackleRange: 5
 --- !u!1001 &1638565034
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -61762,7 +61764,9 @@ MonoBehaviour:
   flashIntensity: 4
   flashRange: 3
   crackle: {fileID: 0}
-  crackleVolume: 0.6
+  synthesizeCrackle: 1
+  crackleVolume: 0.5
+  crackleRange: 5
 --- !u!1 &1639523845
 GameObject:
   m_ObjectHideFlags: 0
