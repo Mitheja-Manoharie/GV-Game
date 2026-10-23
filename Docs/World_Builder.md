@@ -173,9 +173,14 @@ Placed by **Tools > World Builder > Place Particle Effects** (`Assets/Scripts/Ed
 
 | Group | Where | Look | Max particles |
 |---|---|---|---|
-| Sparks | under a ceiling light in the service corridor and in the infirmary north corridor | irregular showers (30 % chance every 0.6 s), stretched streaks that fall and bounce off the floor | 60 each |
+| Sparks | under a ceiling light in the service corridor and in the infirmary north corridor | showers of stretched streaks that fall and bounce off the floor, timed by `FaultyLight` | 60 each |
 | TankBubbles | inside every `Prop_SpecimenTank` | small green-tinted bubbles rising about 2 m | 30 each |
 
+- **Faulty lights:** `FaultyLight` (`Assets/Scripts/Level`) on each spark system makes the fixture above it short out
+  every 1.5–5 s: the glowing panel stutters (a `MaterialPropertyBlock` on that fixture only), a shower of sparks
+  falls and a warm Realtime point light (range 3 m, no shadows) flashes for a split second, all together. The flash
+  light is created at runtime and off between faults, so it never affects the bake. An optional crackle clip plays
+  in 3D.
 - **Materials** (`Assets/Materials/Particles`): copies of URP's unlit particle material. Sparks are additive with an
   HDR colour, so they bloom. Bubbles render at queue 3050, after the tank glass (3000), so they always draw
   inside it instead of flickering with the glass's sort order.

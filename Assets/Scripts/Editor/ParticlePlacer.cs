@@ -9,7 +9,8 @@ namespace GVGame.EditorTools
     /// <summary>
     /// World Builder tool: adds small particle effects to Main under Environment/Effects.
     ///
-    ///   - Sparks falling from two damaged ceiling lights, one on each route, bouncing off the floor.
+    ///   - Sparks falling from two damaged ceiling lights, one on each route, bouncing off the floor. A FaultyLight on
+    ///     each makes the fixture flicker and flash with every shower.
     ///   - Bubbles rising in the four specimen tanks.
     ///
     /// Every system is capped at 30–60 particles, casts no shadows and uses an unlit material, so the whole set
@@ -45,8 +46,9 @@ namespace GVGame.EditorTools
 
             // ---- Sparks under two ceiling lights (y 5): service corridor (east route), infirmary north corridor (west).
             var sparks = Group(root, "Sparks");
-            Sparks(sparks, "Sparks_ServiceCorridor", new Vector3(14f, 4.75f, 9f), sparkMat);
-            Sparks(sparks, "Sparks_InfirmaryNorth", new Vector3(-14f, 4.75f, 25.5f), sparkMat);
+            // Each one also makes the fixture above it short out (FaultyLight), in step with the sparks.
+            Sparks(sparks, "Sparks_ServiceCorridor", new Vector3(14f, 4.75f, 9f), sparkMat).AddComponent<GVGame.Level.FaultyLight>();
+            Sparks(sparks, "Sparks_InfirmaryNorth", new Vector3(-14f, 4.75f, 25.5f), sparkMat).AddComponent<GVGame.Level.FaultyLight>();
 
             // ---- Bubbles in every specimen tank in the scene.
             var bubbles = Group(root, "TankBubbles");
@@ -64,7 +66,7 @@ namespace GVGame.EditorTools
 
         // ------------------------------------------------------------------ effects
 
-        private static void Sparks(Transform parent, string name, Vector3 position, Material material)
+        private static GameObject Sparks(Transform parent, string name, Vector3 position, Material material)
         {
             var ps = Create(parent, name, position, Quaternion.Euler(90f, 0f, 0f), material, out var renderer);   // emits downwards
 
@@ -112,6 +114,7 @@ namespace GVGame.EditorTools
             renderer.renderMode = ParticleSystemRenderMode.Stretch;
             renderer.velocityScale = 0.04f;
             renderer.lengthScale = 1f;
+            return ps.gameObject;
         }
 
         private static void Bubbles(Transform parent, string name, Vector3 position, Material material)
