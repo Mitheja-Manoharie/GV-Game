@@ -398,6 +398,16 @@ test robots until the robot prefabs are assigned.
 
 The runtime code compiles against Unity API stubs. Behaviour in the scene still needs a check in Play mode.
 
+## Keycard objective and fairness
+
+The exit only opens once the player has the keycard, which appears at one of four random spots each run (see
+World_Builder.md). The Director's "exit reachable" constraint stays sufficient because every spot was chosen before
+any lockable door: the service corridor, the maintenance bay, the lab corridor (before `Door_LabSouth`) and the
+infirmary (before `Door_InfirmaryNorth`), all reached from the start through `Door_ArmouryNorth`, which is never
+locked. So locking can never cut the player off from the keycard, and from any spot the exit is reachable whenever
+the constraint holds. Allowing spots behind lockable doors would need a second global constraint, "the keycard is
+reachable while the player does not have it".
+
 ## Default spawn points
 
 Eight candidates spread over both routes; none in the quarantine cell, armoury or control room:
