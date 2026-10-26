@@ -34,6 +34,15 @@ in front of the control room window at (2, 30.5).
 - **Lab route (east):** lab corridor → research lab → lab link → control room. This is the shortest route, at 60 m from the start.
 - **Infirmary route (west):** maintenance bay → infirmary → north and west corridors → control room.
 
+**Keycard objective.** The exit is locked until the player takes the keycard (`KeycardPickup` on a `Prop_KeyCard`,
+`Assets/Scripts/Level`): it hovers, turns and glows screen blue, and E takes it. Every run (start, respawn, play
+again) puts it on one of four `KeycardSpot_*` markers at random, never the same one twice in a row: the infirmary
+desk, a crate in the service corridor, a crate in the lab corridor and the large crate in the maintenance bay
+(**Tools > World Builder > Place Keycard Spots**). An objective line at the top of the screen names the area, and
+`ExitTrigger` shows "EXIT LOCKED / Find the keycard" if the player arrives without it. Every spot lies before any
+lockable door, so the Facility AI can never lock the player away from the keycard, and with the keycard both
+routes still lead to the exit.
+
 Each route passes through one lockable door, so the Facility AI can lock one route and force the other
 without ever cutting off the exit (see [FacilityAI.md](FacilityAI.md)).
 

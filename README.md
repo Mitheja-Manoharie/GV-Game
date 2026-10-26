@@ -5,7 +5,7 @@ An interactive 3D shooting game built in Unity for the **SE3032 – Graphics and
 > **Theme:** Lab Lockdown
 > **Status:** Complete. The `Main` scene is integrated with the final lighting, occlusion and NavMesh bake, the player systems, physics doors and props, audio, all four AI agents and the Facility AI director.
 
-You are trapped in a research facility in lockdown. Armed with a rifle, move barricades and throw objects to get past the facility's robots, and reach the exit while the facility decides where to send enemies and which doors to lock.
+You are trapped in a research facility in lockdown. Armed with a rifle, move barricades and throw objects to get past the facility's robots, find the keycard, which turns up in a different place each run, and reach the exit while the facility decides where to send enemies and which doors to lock.
 
 ---
 

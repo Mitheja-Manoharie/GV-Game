@@ -13,6 +13,7 @@ namespace GVGame.Level
     /// On escape the game is paused (Time.timeScale = 0), so robots stop and the Facility AI makes no more
     /// decisions, and the cursor is released.
     ///
+    /// With a KeycardPickup in the scene the exit stays locked ("EXIT LOCKED") until the player has the keycard.
     /// R plays again without reloading the scene: it uses the player's normal respawn, which already moves the
     /// player to the start, refills health and ammo, removes the robots and resets the Facility AI.
     /// Q quits a build; in the Editor, stop Play mode.
@@ -22,10 +23,13 @@ namespace GVGame.Level
     {
         [Tooltip("Size of the exit zone (metres). Centred on this marker, raised half its height off the floor.")]
         [SerializeField] private Vector3 zoneSize = new Vector3(3f, 2.5f, 2f);
+        [Tooltip("The exit stays locked until the player has the keycard (only when a KeycardPickup is in the scene).")]
+        [SerializeField] private bool requireKeycard = true;
 
         private PlayerHealth player;
         private WeaponController weapon;
         private bool escaped;
+        private float lockedMessageUntil = -1f;
         private float escapeTime, runStartTime;
         private int robotsDefeated;
         private GUIStyle big, small;
@@ -88,6 +92,12 @@ namespace GVGame.Level
             if (escaped || player == null) return;
             if (other.GetComponentInParent<PlayerHealth>() != player || !player.IsAlive) return;
 
+            if (requireKeycard && KeycardPickup.InScene && !KeycardPickup.HasKeycard)
+            {
+                lockedMessageUntil = Time.unscaledTime + 2.5f;
+                return;
+            }
+
             escaped = true;
             escapeTime = Time.timeSinceLevelLoad - runStartTime;
             Time.timeScale = 0f;
@@ -116,7 +126,7 @@ namespace GVGame.Level
 
         private void OnGUI()
         {
-            if (!escaped) return;
+            if (!escaped && Time.unscaledTime >= lockedMessageUntil) return;
 
             if (big == null)
             {
@@ -127,6 +137,15 @@ namespace GVGame.Level
             }
 
             float w = Screen.width, h = Screen.height;
+            if (!escaped)
+            {
+                var red = new GUIStyle(big) { fontSize = 32 };
+                red.normal.textColor = new Color(1f, 0.231f, 0.188f);
+                GUI.Label(new Rect(0, h * 0.3f, w, 44), "EXIT LOCKED", red);
+                GUI.Label(new Rect(0, h * 0.3f + 44, w, 30), "Find the keycard", small);
+                return;
+            }
+
             var previous = GUI.color;
             GUI.color = new Color(0f, 0f, 0f, 0.6f);
             GUI.DrawTexture(new Rect(0, 0, w, h), Texture2D.whiteTexture);
