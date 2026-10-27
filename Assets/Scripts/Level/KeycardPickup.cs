@@ -14,8 +14,8 @@ namespace GVGame.Level
     /// shadows, range 1.2 m). A small objective line at the top of the screen tells the player what to do next.
     /// A respawn or "play again" is a new run, so the keycard comes back and has to be found again.
     /// Random location: if Environment/KeycardSpots holds KeycardSpot_* markers, every run (start, respawn, play again)
-    /// puts the keycard on one of them at random, never the same spot twice in a row, and the objective names the
-    /// area (the text after "KeycardSpot_"). All spots are placed before any lockable door, so the Facility AI can
+    /// puts the keycard on one of them at random, never the same spot twice in a row. All spots are placed before
+    /// any lockable door, so the Facility AI can
     /// never lock the player away from the keycard. Without markers the keycard stays where it was placed.
     /// </summary>
     [DisallowMultipleComponent]
@@ -39,8 +39,6 @@ namespace GVGame.Level
         [Header("Location")]
         [Tooltip("Parent of the KeycardSpot_* markers. Empty: Environment/KeycardSpots is used if it exists.")]
         [SerializeField] private Transform spotsRoot;
-        [Tooltip("Name the area in the objective (e.g. \"Find the keycard (Infirmary)\"). Off: just \"Find the keycard\".")]
-        [SerializeField] private bool showArea = true;
 
         [Header("Text")]
         [SerializeField] private string objectiveFind = "OBJECTIVE   Find the keycard";
@@ -60,7 +58,6 @@ namespace GVGame.Level
         private float messageUntil = -1f;
         private readonly System.Collections.Generic.List<Transform> spots = new System.Collections.Generic.List<Transform>();
         private int currentSpot = -1;
-        private string area = "";
         private GUIStyle objectiveStyle, messageStyle;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -170,7 +167,6 @@ namespace GVGame.Level
             basePosition = spots[index].position;
             baseRotation = spots[index].rotation;
             transform.SetPositionAndRotation(basePosition, baseRotation);
-            area = spots[index].name.Substring("KeycardSpot_".Length).Replace('_', ' ');
         }
 
         private void SetVisible(bool visible)
@@ -195,8 +191,7 @@ namespace GVGame.Level
             }
 
             float w = Screen.width;
-            string find = showArea && area.Length > 0 ? $"{objectiveFind} ({area})" : objectiveFind;
-            GUI.Label(new Rect(0f, 12f, w, 24f), HasKeycard ? objectiveExit : find, objectiveStyle);
+            GUI.Label(new Rect(0f, 12f, w, 24f), HasKeycard ? objectiveExit : objectiveFind, objectiveStyle);
             if (Time.unscaledTime < messageUntil)
                 GUI.Label(new Rect(0f, Screen.height * 0.3f, w, 30f), pickedUpMessage, messageStyle);
         }

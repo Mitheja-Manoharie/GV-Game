@@ -38,7 +38,8 @@ in front of the control room window at (2, 30.5).
 `Assets/Scripts/Level`): it hovers, turns and glows screen blue, and E takes it. Every run (start, respawn, play
 again) puts it on one of four `KeycardSpot_*` markers at random, never the same one twice in a row: the infirmary
 desk, a crate in the service corridor, a crate in the lab corridor and the large crate in the maintenance bay
-(**Tools > World Builder > Place Keycard Spots**). An objective line at the top of the screen names the area, and
+(**Tools > World Builder > Place Keycard Spots**). An objective line at the top of the screen says "Find the keycard" (without naming the area), then "Reach the
+exit", and
 `ExitTrigger` shows "EXIT LOCKED / Find the keycard" if the player arrives without it. Every spot lies before any
 lockable door, so the Facility AI can never lock the player away from the keycard, and with the keycard both
 routes still lead to the exit.
