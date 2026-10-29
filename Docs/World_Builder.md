@@ -165,6 +165,10 @@ Prefabs live in `Assets/Prefabs/Props` and every copy in the scene comes from on
   the light strip and screen glow green while the door is open, and blink red with two short beeps when the Facility
   AI locks it, staying red until it reopens. A small no-shadow light spills the colour onto the wall. Not static, so
   no rebake.
+- **Spinning fans:** `FanSpin` (`Assets/Scripts/Level`) turns the "Propeller" bone of the rigged `Prop_Fan_Small`, so
+  the blades spin while the housing stays still. It runs on the maintenance bay's wall fan and on two more fans in
+  the west corridor and at the crossroads (**Tools > World Builder > Place Corridor Fans**, under
+  `Environment/Fans`), mounted like the bay fan. The new fans are not static, so no rebake.
 - **Control room:** consoles in the south corners, with screens facing the room. Low crates frame the exit.
   **Live screens:** `LiveScreen` (`Assets/Scripts/Level`) on the two `Prop_Computer`s and the `Prop_AccessPoint`
   replaces each screen's texture (only the screen slot: the kit's `M_Decal_Screen`, imported as `T_Decals`, through a `MaterialPropertyBlock`) with a
