@@ -310,7 +310,7 @@ on the level graph can route around locked doors with
 
 | Event / property | Typical use |
 |---|---|
-| `DoorLockChanged(doorId, locked)` | robots re-plan their path (`NavMeshAgent.ResetPath` / `SetDestination`) |
+| `DoorLockChanged(doorId, locked)` | robots re-plan their path (`NavMeshAgent.ResetPath` / `SetDestination`); the `DoorAccessPanel` beside each lockable door turns red |
 | `WaveSpawned(positions, phase)` | alarm sound, warning UI |
 | `PhaseChanged(previous, current)` | music (`FacilityAudio`) and the rotating red `AlarmBeacon` lights at Peak |
 | `DecisionMade(decision)` | logging, analytics |

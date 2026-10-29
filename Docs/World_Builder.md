@@ -159,6 +159,12 @@ Prefabs live in `Assets/Prefabs/Props` and every copy in the scene comes from on
   **Story:** a chair knocked onto its side in front of the tanks, syringes dropped on the floor and left on the
   desk, as if the scientists left in a hurry. Placed by **Tools > World Builder > Place Lab Story** (`LabStoryPlacer.cs`) under `Props/Story`;
   **Remove Lab Story** deletes them. They are not static and use light probes, so no rebake.
+- **Door access panels:** a MegaKit `Prop_AccessPoint` on the wall beside each of the four lockable doors, on the
+  side the player approaches from (**Tools > World Builder > Place Door Access Panels**, under
+  `Environment/AccessPanels`). `DoorAccessPanel` (`Assets/Scripts/Level`) follows `FacilityEvents.DoorLockChanged`:
+  the light strip and screen glow green while the door is open, and blink red with two short beeps when the Facility
+  AI locks it, staying red until it reopens. A small no-shadow light spills the colour onto the wall. Not static, so
+  no rebake.
 - **Control room:** consoles in the south corners, with screens facing the room. Low crates frame the exit.
   **Live screens:** `LiveScreen` (`Assets/Scripts/Level`) on the two `Prop_Computer`s and the `Prop_AccessPoint`
   replaces each screen's texture (only the screen slot: the kit's `M_Decal_Screen`, imported as `T_Decals`, through a `MaterialPropertyBlock`) with a
