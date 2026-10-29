@@ -6485,6 +6485,70 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 5, y: 4.05, z: 3.5}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!1001 &103775892
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 219034562}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -11
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.09
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 19.88
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_CastShadows
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_Name
+      value: AccessPanel_InfirmaryNorth
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 724749205}
+  m_SourcePrefab: {fileID: 100100000, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
 --- !u!1 &106213719
 GameObject:
   m_ObjectHideFlags: 0
@@ -14512,6 +14576,41 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!1 &219034561
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 219034562}
+  m_Layer: 0
+  m_Name: AccessPanels
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &219034562
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 219034561}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 445809124}
+  - {fileID: 724749204}
+  - {fileID: 1452590092}
+  - {fileID: 2019420875}
+  m_Father: {fileID: 1411089585}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &224029865
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -14586,6 +14685,70 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: c429da37e8a424e3fad4349b08024418, type: 3}
   m_PrefabInstance: {fileID: 224029865}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &224894664
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 219034562}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 15.831
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.09
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 23.044
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: -0.00000004371139
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_CastShadows
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_Name
+      value: AccessPanel_LabSouth
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 445809125}
+  m_SourcePrefab: {fileID: 100100000, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
 --- !u!1001 &229606845
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -21797,6 +21960,70 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: c429da37e8a424e3fad4349b08024418, type: 3}
   m_PrefabInstance: {fileID: 330777714}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &332899852
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 219034562}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -7
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.09
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 31.88
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_CastShadows
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_Name
+      value: AccessPanel_ControlWest
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1452590093}
+  m_SourcePrefab: {fileID: 100100000, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
 --- !u!1001 &335573040
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -23697,6 +23924,35 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 5, y: 4.05, z: 3.5}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!1 &445809123 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+  m_PrefabInstance: {fileID: 224894664}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &445809124 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+  m_PrefabInstance: {fileID: 224894664}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &445809125
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 445809123}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: afc7b4b0ac69e4a4ea08a7e96b34370a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GVGame.Level.DoorAccessPanel
+  doorId: Door_LabSouth
+  openColor: {r: 0.25, g: 1, b: 0.4, a: 1}
+  lockedColor: {r: 1, g: 0.231, b: 0.188, a: 1}
+  emission: 2
+  lightIntensity: 1.2
+  beepOnLock: 1
+  beepVolume: 0.5
 --- !u!1001 &446543640
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -28486,6 +28742,70 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 0ba33c95d33954a25b1f18546caeec68, type: 3}
   m_PrefabInstance: {fileID: 695519377}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &698063508
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 219034562}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 9.139
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.09
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 31.88
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_CastShadows
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      propertyPath: m_Name
+      value: AccessPanel_ControlEast
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2019420876}
+  m_SourcePrefab: {fileID: 100100000, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
 --- !u!1001 &710429608
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -28987,6 +29307,35 @@ LightProbeGroup:
   - {x: 8, y: 0.5, z: 30}
   - {x: 8, y: 2, z: 30}
   m_Dering: 1
+--- !u!1 &724749203 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+  m_PrefabInstance: {fileID: 103775892}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &724749204 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+  m_PrefabInstance: {fileID: 103775892}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &724749205
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 724749203}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: afc7b4b0ac69e4a4ea08a7e96b34370a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GVGame.Level.DoorAccessPanel
+  doorId: Door_InfirmaryNorth
+  openColor: {r: 0.25, g: 1, b: 0.4, a: 1}
+  lockedColor: {r: 1, g: 0.231, b: 0.188, a: 1}
+  emission: 2
+  lightIntensity: 1.2
+  beepOnLock: 1
+  beepVolume: 0.5
 --- !u!1 &729711421
 GameObject:
   m_ObjectHideFlags: 0
@@ -47685,6 +48034,7 @@ Transform:
   - {fileID: 644434802}
   - {fileID: 1795482968}
   - {fileID: 1384100820}
+  - {fileID: 219034562}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1411089586
@@ -48429,6 +48779,35 @@ Transform:
   - {fileID: 1043187890}
   m_Father: {fileID: 2124125349}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1452590091 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+  m_PrefabInstance: {fileID: 332899852}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1452590092 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+  m_PrefabInstance: {fileID: 332899852}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1452590093
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1452590091}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: afc7b4b0ac69e4a4ea08a7e96b34370a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GVGame.Level.DoorAccessPanel
+  doorId: Door_ControlWest
+  openColor: {r: 0.25, g: 1, b: 0.4, a: 1}
+  lockedColor: {r: 1, g: 0.231, b: 0.188, a: 1}
+  emission: 2
+  lightIntensity: 1.2
+  beepOnLock: 1
+  beepVolume: 0.5
 --- !u!1001 &1457671154
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -51858,7 +52237,6 @@ MonoBehaviour:
   glowColor: {r: 0.353, g: 0.706, b: 1, a: 1}
   glowIntensity: 1.5
   spotsRoot: {fileID: 0}
-  showArea: 1
   objectiveFind: OBJECTIVE   Find the keycard
   objectiveExit: OBJECTIVE   Reach the exit (Control Room)
   pickedUpMessage: KEYCARD ACQUIRED   The exit is unlocked
@@ -70040,6 +70418,35 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -2236119147091980969, guid: 4f294f570e2114659b5308800e227959, type: 3}
+--- !u!1 &2019420874 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+  m_PrefabInstance: {fileID: 698063508}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &2019420875 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: bf7a34202fc3542f4a862f07ce37b082, type: 3}
+  m_PrefabInstance: {fileID: 698063508}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2019420876
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2019420874}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: afc7b4b0ac69e4a4ea08a7e96b34370a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GVGame.Level.DoorAccessPanel
+  doorId: Door_ControlEast
+  openColor: {r: 0.25, g: 1, b: 0.4, a: 1}
+  lockedColor: {r: 1, g: 0.231, b: 0.188, a: 1}
+  emission: 2
+  lightIntensity: 1.2
+  beepOnLock: 1
+  beepVolume: 0.5
 --- !u!1001 &2030911159
 PrefabInstance:
   m_ObjectHideFlags: 0
