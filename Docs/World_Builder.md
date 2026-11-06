@@ -290,6 +290,58 @@ After changing level geometry or static props in `Main`:
 4. Press Play and check the Console for `LevelGraphProvider` warnings.
 5. Commit everything in `Assets/Scenes/Main/` together with the scene.
 
+## Performance
+
+Measured on 6 November 2026 in the Editor (Unity 6.3, URP, MacBook with Apple silicon, 1920 × 1080) with
+`PerformanceBenchmark` (`Assets/Scripts/Level`, on `FacilityAI`, press **F4** in Play mode). It pauses the game, moves
+the camera to four fixed viewpoints and averages 60 frames per setting, so every run is repeatable. Raw data:
+`Docs/Performance/benchmark.csv` and `textures.csv`. Frame times include Editor overhead and the GPU is far from its
+limit, so the counts (batches, draw calls, triangles) are the meaningful cost; frame time is shown for completeness.
+
+**Occlusion culling** (smallest occluder 2 m, see Bakes). Same viewpoint, culling on → off:
+
+| Viewpoint | Batches | Draw calls | Triangles | SetPass calls | Frame time |
+|---|---|---|---|---|---|
+| Service corridor, looking north | 204 → 448 (−54 %) | 392 → 1,010 (−61 %) | 174k → 432k (−60 %) | 37 → 54 | 3.00 → 3.16 ms |
+| Maintenance bay, looking NW | 290 → 409 (−29 %) | 506 → 894 (−43 %) | 241k → 334k (−28 %) | 41 → 50 | 3.19 → 3.26 ms |
+| Crossroads, looking into the bay | 258 → 448 (−42 %) | 466 → 938 (−50 %) | 209k → 365k (−43 %) | 29 → 50 | 3.24 → 3.34 ms |
+| Control room, from the lab link | 229 → 365 (−37 %) | 419 → 751 (−44 %) | 121k → 258k (−53 %) | 41 → 51 | 2.96 → 3.06 ms |
+
+Culling removes 28–60 % of the triangles and 29–54 % of the batches. The gain is largest in the corridor, where walls
+hide most of the level, and smallest in the open maintenance bay, where most of what is in front of the camera is
+genuinely visible.
+
+**Static batching.** With culling on, Unity draws 392–506 draw calls as 204–290 batches: 188–216 draw calls (43–48 %)
+are merged, and 276–320 draw calls go through static batching (6 static batches). That is the Stats panel's "Saved by
+batching" (189 in the corridor). It works because the structure and static props share a few trim-sheet materials.
+
+**Baked vs Realtime lighting.** 44 lights are Baked and cost nothing per frame. 13 Realtime lights are active in a
+normal moment, all small and without shadows: the 4 `AlienGlow` tank lights, the 4 door access panels, the keycard
+glow and the 4 drones' eye lights. A Peak adds the 8 alarm beacons (21 in total), and a faulty-light flash adds 1 for a
+split second. Shadow casters: 0. Forward+ rendering handles this many lights without a per-object limit.
+
+**Texture budget** (`Tools > World Builder > Cap Small-Prop Textures At 1024`). The small Essentials props (ammo boxes,
+health packs, chest) never fill more than a small part of the screen, so their texture set was capped from 2048 to
+1024 px:
+
+| Texture | Before | After |
+|---|---|---|
+| T_Props_Batch2_BaseColor | 2048 px, 2,730 KB | 1024 px, 682 KB |
+| T_Props_Batch2_Emissive | 2048 px, 2,730 KB | 1024 px, 682 KB |
+| T_Props_Batch2_ORM | 2048 px, 2,730 KB | 1024 px, 682 KB |
+| T_Props_Batch2_Normal | 1024 px (source), 682 KB | unchanged |
+| **Total** | **8,874 KB** | **2,730 KB (−69 %, 6 MB saved)** |
+
+The wall and trim sheets and the crates stay at 2048 px because the player sees them up close; the decal copy
+(`T_Decals_Cutout`) was already imported at 1024 px from its 2000 px source.
+
+**LOD culling of small props** (`Tools > World Builder > Add LOD Culling To Small Props`). 27 props under 0.8 m got a
+LOD Group that hides them beyond about 25 m (cull height = size / (2 · 25 m · tan(FOV/2))). Measured gain: none worth
+reporting (at most 2 triangles in these views). The level's longest sightlines are about 20–25 m, so almost no small
+prop is ever that far away while visible, and occlusion culling already removes the ones behind walls. The groups
+are kept because they cost almost nothing and only help on the longest views; in a larger level this technique would
+matter more.
+
 ## Design decisions
 
 - **4 m modular grid:** it matches the MegaKit wall length, keeps every piece snapped, and gives the Facility

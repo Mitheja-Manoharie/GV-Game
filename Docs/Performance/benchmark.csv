@@ -1,0 +1,17 @@
+viewpoint,occlusion,lod_culling,frame_ms,fps,batches,setpass_calls,draw_calls,triangles,vertices,static_batched_draw_calls,static_batches,instanced_batched_draw_calls,realtime_lights,baked_lights
+"Service corridor (armoury door, looking north)",on,on,3.00,333,204,37,392,173890,183952,283,6,0,13,44
+"Service corridor (armoury door, looking north)",on,off,3.00,333,204,37,392,173892,183956,283,6,0,13,44
+"Service corridor (armoury door, looking north)",off,on,3.16,317,448,54,1010,432310,462002,750,8,0,13,44
+"Service corridor (armoury door, looking north)",off,off,3.17,316,448,54,1010,432312,462006,750,8,0,13,44
+"Maintenance bay (SE corner, looking NW)",on,on,3.19,314,290,41,506,241232,264678,320,6,0,13,44
+"Maintenance bay (SE corner, looking NW)",on,off,3.18,315,290,41,506,241234,264682,320,6,0,13,44
+"Maintenance bay (SE corner, looking NW)",off,on,3.26,307,409,50,894,333660,369754,627,6,0,13,44
+"Maintenance bay (SE corner, looking NW)",off,off,3.26,307,409,50,894,333662,369758,627,6,0,13,44
+"Crossroads (looking west into the bay)",on,on,3.24,308,258,29,466,209014,226484,312,6,0,13,44
+"Crossroads (looking west into the bay)",on,off,3.23,309,258,29,466,209016,226488,312,6,0,13,44
+"Crossroads (looking west into the bay)",off,on,3.34,299,448,50,938,364998,399714,646,6,0,13,44
+"Crossroads (looking west into the bay)",off,off,3.36,298,448,50,938,365000,399718,646,6,0,13,44
+"Control room (from the lab link, looking west)",on,on,2.96,338,229,41,419,121254,132724,276,6,0,13,44
+"Control room (from the lab link, looking west)",on,off,2.96,338,229,41,419,121256,132728,276,6,0,13,44
+"Control room (from the lab link, looking west)",off,on,3.06,327,365,51,751,257716,282986,510,6,0,13,44
+"Control room (from the lab link, looking west)",off,off,3.04,328,365,51,751,257718,282990,510,6,0,13,44
