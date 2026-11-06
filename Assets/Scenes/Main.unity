@@ -24711,6 +24711,7 @@ GameObject:
   - component: {fileID: 489904360}
   - component: {fileID: 489904361}
   - component: {fileID: 489904362}
+  - component: {fileID: 489904363}
   m_Layer: 0
   m_Name: FacilityAI
   m_TagString: Untagged
@@ -24886,6 +24887,19 @@ MonoBehaviour:
   pitchRange: {x: 0.93, y: 1.07}
   maxDistance: 40
   output: {fileID: 0}
+--- !u!114 &489904363
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 489904356}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 415b6cd6f3a7149a98f6efdf8c8ce0f7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GVGame.Level.DebugOverlayToggle
+  visibleOnStart: 0
 --- !u!1 &502193763
 GameObject:
   m_ObjectHideFlags: 0

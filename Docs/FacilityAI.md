@@ -288,6 +288,10 @@ reach for everyone. Raising the progress weight cost weak players too much.
 
 ### Debug overlay
 
+Hidden by default; **F1** shows or hides it together with the Hunter, Flanker and Drone Stalker panels
+(`DebugOverlayToggle` in `Assets/Scripts/Level`, on `FacilityAI`). The per-decision Console log follows the same switch,
+so a normal run and the showcase build start with a clean screen and a quiet Console.
+
 - **Live intensity graph** covering the last 60 s:
   - intensity in blue and health in orange;
   - build-up and peak bands;

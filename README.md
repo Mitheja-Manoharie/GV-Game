@@ -91,6 +91,7 @@ Open `Assets/Scenes/Main.unity` and press **Play**.
 | Restart after death | R |
 | Release / lock cursor | Esc / Left click |
 | First / third-person view (shows the Alien body) | V |
+| Show / hide the AI debug overlays (Facility AI, Hunter, Flankers, Drone Stalker) | F1 |
 
 ---
 
