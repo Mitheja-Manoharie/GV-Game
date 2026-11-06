@@ -83,6 +83,43 @@ data in `Assets/Scenes/Main/`. The dev scene was removed once `Main` was final.
 6. **Lighting:** fixtures, probes and post-processing, then preview bakes and a readability review of each room.
 7. **Final bakes:** lighting, occlusion and NavMesh, rebaked for `Main.unity` on 2026-10-19.
 
+## Tools I built
+
+After the art pass, everything I added to or changed in the level was done by an Editor tool, not by hand. The tools
+are under **Tools > World Builder** (`Assets/Scripts/Editor`).
+
+| Tool (menu item) | What it does | Why a tool |
+|---|---|---|
+| Place Decals | red hazard stripes on the approach side of the four lockable doors | 12 quads at exactly 1.4 cm above the floor, lined up with each door. A rerun replaces the whole group. |
+| Place Particle Effects | sparks with a `FaultyLight` under two damaged fixtures, and bubbles in the four specimen tanks | creates the particle materials once and gives every system the same particle cap (30–60) and no-shadow settings |
+| Place Lab Story / Remove Lab Story | fallen chair, plus syringes on the floor and the desk in the research lab | drops each model onto its surface (floor, or the desk top at 0.94 m) using its mesh bounds, and fits the chair's collider to its mesh so it cannot block the health pack |
+| Place Keycard Spots | the `KeycardSpot_*` markers the keycard picks from at random | builds in the fairness rule: every spot comes before any door the Facility AI can lock, so the AI can never trap the player away from the keycard |
+| Place Door Access Panels | an access panel beside each of the four lockable doors | applies one placement rule to all four doors: 0.12 m off the wall line, at the height of the kit's own panel. Fixing a floating panel took one changed number and a rerun. |
+| Place Corridor Fans / Remove Corridor Fans | makes the maintenance bay fan spin and adds two fans in the corridors | copies the bay fan's height, wall offset and rotation exactly, turned to face away from each new wall |
+| Add / Remove LOD Culling To Small Props | adds a LOD Group to every prop under 0.8 m that hides it beyond 25 m | finds all 27 small props by size and works out each cull height from the camera's field of view. Remove allows the before/after measurement. |
+| Apply Prop Texture Budget / Restore Prop Textures To 2048 | sets the import size of each prop texture and records memory before and after | the budget is code, so it can be reviewed and repeated, and it writes `textures.csv` as evidence |
+| Quality Report | checks lightmap UVs, lightmap UV overlap, texel density and light-probe coverage, and writes CSV files | turns visual checks into numbers. It found the 24 props with overlapping lightmap UVs and the blurry pickups (see Quality checks). |
+| Light Overlapping Props With Probes | switches the props the report flags to light-probe lighting | changes exactly the props the report lists and nothing else |
+
+`PerformanceBenchmark` (`Assets/Scripts/Level`, **F4** in Play mode) does the same for measurement. It uses four
+fixed viewpoints and the same settings every run, so the before/after numbers in Performance can be repeated.
+
+**Why tools instead of placing by hand**
+
+- **Exact and consistent:** positions come from measured rules (the wall line, the surface height, the kit's own
+  fixtures), so the four panels or the three fans match each other exactly.
+- **Repeatable:** each tool rebuilds its own group from scratch. Moving something is one changed number and a
+  rerun, not a hand edit to every copy. The access panels went through three positions this way.
+- **Undoable and removable:** every change goes through Unity's Undo, and the add tools have a Remove partner, so
+  an idea can be tried and dropped without leaving pieces behind in `Main.unity`.
+- **Safe for the bake:** placed objects are non-static, cast no shadows and are lit by light probes, so adding them
+  never forces a lighting rebake. The one tool that changes baked objects says to rebake.
+- **Reviewable:** the placement is code in a pull request, so teammates can see exactly what changed in the scene
+  and why.
+
+Each tool was built on its own feature branch and merged into the protected `dev` branch by pull request. Bake
+output is tracked with Git LFS and rebaked with the checklist under Bakes.
+
 ## Modular art
 
 | Element | Choice | Details |
