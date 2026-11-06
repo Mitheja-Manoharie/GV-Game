@@ -1,0 +1,278 @@
+object,mesh,has_lightmap_uv,scale_in_lightmap
+"Environment/QuarantineCell/Art/Platform_CenterPlate",Platform_CenterPlate,yes,1
+"Environment/QuarantineCell/Art/Platform_CenterPlate (1)",Platform_CenterPlate,yes,1
+"Environment/QuarantineCell/Art/Platform_CenterPlate (2)",Platform_CenterPlate,yes,1
+"Environment/QuarantineCell/Art/Platform_CenterPlate (3)",Platform_CenterPlate,yes,1
+"Environment/QuarantineCell/Art/WallAstra_Corner_Square_Inner",WallAstra_Corner_Square_Inner,yes,1
+"Environment/QuarantineCell/Art/WallAstra_Corner_Square_Inner (1)",WallAstra_Corner_Square_Inner,yes,1
+"Environment/QuarantineCell/Art/WallAstra_Corner_Square_Inner (2)",WallAstra_Corner_Square_Inner,yes,1
+"Environment/QuarantineCell/Art/WallAstra_Straight",WallAstra_Straight,yes,1
+"Environment/QuarantineCell/Ceiling/Platform_DarkPlates (1)",Platform_DarkPlates,yes,1
+"Environment/QuarantineCell/Ceiling/Platform_DarkPlates (2)",Platform_DarkPlates,yes,1
+"Environment/QuarantineCell/Ceiling/Platform_DarkPlates (3)",Platform_DarkPlates,yes,1
+"Environment/QuarantineCell/Ceiling/Platform_DarkPlates (4)",Platform_DarkPlates,yes,1
+"Environment/QuarantineCell/Ceiling/TopCables_Corner_Square_Inner (1)",TopCables_Corner_Square_Inner,yes,1
+"Environment/QuarantineCell/Ceiling/TopCables_Corner_Square_Inner (2)",TopCables_Corner_Square_Inner,yes,1
+"Environment/QuarantineCell/Ceiling/TopCables_Corner_Square_Inner (3)",TopCables_Corner_Square_Inner,yes,1
+"Environment/QuarantineCell/Ceiling/TopCables_Straight_Hanging",TopCables_Straight_Hanging,yes,1
+"Environment/QuarantineCell/Props/Decor/Prop_Desk_Small",Prop_Desk_Small,yes,1
+"Environment/QuarantineCell/Props/Decor/Prop_Chair",Prop_Chair,yes,1
+"Environment/QuarantineCell/Props/Decor/Prop_Crate3",Prop_Crate3,yes,1
+"Environment/Armoury/Art/Platform_CenterPlate",Platform_CenterPlate,yes,1
+"Environment/Armoury/Art/Platform_X",Platform_X,yes,1
+"Environment/Armoury/Art/Platform_CenterPlate (1)",Platform_CenterPlate,yes,1
+"Environment/Armoury/Art/Platform_CenterPlate (2)",Platform_CenterPlate,yes,1
+"Environment/Armoury/Art/WallAstra_Corner_Square_Inner",WallAstra_Corner_Square_Inner,yes,1
+"Environment/Armoury/Art/WallAstra_Corner_Square_Inner (1)",WallAstra_Corner_Square_Inner,yes,1
+"Environment/Armoury/Art/WallAstra_Straight",WallAstra_Straight,yes,1
+"Environment/Armoury/Art/WallAstra_Straight (1)",WallAstra_Straight,yes,1
+"Environment/Armoury/Art/Door_Frame_Square",Door_Frame_Square,yes,1
+"Environment/Armoury/Ceiling/Platform_DarkPlates (1)",Platform_DarkPlates,yes,1
+"Environment/Armoury/Ceiling/Platform_DarkPlates (2)",Platform_DarkPlates,yes,1
+"Environment/Armoury/Ceiling/Platform_DarkPlates (3)",Platform_DarkPlates,yes,1
+"Environment/Armoury/Ceiling/Platform_DarkPlates (4)",Platform_DarkPlates,yes,1
+"Environment/Armoury/Ceiling/TopCables_Corner_Square_Inner (1)",TopCables_Corner_Square_Inner,yes,1
+"Environment/Armoury/Ceiling/TopCables_Corner_Square_Inner (2)",TopCables_Corner_Square_Inner,yes,1
+"Environment/Armoury/Ceiling/TopCables_Straight (1)",TopCables_Straight,yes,1
+"Environment/Armoury/Ceiling/TopCables_Straight (2)",TopCables_Straight,yes,1
+"Environment/Armoury/Props/Decor/Prop_Shelves_WideTall",Prop_Shelves_WideTall,yes,1
+"Environment/Armoury/Props/Decor/Prop_Shelves_WideTall",Prop_Shelves_WideTall,yes,1
+"Environment/Armoury/Props/Decor/Prop_Locker",Prop_Locker,yes,1
+"Environment/Armoury/Props/Decor/Prop_Locker",Prop_Locker,yes,1
+"Environment/ServiceCorridor/Art/Platform_Simple",Platform_Simple,yes,1
+"Environment/ServiceCorridor/Art/WallAstra_Straight",WallAstra_Straight,yes,1
+"Environment/ServiceCorridor/Art/WallAstra_Straight (1)",WallAstra_Straight,yes,1
+"Environment/ServiceCorridor/Art/Platform_Simple (1)",Platform_Simple,yes,1
+"Environment/ServiceCorridor/Art/WallAstra_Straight (2)",WallAstra_Straight,yes,1
+"Environment/ServiceCorridor/Art/Platform_Squares",Platform_Squares,yes,1
+"Environment/ServiceCorridor/Art/Platform_Simple (2)",Platform_Simple,yes,1
+"Environment/ServiceCorridor/Art/Platform_Simple (3)",Platform_Simple,yes,1
+"Environment/ServiceCorridor/Art/WallAstra_Straight (4)",WallAstra_Straight,yes,1
+"Environment/ServiceCorridor/Art/Platform_Simple (4)",Platform_Simple,yes,1
+"Environment/ServiceCorridor/Art/WallAstra_Straight (5)",WallAstra_Straight,yes,1
+"Environment/ServiceCorridor/Art/WallAstra_Corner_Square_Outer",WallAstra_Corner_Square_Outer,yes,1
+"Environment/ServiceCorridor/Art/WallAstra_Corner_Square_Outer (1)",WallAstra_Corner_Square_Outer,yes,1
+"Environment/ServiceCorridor/Art/WallAstra_Straight (3)",WallAstra_Straight,yes,1
+"Environment/ServiceCorridor/Art/Door_Frame_Square_Blocked",Door_Frame_Square_Blocked,yes,1
+"Environment/ServiceCorridor/Ceiling/Platform_DarkPlates (1)",Platform_DarkPlates,yes,1
+"Environment/ServiceCorridor/Ceiling/TopCables_Straight (1)",TopCables_Straight,yes,1
+"Environment/ServiceCorridor/Ceiling/TopCables_Straight_Hanging",TopCables_Straight_Hanging,yes,1
+"Environment/ServiceCorridor/Ceiling/Platform_DarkPlates (2)",Platform_DarkPlates,yes,1
+"Environment/ServiceCorridor/Ceiling/TopCables_Straight (3)",TopCables_Straight,yes,1
+"Environment/ServiceCorridor/Ceiling/Platform_DarkPlates (3)",Platform_DarkPlates,yes,1
+"Environment/ServiceCorridor/Ceiling/Platform_DarkPlates (4)",Platform_DarkPlates,yes,1
+"Environment/ServiceCorridor/Ceiling/Platform_DarkPlates (5)",Platform_DarkPlates,yes,1
+"Environment/ServiceCorridor/Ceiling/TopCables_Straight (4)",TopCables_Straight,yes,1
+"Environment/ServiceCorridor/Ceiling/Platform_DarkPlates (6)",Platform_DarkPlates,yes,1
+"Environment/ServiceCorridor/Ceiling/TopCables_Straight (5)",TopCables_Straight,yes,1
+"Environment/ServiceCorridor/Ceiling/TopCables_Corner_Square_Outer (1)",TopCables_Corner_Square_Outer,yes,1
+"Environment/ServiceCorridor/Ceiling/TopCables_Corner_Square_Outer (2)",TopCables_Corner_Square_Outer,yes,1
+"Environment/ServiceCorridor/Ceiling/TopCables_Straight (6)",TopCables_Straight,yes,1
+"Environment/ServiceCorridor/Props/Cover/Prop_Crate3",Prop_Crate3,yes,1
+"Environment/ServiceCorridor/Props/Cover/Prop_Crate3",Prop_Crate3,yes,1
+"Environment/ServiceCorridor/Props/Cover/Prop_Crate3",Prop_Crate3,yes,1
+"Environment/ServiceCorridor/Props/Decor/Prop_Cable_3",Prop_Cable_3,yes,1
+"Environment/ServiceCorridor/Props/Decor/Prop_Cable_1",Prop_Cable_1,yes,1
+"Environment/MaintenanceBay/Art/Platform_DarkPlates",Platform_DarkPlates,yes,1
+"Environment/MaintenanceBay/Art/Platform_DarkPlates (1)",Platform_DarkPlates,yes,1
+"Environment/MaintenanceBay/Art/Platform_DarkPlates (2)",Platform_DarkPlates,yes,1
+"Environment/MaintenanceBay/Art/Platform_Metal",Platform_Metal,yes,1
+"Environment/MaintenanceBay/Art/Platform_Metal (1)",Platform_Metal,yes,1
+"Environment/MaintenanceBay/Art/Platform_Metal (2)",Platform_Metal,yes,1
+"Environment/MaintenanceBay/Art/Platform_DarkPlates (6)",Platform_DarkPlates,yes,1
+"Environment/MaintenanceBay/Art/Platform_DarkPlates (7)",Platform_DarkPlates,yes,1
+"Environment/MaintenanceBay/Art/Platform_DarkPlates (8)",Platform_DarkPlates,yes,1
+"Environment/MaintenanceBay/Art/WallAstra_Straight",WallAstra_Straight,yes,1
+"Environment/MaintenanceBay/Art/WallAstra_Corner_Square_Inner (1)",WallAstra_Corner_Square_Inner,yes,1
+"Environment/MaintenanceBay/Art/WallAstra_Straight (1)",WallAstra_Straight,yes,1
+"Environment/MaintenanceBay/Art/WallAstra_Corner_Square_Inner (3)",WallAstra_Corner_Square_Inner,yes,1
+"Environment/MaintenanceBay/Art/WallAstra_Straight_Divided",WallAstra_Straight_Divided,yes,1
+"Environment/MaintenanceBay/Art/WallAstra_Straight_Broken",WallAstra_Straight_Broken,yes,1
+"Environment/MaintenanceBay/Art/Column_Simple",Column_Simple,yes,1
+"Environment/MaintenanceBay/Art/Column_Simple",Column_Simple,yes,1
+"Environment/MaintenanceBay/Art/GapFiller (SW corner)",Cube,yes,1
+"Environment/MaintenanceBay/Ceiling/Platform_DarkPlates (1)",Platform_DarkPlates,yes,1
+"Environment/MaintenanceBay/Ceiling/Platform_DarkPlates (2)",Platform_DarkPlates,yes,1
+"Environment/MaintenanceBay/Ceiling/Platform_DarkPlates (3)",Platform_DarkPlates,yes,1
+"Environment/MaintenanceBay/Ceiling/Platform_DarkPlates (4)",Platform_DarkPlates,yes,1
+"Environment/MaintenanceBay/Ceiling/Platform_DarkPlates (5)",Platform_DarkPlates,yes,1
+"Environment/MaintenanceBay/Ceiling/Platform_DarkPlates (6)",Platform_DarkPlates,yes,1
+"Environment/MaintenanceBay/Ceiling/Platform_DarkPlates (7)",Platform_DarkPlates,yes,1
+"Environment/MaintenanceBay/Ceiling/Platform_DarkPlates (8)",Platform_DarkPlates,yes,1
+"Environment/MaintenanceBay/Ceiling/Platform_DarkPlates (9)",Platform_DarkPlates,yes,1
+"Environment/MaintenanceBay/Ceiling/TopCables_Straight (1)",TopCables_Straight,yes,1
+"Environment/MaintenanceBay/Ceiling/TopCables_Corner_Square_Inner (1)",TopCables_Corner_Square_Inner,yes,1
+"Environment/MaintenanceBay/Ceiling/TopCables_Straight_Hanging",TopCables_Straight_Hanging,yes,1
+"Environment/MaintenanceBay/Ceiling/TopCables_Corner_Square_Inner (2)",TopCables_Corner_Square_Inner,yes,1
+"Environment/MaintenanceBay/Ceiling/TopCables_Straight (3)",TopCables_Straight,yes,1
+"Environment/MaintenanceBay/Ceiling/TopCables_Straight (4)",TopCables_Straight,yes,1
+"Environment/MaintenanceBay/Props/Cover/Prop_Crate_Tarp_Large",Prop_Crate_Tarp_Large,yes,1
+"Environment/MaintenanceBay/Props/Cover/Prop_Crate_Large",Prop_Crate_Large,yes,1
+"Environment/MaintenanceBay/Props/Cover/Prop_Desk_L",Prop_Desk_L,yes,1
+"Environment/MaintenanceBay/Props/Decor/Prop_Shelves_WideShort",Prop_Shelves_WideShort,yes,1
+"Environment/MaintenanceBay/Props/Decor/Prop_PipeHolder",Prop_PipeHolder,yes,1
+"Environment/Infirmary/Art/Platform_CenterPlate",Platform_CenterPlate,yes,1
+"Environment/Infirmary/Art/Platform_CenterPlate (1)",Platform_CenterPlate,yes,1
+"Environment/Infirmary/Art/Platform_CenterPlate (2)",Platform_CenterPlate,yes,1
+"Environment/Infirmary/Art/Platform_CenterPlate (3)",Platform_CenterPlate,yes,1
+"Environment/Infirmary/Art/WallAstra_Corner_Square_Inner",WallAstra_Corner_Square_Inner,yes,1
+"Environment/Infirmary/Art/WallAstra_Corner_Square_Inner (1)",WallAstra_Corner_Square_Inner,yes,1
+"Environment/Infirmary/Art/WallAstra_Straight",WallAstra_Straight,yes,1
+"Environment/Infirmary/Art/WallAstra_Straight (1)",WallAstra_Straight,yes,1
+"Environment/Infirmary/Art/Door_Frame_Square",Door_Frame_Square,yes,1
+"Environment/Infirmary/Ceiling/Platform_DarkPlates (1)",Platform_DarkPlates,yes,1
+"Environment/Infirmary/Ceiling/Platform_DarkPlates (2)",Platform_DarkPlates,yes,1
+"Environment/Infirmary/Ceiling/Platform_DarkPlates (3)",Platform_DarkPlates,yes,1
+"Environment/Infirmary/Ceiling/Platform_DarkPlates (4)",Platform_DarkPlates,yes,1
+"Environment/Infirmary/Ceiling/TopCables_Corner_Square_Inner (1)",TopCables_Corner_Square_Inner,yes,1
+"Environment/Infirmary/Ceiling/TopCables_Corner_Square_Inner (2)",TopCables_Corner_Square_Inner,yes,1
+"Environment/Infirmary/Ceiling/TopCables_Straight (1)",TopCables_Straight,yes,1
+"Environment/Infirmary/Ceiling/TopCables_Straight (2)",TopCables_Straight,yes,1
+"Environment/Infirmary/Props/Decor/Prop_Desk_Small",Prop_Desk_Small,yes,1
+"Environment/Infirmary/Props/Decor/Prop_Shelves_ThinTall",Prop_Shelves_ThinTall,yes,1
+"Environment/Infirmary/Props/Decor/Prop_Locker",Prop_Locker,yes,1
+"Environment/ResearchLab/Art/Platform_CenterPlate (1)",Platform_CenterPlate,yes,1
+"Environment/ResearchLab/Art/Platform_CenterPlate (2)",Platform_CenterPlate,yes,1
+"Environment/ResearchLab/Art/Platform_CenterPlate (3)",Platform_CenterPlate,yes,1
+"Environment/ResearchLab/Art/Platform_CenterPlate (4)",Platform_CenterPlate,yes,1
+"Environment/ResearchLab/Art/WallAstra_Corner_Square_Inner (2)",WallAstra_Corner_Square_Inner,yes,1
+"Environment/ResearchLab/Art/WallAstra_Straight (2)",WallAstra_Straight,yes,1
+"Environment/ResearchLab/Art/WallAstra_Corner_Square_Inner (1)",WallAstra_Corner_Square_Inner,yes,1
+"Environment/ResearchLab/Art/Door_Frame_Square",Door_Frame_Square,yes,1
+"Environment/ResearchLab/Ceiling/Platform_DarkPlates (1)",Platform_DarkPlates,yes,1
+"Environment/ResearchLab/Ceiling/Platform_DarkPlates (2)",Platform_DarkPlates,yes,1
+"Environment/ResearchLab/Ceiling/Platform_DarkPlates (3)",Platform_DarkPlates,yes,1
+"Environment/ResearchLab/Ceiling/Platform_DarkPlates (4)",Platform_DarkPlates,yes,1
+"Environment/ResearchLab/Ceiling/TopCables_Corner_Square_Inner (2)",TopCables_Corner_Square_Inner,yes,1
+"Environment/ResearchLab/Ceiling/TopCables_Straight (2)",TopCables_Straight,yes,1
+"Environment/ResearchLab/Ceiling/TopCables_Corner_Square_Inner (1)",TopCables_Corner_Square_Inner,yes,1
+"Environment/ResearchLab/Props/Cover/Prop_Desk_Medium",Prop_Desk_Medium,yes,1
+"Environment/ResearchLab/Props/Decor/Prop_SpecimenTank",Cylinder,yes,1
+"Environment/ResearchLab/Props/Decor/Prop_SpecimenTank/Base",Cylinder,yes,1
+"Environment/ResearchLab/Props/Decor/Prop_SpecimenTank/Cap",Cylinder,yes,1
+"Environment/ResearchLab/Props/Decor/Prop_SpecimenTank",Cylinder,yes,1
+"Environment/ResearchLab/Props/Decor/Prop_SpecimenTank/Base",Cylinder,yes,1
+"Environment/ResearchLab/Props/Decor/Prop_SpecimenTank/Cap",Cylinder,yes,1
+"Environment/ResearchLab/Props/Decor/Prop_SpecimenTank",Cylinder,yes,1
+"Environment/ResearchLab/Props/Decor/Prop_SpecimenTank/Base",Cylinder,yes,1
+"Environment/ResearchLab/Props/Decor/Prop_SpecimenTank/Cap",Cylinder,yes,1
+"Environment/ResearchLab/Props/Decor/Prop_SpecimenTank",Cylinder,yes,1
+"Environment/ResearchLab/Props/Decor/Prop_SpecimenTank/Base",Cylinder,yes,1
+"Environment/ResearchLab/Props/Decor/Prop_SpecimenTank/Cap",Cylinder,yes,1
+"Environment/ResearchLab/Props/Decor/Prop_Shelves_WideShort",Prop_Shelves_WideShort,yes,1
+"Environment/ControlRoom/Art/Platform_CenterPlate (1)",Platform_CenterPlate,yes,1
+"Environment/ControlRoom/Art/Platform_CenterPlate (2)",Platform_CenterPlate,yes,1
+"Environment/ControlRoom/Art/Platform_CenterPlate (3)",Platform_CenterPlate,yes,1
+"Environment/ControlRoom/Art/Platform_CenterPlate (4)",Platform_CenterPlate,yes,1
+"Environment/ControlRoom/Art/Platform_CenterPlate (5)",Platform_CenterPlate,yes,1
+"Environment/ControlRoom/Art/Platform_CenterPlate (6)",Platform_CenterPlate,yes,1
+"Environment/ControlRoom/Art/WallAstra_Straight (1)",WallAstra_Straight,yes,1
+"Environment/ControlRoom/Art/WallAstra_Straight (2)",WallAstra_Straight,yes,1
+"Environment/ControlRoom/Art/WallAstra_Corner_Square_Inner (1)",WallAstra_Corner_Square_Inner,yes,1
+"Environment/ControlRoom/Art/WallAstra_Straight (3)",WallAstra_Straight,yes,1
+"Environment/ControlRoom/Art/WallAstra_Straight_Window (1)",WallAstra_Straight_Window,yes,1
+"Environment/ControlRoom/Art/WallAstra_Straight (4)",WallAstra_Straight,yes,1
+"Environment/ControlRoom/Art/Door_Frame_A",Door_Frame_A,yes,1
+"Environment/ControlRoom/Art/Door_Frame_A",Door_Frame_A,yes,1
+"Environment/ControlRoom/Art/Column_Simple",Column_Simple,yes,1
+"Environment/ControlRoom/Ceiling/Platform_DarkPlates (1)",Platform_DarkPlates,yes,1
+"Environment/ControlRoom/Ceiling/Platform_DarkPlates (2)",Platform_DarkPlates,yes,1
+"Environment/ControlRoom/Ceiling/Platform_DarkPlates (3)",Platform_DarkPlates,yes,1
+"Environment/ControlRoom/Ceiling/Platform_DarkPlates (4)",Platform_DarkPlates,yes,1
+"Environment/ControlRoom/Ceiling/Platform_DarkPlates (5)",Platform_DarkPlates,yes,1
+"Environment/ControlRoom/Ceiling/Platform_DarkPlates (6)",Platform_DarkPlates,yes,1
+"Environment/ControlRoom/Ceiling/TopCables_Straight (1)",TopCables_Straight,yes,1
+"Environment/ControlRoom/Ceiling/TopCables_Straight (2)",TopCables_Straight,yes,1
+"Environment/ControlRoom/Ceiling/TopCables_Corner_Square_Inner (1)",TopCables_Corner_Square_Inner,yes,1
+"Environment/ControlRoom/Ceiling/TopCables_Straight (3)",TopCables_Straight,yes,1
+"Environment/ControlRoom/Ceiling/TopCables_Straight (4)",TopCables_Straight,yes,1
+"Environment/ControlRoom/Ceiling/TopCables_Straight (5)",TopCables_Straight,yes,1
+"Environment/ControlRoom/Props/Cover/Prop_Crate4",Prop_Crate4,yes,1
+"Environment/ControlRoom/Props/Cover/Prop_Crate4",Prop_Crate4,yes,1
+"Environment/ControlRoom/Props/Decor/Prop_Desk_L",Prop_Desk_L,yes,1
+"Environment/ControlRoom/Props/Decor/Prop_Desk_L",Prop_Desk_L,yes,1
+"Environment/ControlRoom/Props/Decor/Prop_Computer",Prop_Computer,yes,1
+"Environment/ControlRoom/Props/Decor/Prop_Computer",Prop_Computer,yes,1
+"Environment/ControlRoom/Props/Decor/Prop_Chair",Prop_Chair,yes,1
+"Environment/ControlRoom/Props/Decor/Prop_Chair",Prop_Chair,yes,1
+"Environment/ControlRoom/Props/Decor/Prop_AccessPoint",Prop_AccessPoint,yes,1
+"Environment/Corridors/Quarantine → armoury corridor/Art/Platform_Simple",Platform_Simple,yes,1
+"Environment/Corridors/Quarantine → armoury corridor/Art/WallAstra_Straight",WallAstra_Straight,yes,1
+"Environment/Corridors/Quarantine → armoury corridor/Art/WallAstra_Straight (1)",WallAstra_Straight,yes,1
+"Environment/Corridors/Quarantine → armoury corridor/Ceiling/Platform_DarkPlates (1)",Platform_DarkPlates,yes,1
+"Environment/Corridors/Quarantine → armoury corridor/Ceiling/TopCables_Straight (1)",TopCables_Straight,yes,1
+"Environment/Corridors/Quarantine → armoury corridor/Ceiling/TopCables_Straight (2)",TopCables_Straight,yes,1
+"Environment/Corridors/Quarantine → armoury corridor/Ceiling/GapFiller (quarantine jamb)",Cube,yes,1
+"Environment/Corridors/Quarantine → armoury corridor/Ceiling/GapFiller (armoury jamb)",Cube,yes,1
+"Environment/Corridors/Bay → infirmary corridor/Art/Platform_Simple",Platform_Simple,yes,1
+"Environment/Corridors/Bay → infirmary corridor/Art/WallAstra_Corner_Square_Outer",WallAstra_Corner_Square_Outer,yes,1
+"Environment/Corridors/Bay → infirmary corridor/Art/WallAstra_Corner_Square_Outer (1)",WallAstra_Corner_Square_Outer,yes,1
+"Environment/Corridors/Bay → infirmary corridor/Ceiling/Platform_DarkPlates (1)",Platform_DarkPlates,yes,1
+"Environment/Corridors/Bay → infirmary corridor/Ceiling/TopCables_Corner_Square_Outer (1)",TopCables_Corner_Square_Outer,yes,1
+"Environment/Corridors/Bay → infirmary corridor/Ceiling/TopCables_Corner_Square_Outer (2)",TopCables_Corner_Square_Outer,yes,1
+"Environment/Corridors/Infirmary north corridor/Art/Platform_Simple",Platform_Simple,yes,1
+"Environment/Corridors/Infirmary north corridor/Art/WallAstra_Straight",WallAstra_Straight,yes,1
+"Environment/Corridors/Infirmary north corridor/Art/WallAstra_Straight (1)",WallAstra_Straight,yes,1
+"Environment/Corridors/Infirmary north corridor/Art/Platform_Simple (1)",Platform_Simple,yes,1
+"Environment/Corridors/Infirmary north corridor/Art/Door_Frame_Square_Blocked",Door_Frame_Square_Blocked,yes,1
+"Environment/Corridors/Infirmary north corridor/Ceiling/Platform_DarkPlates (1)",Platform_DarkPlates,yes,1
+"Environment/Corridors/Infirmary north corridor/Ceiling/TopCables_Straight (1)",TopCables_Straight,yes,1
+"Environment/Corridors/Infirmary north corridor/Ceiling/TopCables_Straight (2)",TopCables_Straight,yes,1
+"Environment/Corridors/Infirmary north corridor/Ceiling/Platform_DarkPlates (2)",Platform_DarkPlates,yes,1
+"Environment/Corridors/Corridor to control room/Art/Platform_Simple",Platform_Simple,yes,1
+"Environment/Corridors/Corridor to control room/Art/Platform_Simple (1)",Platform_Simple,yes,1
+"Environment/Corridors/Corridor to control room/Art/Platform_Simple (2)",Platform_Simple,yes,1
+"Environment/Corridors/Corridor to control room/Art/WallAstra_Corner_Square_Inner",WallAstra_Corner_Square_Inner,yes,1
+"Environment/Corridors/Corridor to control room/Art/WallAstra_Corner_Square_Outer",WallAstra_Corner_Square_Outer,yes,1
+"Environment/Corridors/Corridor to control room/Art/WallAstra_Straight (1)",WallAstra_Straight,yes,1
+"Environment/Corridors/Corridor to control room/Art/WallAstra_Corner_Square_Outer (1)",WallAstra_Corner_Square_Outer,yes,1
+"Environment/Corridors/Corridor to control room/Art/Door_Frame_Square_Blocked",Door_Frame_Square_Blocked,yes,1
+"Environment/Corridors/Corridor to control room/Ceiling/Platform_DarkPlates (1)",Platform_DarkPlates,yes,1
+"Environment/Corridors/Corridor to control room/Ceiling/Platform_DarkPlates (2)",Platform_DarkPlates,yes,1
+"Environment/Corridors/Corridor to control room/Ceiling/Platform_DarkPlates (3)",Platform_DarkPlates,yes,1
+"Environment/Corridors/Corridor to control room/Ceiling/TopCables_Corner_Square_Inner (1)",TopCables_Corner_Square_Inner,yes,1
+"Environment/Corridors/Corridor to control room/Ceiling/TopCables_Corner_Square_Outer (1)",TopCables_Corner_Square_Outer,yes,1
+"Environment/Corridors/Corridor to control room/Ceiling/TopCables_Straight (1)",TopCables_Straight,yes,1
+"Environment/Corridors/Corridor to control room/Ceiling/TopCables_Corner_Square_Outer (2)",TopCables_Corner_Square_Outer,yes,1
+"Environment/Corridors/Control room → lab corridor/Art/Platform_Simple (1)",Platform_Simple,yes,1
+"Environment/Corridors/Control room → lab corridor/Art/WallAstra_Straight (1)",WallAstra_Straight,yes,1
+"Environment/Corridors/Control room → lab corridor/Art/WallAstra_Corner_Square_Outer (1)",WallAstra_Corner_Square_Outer,yes,1
+"Environment/Corridors/Control room → lab corridor/Ceiling/Platform_DarkPlates (1)",Platform_DarkPlates,yes,1
+"Environment/Corridors/Control room → lab corridor/Ceiling/TopCables_Straight (1)",TopCables_Straight,yes,1
+"Environment/Corridors/Control room → lab corridor/Ceiling/TopCables_Corner_Square_Outer (1)",TopCables_Corner_Square_Outer,yes,1
+"Environment/Lighting/QuarantineCell/Light_Wide_White",Prop_Light_Wide,yes,1
+"Environment/Lighting/QuarantineCell/Light_Floor_White (desk)",Prop_Light_Floor,yes,1
+"Environment/Lighting/Corridors/Light_Small_White",Prop_Light_Small,yes,1
+"Environment/Lighting/Corridors/Light_Small_White",Prop_Light_Small,yes,1
+"Environment/Lighting/Corridors/Light_Small_Red",Prop_Light_Small,yes,1
+"Environment/Lighting/Corridors/Light_Small_White",Prop_Light_Small,yes,1
+"Environment/Lighting/Corridors/Light_Small_White",Prop_Light_Small,yes,1
+"Environment/Lighting/Corridors/Light_Small_White",Prop_Light_Small,yes,1
+"Environment/Lighting/Corridors/Light_Small_Red",Prop_Light_Small,yes,1
+"Environment/Lighting/Corridors/Light_Small_Red",Prop_Light_Small,yes,1
+"Environment/Lighting/Corridors/Light_Small_White",Prop_Light_Small,yes,1
+"Environment/Lighting/ServiceCorridor/Light_Small_Red",Prop_Light_Small,yes,1
+"Environment/Lighting/ServiceCorridor/Light_Small_White",Prop_Light_Small,yes,1
+"Environment/Lighting/ServiceCorridor/Light_Small_White",Prop_Light_Small,yes,1
+"Environment/Lighting/ServiceCorridor/Light_Small_White",Prop_Light_Small,yes,1
+"Environment/Lighting/ServiceCorridor/Light_Small_Red",Prop_Light_Small,yes,1
+"Environment/Lighting/ServiceCorridor/Light_Small_Red (crossroads)",Prop_Light_Small,yes,1
+"Environment/Lighting/Armoury/Light_Wide_White",Prop_Light_Wide,yes,1
+"Environment/Lighting/Armoury/Light_Small_Spot",Prop_Light_Small,yes,1
+"Environment/Lighting/Armoury/Light_Small_Spot",Prop_Light_Small,yes,1
+"Environment/Lighting/Armoury/Light_Small_Spot (pickup tile)",Prop_Light_Small,yes,1
+"Environment/Lighting/MaintenanceBay/Light_Wide_Red",Prop_Light_Wide,yes,1
+"Environment/Lighting/MaintenanceBay/Light_Wide_Red",Prop_Light_Wide,yes,1
+"Environment/Lighting/MaintenanceBay/Light_Small_Spot (medkit)",Prop_Light_Small,yes,1
+"Environment/Lighting/MaintenanceBay/Light_Small_White (fill)",Prop_Light_Small,yes,1
+"Environment/Lighting/MaintenanceBay/Light_Small_White (fill)",Prop_Light_Small,yes,1
+"Environment/Lighting/MaintenanceBay/Light_Small_White (fill)",Prop_Light_Small,yes,1
+"Environment/Lighting/Infirmary/Light_Wide_White",Prop_Light_Wide,yes,1
+"Environment/Lighting/Infirmary/Light_Wide_White",Prop_Light_Wide,yes,1
+"Environment/Lighting/Infirmary/Light_Small_White (desk)",Prop_Light_Small,yes,1
+"Environment/Lighting/ResearchLab/Light_Small_White",Prop_Light_Small,yes,1
+"Environment/Lighting/ControlRoom/Light_Wide_White",Prop_Light_Wide,yes,1
+"Environment/Lighting/ControlRoom/Light_Wide_White",Prop_Light_Wide,yes,1
+"Environment/Lighting/ControlRoom/Light_Corner_White",Prop_Light_Corner,yes,1
+"Environment/Lighting/ControlRoom/Light_Corner_White",Prop_Light_Corner,yes,1
+"Environment/Lighting/ControlRoom/Light_Floor_White",Prop_Light_Floor,yes,1

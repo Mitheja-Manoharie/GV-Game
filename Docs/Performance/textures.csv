@@ -1,6 +1,9 @@
 texture,source_px,before_px,before_kb,after_px,after_kb
-T_Props_Batch2_BaseColor,2048,2048,2730,1024,682
-T_Props_Batch2_Emissive,2048,2048,2730,1024,682
-T_Props_Batch2_ORM,2048,2048,2730,1024,682
+T_Props_Batch2_BaseColor,2048,1024,682,2048,2730
+T_Props_Batch2_Emissive,2048,1024,682,1024,682
+T_Props_Batch2_ORM,2048,1024,682,1024,682
 T_Props_Batch2_Normal,1024,1024,682,1024,682
-TOTAL,,,8874,,2730
+T_Props_Crates_BaseColor,4096,2048,2730,4096,10922
+T_Props_Crates_Normal,4096,2048,2730,2048,2730
+T_Props_Crates_ORM,4096,2048,2730,2048,2730
+TOTAL,,,10922,,21162
