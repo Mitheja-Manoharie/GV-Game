@@ -1,0 +1,330 @@
+object,group,texture,px_per_m,vs_group_median
+"Environment/QuarantineCell/Art/Platform_CenterPlate",Structure,T_Trim_01_BaseColor_Red,535,1.09
+"Environment/QuarantineCell/Art/Platform_CenterPlate (1)",Structure,T_Trim_01_BaseColor_Red,535,1.09
+"Environment/QuarantineCell/Art/Platform_CenterPlate (2)",Structure,T_Trim_01_BaseColor_Red,535,1.09
+"Environment/QuarantineCell/Art/Platform_CenterPlate (3)",Structure,T_Trim_01_BaseColor_Red,535,1.09
+"Environment/QuarantineCell/Art/WallAstra_Corner_Square_Inner",Structure,T_Trim_03_BaseColor,494,1.01
+"Environment/QuarantineCell/Art/WallAstra_Corner_Square_Inner (1)",Structure,T_Trim_03_BaseColor,494,1.01
+"Environment/QuarantineCell/Art/WallAstra_Corner_Square_Inner (2)",Structure,T_Trim_03_BaseColor,494,1.01
+"Environment/QuarantineCell/Art/WallAstra_Straight",Structure,T_Trim_03_BaseColor,490,1.00
+"Environment/QuarantineCell/Ceiling/Platform_DarkPlates (1)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/QuarantineCell/Ceiling/Platform_DarkPlates (2)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/QuarantineCell/Ceiling/Platform_DarkPlates (3)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/QuarantineCell/Ceiling/Platform_DarkPlates (4)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/QuarantineCell/Ceiling/TopCables_Corner_Square_Inner (1)",Structure,T_Trim_02_BaseColor_Red,697,1.42
+"Environment/QuarantineCell/Ceiling/TopCables_Corner_Square_Inner (2)",Structure,T_Trim_02_BaseColor_Red,697,1.42
+"Environment/QuarantineCell/Ceiling/TopCables_Corner_Square_Inner (3)",Structure,T_Trim_02_BaseColor_Red,697,1.42
+"Environment/QuarantineCell/Ceiling/TopCables_Straight_Hanging",Structure,T_Trim_02_BaseColor_Red,698,1.43
+"Environment/Armoury/Art/Platform_CenterPlate",Structure,T_Trim_01_BaseColor_Red,535,1.09
+"Environment/Armoury/Art/Platform_X",Structure,T_Trim_02_BaseColor_Red,427,0.87
+"Environment/Armoury/Art/Platform_CenterPlate (1)",Structure,T_Trim_01_BaseColor_Red,535,1.09
+"Environment/Armoury/Art/Platform_CenterPlate (2)",Structure,T_Trim_01_BaseColor_Red,535,1.09
+"Environment/Armoury/Art/WallAstra_Corner_Square_Inner",Structure,T_Trim_03_BaseColor,494,1.01
+"Environment/Armoury/Art/WallAstra_Corner_Square_Inner (1)",Structure,T_Trim_03_BaseColor,494,1.01
+"Environment/Armoury/Art/WallAstra_Straight",Structure,T_Trim_03_BaseColor,490,1.00
+"Environment/Armoury/Art/WallAstra_Straight (1)",Structure,T_Trim_03_BaseColor,490,1.00
+"Environment/Armoury/Art/Door_Frame_Square",Structure,T_Trim_01_BaseColor_Red,445,0.91
+"Environment/Armoury/Ceiling/Platform_DarkPlates (1)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/Armoury/Ceiling/Platform_DarkPlates (2)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/Armoury/Ceiling/Platform_DarkPlates (3)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/Armoury/Ceiling/Platform_DarkPlates (4)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/Armoury/Ceiling/TopCables_Corner_Square_Inner (1)",Structure,T_Trim_02_BaseColor_Red,697,1.42
+"Environment/Armoury/Ceiling/TopCables_Corner_Square_Inner (2)",Structure,T_Trim_02_BaseColor_Red,697,1.42
+"Environment/Armoury/Ceiling/TopCables_Straight (1)",Structure,T_Trim_02_BaseColor_Red,697,1.42
+"Environment/Armoury/Ceiling/TopCables_Straight (2)",Structure,T_Trim_02_BaseColor_Red,697,1.42
+"Environment/ServiceCorridor/Art/Platform_Simple",Structure,T_Trim_03_BaseColor,305,0.62
+"Environment/ServiceCorridor/Art/WallAstra_Straight",Structure,T_Trim_03_BaseColor,490,1.00
+"Environment/ServiceCorridor/Art/WallAstra_Straight (1)",Structure,T_Trim_03_BaseColor,490,1.00
+"Environment/ServiceCorridor/Art/Platform_Simple (1)",Structure,T_Trim_03_BaseColor,305,0.62
+"Environment/ServiceCorridor/Art/WallAstra_Straight (2)",Structure,T_Trim_03_BaseColor,490,1.00
+"Environment/ServiceCorridor/Art/Platform_Squares",Structure,T_Trim_02_BaseColor,448,0.92
+"Environment/ServiceCorridor/Art/Platform_Simple (2)",Structure,T_Trim_03_BaseColor,305,0.62
+"Environment/ServiceCorridor/Art/Platform_Simple (3)",Structure,T_Trim_03_BaseColor,305,0.62
+"Environment/ServiceCorridor/Art/WallAstra_Straight (4)",Structure,T_Trim_03_BaseColor,490,1.00
+"Environment/ServiceCorridor/Art/Platform_Simple (4)",Structure,T_Trim_03_BaseColor,305,0.62
+"Environment/ServiceCorridor/Art/WallAstra_Straight (5)",Structure,T_Trim_03_BaseColor,490,1.00
+"Environment/ServiceCorridor/Art/WallAstra_Corner_Square_Outer",Structure,T_Trim_03_BaseColor,492,1.01
+"Environment/ServiceCorridor/Art/WallAstra_Corner_Square_Outer (1)",Structure,T_Trim_03_BaseColor,492,1.01
+"Environment/ServiceCorridor/Art/WallAstra_Straight (3)",Structure,T_Trim_03_BaseColor,490,1.00
+"Environment/ServiceCorridor/Art/Door_Frame_Square_Blocked",Structure,T_Trim_01_BaseColor_Red,322,0.66
+"Environment/ServiceCorridor/Ceiling/Platform_DarkPlates (1)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/ServiceCorridor/Ceiling/TopCables_Straight (1)",Structure,T_Trim_02_BaseColor_Red,697,1.42
+"Environment/ServiceCorridor/Ceiling/TopCables_Straight_Hanging",Structure,T_Trim_02_BaseColor_Red,698,1.43
+"Environment/ServiceCorridor/Ceiling/Platform_DarkPlates (2)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/ServiceCorridor/Ceiling/TopCables_Straight (3)",Structure,T_Trim_02_BaseColor_Red,697,1.42
+"Environment/ServiceCorridor/Ceiling/Platform_DarkPlates (3)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/ServiceCorridor/Ceiling/Platform_DarkPlates (4)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/ServiceCorridor/Ceiling/Platform_DarkPlates (5)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/ServiceCorridor/Ceiling/TopCables_Straight (4)",Structure,T_Trim_02_BaseColor_Red,697,1.42
+"Environment/ServiceCorridor/Ceiling/Platform_DarkPlates (6)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/ServiceCorridor/Ceiling/TopCables_Straight (5)",Structure,T_Trim_02_BaseColor_Red,697,1.42
+"Environment/ServiceCorridor/Ceiling/TopCables_Corner_Square_Outer (1)",Structure,T_Trim_02_BaseColor_Red,691,1.41
+"Environment/ServiceCorridor/Ceiling/TopCables_Corner_Square_Outer (2)",Structure,T_Trim_02_BaseColor_Red,691,1.41
+"Environment/ServiceCorridor/Ceiling/TopCables_Straight (6)",Structure,T_Trim_02_BaseColor_Red,697,1.42
+"Environment/MaintenanceBay/Art/Platform_DarkPlates",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/MaintenanceBay/Art/Platform_DarkPlates (1)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/MaintenanceBay/Art/Platform_DarkPlates (2)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/MaintenanceBay/Art/Platform_Metal",Structure,T_Trim_02_BaseColor_Red,310,0.63
+"Environment/MaintenanceBay/Art/Platform_Metal (1)",Structure,T_Trim_02_BaseColor_Red,310,0.63
+"Environment/MaintenanceBay/Art/Platform_Metal (2)",Structure,T_Trim_02_BaseColor_Red,310,0.63
+"Environment/MaintenanceBay/Art/Platform_DarkPlates (6)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/MaintenanceBay/Art/Platform_DarkPlates (7)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/MaintenanceBay/Art/Platform_DarkPlates (8)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/MaintenanceBay/Art/WallAstra_Straight",Structure,T_Trim_03_BaseColor,490,1.00
+"Environment/MaintenanceBay/Art/WallAstra_Corner_Square_Inner (1)",Structure,T_Trim_03_BaseColor,494,1.01
+"Environment/MaintenanceBay/Art/WallAstra_Straight (1)",Structure,T_Trim_03_BaseColor,490,1.00
+"Environment/MaintenanceBay/Art/WallAstra_Corner_Square_Inner (3)",Structure,T_Trim_03_BaseColor,494,1.01
+"Environment/MaintenanceBay/Art/WallAstra_Straight_Divided",Structure,T_Trim_03_Cables,461,0.94
+"Environment/MaintenanceBay/Art/WallAstra_Straight_Broken",Structure,T_Trim_03_Cables,857,1.75
+"Environment/MaintenanceBay/Art/Column_Simple",Structure,T_Trim_01_BaseColor_Red,708,1.45
+"Environment/MaintenanceBay/Art/Column_Simple",Structure,T_Trim_01_BaseColor_Red,708,1.45
+"Environment/MaintenanceBay/Art/GapFiller (SW corner)",Structure,T_Trim_03_Cables,1070,2.18
+"Environment/MaintenanceBay/Ceiling/Platform_DarkPlates (1)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/MaintenanceBay/Ceiling/Platform_DarkPlates (2)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/MaintenanceBay/Ceiling/Platform_DarkPlates (3)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/MaintenanceBay/Ceiling/Platform_DarkPlates (4)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/MaintenanceBay/Ceiling/Platform_DarkPlates (5)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/MaintenanceBay/Ceiling/Platform_DarkPlates (6)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/MaintenanceBay/Ceiling/Platform_DarkPlates (7)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/MaintenanceBay/Ceiling/Platform_DarkPlates (8)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/MaintenanceBay/Ceiling/Platform_DarkPlates (9)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/MaintenanceBay/Ceiling/TopCables_Straight (1)",Structure,T_Trim_02_BaseColor_Red,697,1.42
+"Environment/MaintenanceBay/Ceiling/TopCables_Corner_Square_Inner (1)",Structure,T_Trim_02_BaseColor_Red,697,1.42
+"Environment/MaintenanceBay/Ceiling/TopCables_Straight_Hanging",Structure,T_Trim_02_BaseColor_Red,698,1.43
+"Environment/MaintenanceBay/Ceiling/TopCables_Corner_Square_Inner (2)",Structure,T_Trim_02_BaseColor_Red,697,1.42
+"Environment/MaintenanceBay/Ceiling/TopCables_Straight (3)",Structure,T_Trim_02_BaseColor_Red,697,1.42
+"Environment/MaintenanceBay/Ceiling/TopCables_Straight (4)",Structure,T_Trim_02_BaseColor_Red,697,1.42
+"Environment/Infirmary/Art/Platform_CenterPlate",Structure,T_Trim_01_BaseColor_Red,535,1.09
+"Environment/Infirmary/Art/Platform_CenterPlate (1)",Structure,T_Trim_01_BaseColor_Red,535,1.09
+"Environment/Infirmary/Art/Platform_CenterPlate (2)",Structure,T_Trim_01_BaseColor_Red,535,1.09
+"Environment/Infirmary/Art/Platform_CenterPlate (3)",Structure,T_Trim_01_BaseColor_Red,535,1.09
+"Environment/Infirmary/Art/WallAstra_Corner_Square_Inner",Structure,T_Trim_03_BaseColor,494,1.01
+"Environment/Infirmary/Art/WallAstra_Corner_Square_Inner (1)",Structure,T_Trim_03_BaseColor,494,1.01
+"Environment/Infirmary/Art/WallAstra_Straight",Structure,T_Trim_03_BaseColor,490,1.00
+"Environment/Infirmary/Art/WallAstra_Straight (1)",Structure,T_Trim_03_BaseColor,490,1.00
+"Environment/Infirmary/Art/Door_Frame_Square",Structure,T_Trim_01_BaseColor_Red,445,0.91
+"Environment/Infirmary/Ceiling/Platform_DarkPlates (1)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/Infirmary/Ceiling/Platform_DarkPlates (2)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/Infirmary/Ceiling/Platform_DarkPlates (3)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/Infirmary/Ceiling/Platform_DarkPlates (4)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/Infirmary/Ceiling/TopCables_Corner_Square_Inner (1)",Structure,T_Trim_02_BaseColor_Red,697,1.42
+"Environment/Infirmary/Ceiling/TopCables_Corner_Square_Inner (2)",Structure,T_Trim_02_BaseColor_Red,697,1.42
+"Environment/Infirmary/Ceiling/TopCables_Straight (1)",Structure,T_Trim_02_BaseColor_Red,697,1.42
+"Environment/Infirmary/Ceiling/TopCables_Straight (2)",Structure,T_Trim_02_BaseColor_Red,697,1.42
+"Environment/ResearchLab/Art/Platform_CenterPlate (1)",Structure,T_Trim_01_BaseColor_Red,535,1.09
+"Environment/ResearchLab/Art/Platform_CenterPlate (2)",Structure,T_Trim_01_BaseColor_Red,535,1.09
+"Environment/ResearchLab/Art/Platform_CenterPlate (3)",Structure,T_Trim_01_BaseColor_Red,535,1.09
+"Environment/ResearchLab/Art/Platform_CenterPlate (4)",Structure,T_Trim_01_BaseColor_Red,535,1.09
+"Environment/ResearchLab/Art/WallAstra_Corner_Square_Inner (2)",Structure,T_Trim_03_BaseColor,494,1.01
+"Environment/ResearchLab/Art/WallAstra_Straight (2)",Structure,T_Trim_03_BaseColor,490,1.00
+"Environment/ResearchLab/Art/WallAstra_Corner_Square_Inner (1)",Structure,T_Trim_03_BaseColor,494,1.01
+"Environment/ResearchLab/Art/Door_Frame_Square",Structure,T_Trim_01_BaseColor_Red,445,0.91
+"Environment/ResearchLab/Ceiling/Platform_DarkPlates (1)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/ResearchLab/Ceiling/Platform_DarkPlates (2)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/ResearchLab/Ceiling/Platform_DarkPlates (3)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/ResearchLab/Ceiling/Platform_DarkPlates (4)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/ResearchLab/Ceiling/TopCables_Corner_Square_Inner (2)",Structure,T_Trim_02_BaseColor_Red,697,1.42
+"Environment/ResearchLab/Ceiling/TopCables_Straight (2)",Structure,T_Trim_02_BaseColor_Red,697,1.42
+"Environment/ResearchLab/Ceiling/TopCables_Corner_Square_Inner (1)",Structure,T_Trim_02_BaseColor_Red,697,1.42
+"Environment/ControlRoom/Art/Platform_CenterPlate (1)",Structure,T_Trim_01_BaseColor_Red,535,1.09
+"Environment/ControlRoom/Art/Platform_CenterPlate (2)",Structure,T_Trim_01_BaseColor_Red,535,1.09
+"Environment/ControlRoom/Art/Platform_CenterPlate (3)",Structure,T_Trim_01_BaseColor_Red,535,1.09
+"Environment/ControlRoom/Art/Platform_CenterPlate (4)",Structure,T_Trim_01_BaseColor_Red,535,1.09
+"Environment/ControlRoom/Art/Platform_CenterPlate (5)",Structure,T_Trim_01_BaseColor_Red,535,1.09
+"Environment/ControlRoom/Art/Platform_CenterPlate (6)",Structure,T_Trim_01_BaseColor_Red,535,1.09
+"Environment/ControlRoom/Art/WallAstra_Straight (1)",Structure,T_Trim_03_BaseColor,490,1.00
+"Environment/ControlRoom/Art/WallAstra_Straight (2)",Structure,T_Trim_03_BaseColor,490,1.00
+"Environment/ControlRoom/Art/WallAstra_Corner_Square_Inner (1)",Structure,T_Trim_03_BaseColor,494,1.01
+"Environment/ControlRoom/Art/WallAstra_Straight (3)",Structure,T_Trim_03_BaseColor,490,1.00
+"Environment/ControlRoom/Art/WallAstra_Straight (4)",Structure,T_Trim_03_BaseColor,490,1.00
+"Environment/ControlRoom/Art/Door_Frame_A",Structure,T_Trim_01_BaseColor_Red,333,0.68
+"Environment/ControlRoom/Art/Door_Frame_A",Structure,T_Trim_01_BaseColor_Red,333,0.68
+"Environment/ControlRoom/Art/Column_Simple",Structure,T_Trim_01_BaseColor_Red,708,1.45
+"Environment/ControlRoom/Ceiling/Platform_DarkPlates (1)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/ControlRoom/Ceiling/Platform_DarkPlates (2)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/ControlRoom/Ceiling/Platform_DarkPlates (3)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/ControlRoom/Ceiling/Platform_DarkPlates (4)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/ControlRoom/Ceiling/Platform_DarkPlates (5)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/ControlRoom/Ceiling/Platform_DarkPlates (6)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/ControlRoom/Ceiling/TopCables_Straight (1)",Structure,T_Trim_02_BaseColor_Red,697,1.42
+"Environment/ControlRoom/Ceiling/TopCables_Straight (2)",Structure,T_Trim_02_BaseColor_Red,697,1.42
+"Environment/ControlRoom/Ceiling/TopCables_Corner_Square_Inner (1)",Structure,T_Trim_02_BaseColor_Red,697,1.42
+"Environment/ControlRoom/Ceiling/TopCables_Straight (3)",Structure,T_Trim_02_BaseColor_Red,697,1.42
+"Environment/ControlRoom/Ceiling/TopCables_Straight (4)",Structure,T_Trim_02_BaseColor_Red,697,1.42
+"Environment/ControlRoom/Ceiling/TopCables_Straight (5)",Structure,T_Trim_02_BaseColor_Red,697,1.42
+"Environment/Corridors/Quarantine → armoury corridor/Art/Platform_Simple",Structure,T_Trim_03_BaseColor,305,0.62
+"Environment/Corridors/Quarantine → armoury corridor/Art/WallAstra_Straight",Structure,T_Trim_03_BaseColor,490,1.00
+"Environment/Corridors/Quarantine → armoury corridor/Art/WallAstra_Straight (1)",Structure,T_Trim_03_BaseColor,490,1.00
+"Environment/Corridors/Quarantine → armoury corridor/Ceiling/Platform_DarkPlates (1)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/Corridors/Quarantine → armoury corridor/Ceiling/TopCables_Straight (1)",Structure,T_Trim_02_BaseColor_Red,697,1.42
+"Environment/Corridors/Quarantine → armoury corridor/Ceiling/TopCables_Straight (2)",Structure,T_Trim_02_BaseColor_Red,697,1.42
+"Environment/Corridors/Quarantine → armoury corridor/Ceiling/GapFiller (quarantine jamb)",Structure,T_Trim_03_Cables,1529,3.12
+"Environment/Corridors/Quarantine → armoury corridor/Ceiling/GapFiller (armoury jamb)",Structure,T_Trim_03_Cables,1529,3.12
+"Environment/Corridors/Bay → infirmary corridor/Art/Platform_Simple",Structure,T_Trim_03_BaseColor,305,0.62
+"Environment/Corridors/Bay → infirmary corridor/Art/WallAstra_Corner_Square_Outer",Structure,T_Trim_03_BaseColor,492,1.01
+"Environment/Corridors/Bay → infirmary corridor/Art/WallAstra_Corner_Square_Outer (1)",Structure,T_Trim_03_BaseColor,492,1.01
+"Environment/Corridors/Bay → infirmary corridor/Ceiling/Platform_DarkPlates (1)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/Corridors/Bay → infirmary corridor/Ceiling/TopCables_Corner_Square_Outer (1)",Structure,T_Trim_02_BaseColor_Red,691,1.41
+"Environment/Corridors/Bay → infirmary corridor/Ceiling/TopCables_Corner_Square_Outer (2)",Structure,T_Trim_02_BaseColor_Red,691,1.41
+"Environment/Corridors/Infirmary north corridor/Art/Platform_Simple",Structure,T_Trim_03_BaseColor,305,0.62
+"Environment/Corridors/Infirmary north corridor/Art/WallAstra_Straight",Structure,T_Trim_03_BaseColor,490,1.00
+"Environment/Corridors/Infirmary north corridor/Art/WallAstra_Straight (1)",Structure,T_Trim_03_BaseColor,490,1.00
+"Environment/Corridors/Infirmary north corridor/Art/Platform_Simple (1)",Structure,T_Trim_03_BaseColor,305,0.62
+"Environment/Corridors/Infirmary north corridor/Art/Door_Frame_Square_Blocked",Structure,T_Trim_01_BaseColor_Red,322,0.66
+"Environment/Corridors/Infirmary north corridor/Ceiling/Platform_DarkPlates (1)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/Corridors/Infirmary north corridor/Ceiling/TopCables_Straight (1)",Structure,T_Trim_02_BaseColor_Red,697,1.42
+"Environment/Corridors/Infirmary north corridor/Ceiling/TopCables_Straight (2)",Structure,T_Trim_02_BaseColor_Red,697,1.42
+"Environment/Corridors/Infirmary north corridor/Ceiling/Platform_DarkPlates (2)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/Corridors/Corridor to control room/Art/Platform_Simple",Structure,T_Trim_03_BaseColor,305,0.62
+"Environment/Corridors/Corridor to control room/Art/Platform_Simple (1)",Structure,T_Trim_03_BaseColor,305,0.62
+"Environment/Corridors/Corridor to control room/Art/Platform_Simple (2)",Structure,T_Trim_03_BaseColor,305,0.62
+"Environment/Corridors/Corridor to control room/Art/WallAstra_Corner_Square_Inner",Structure,T_Trim_03_BaseColor,494,1.01
+"Environment/Corridors/Corridor to control room/Art/WallAstra_Corner_Square_Outer",Structure,T_Trim_03_BaseColor,492,1.01
+"Environment/Corridors/Corridor to control room/Art/WallAstra_Straight (1)",Structure,T_Trim_03_BaseColor,490,1.00
+"Environment/Corridors/Corridor to control room/Art/WallAstra_Corner_Square_Outer (1)",Structure,T_Trim_03_BaseColor,492,1.01
+"Environment/Corridors/Corridor to control room/Art/Door_Frame_Square_Blocked",Structure,T_Trim_01_BaseColor_Red,322,0.66
+"Environment/Corridors/Corridor to control room/Ceiling/Platform_DarkPlates (1)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/Corridors/Corridor to control room/Ceiling/Platform_DarkPlates (2)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/Corridors/Corridor to control room/Ceiling/Platform_DarkPlates (3)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/Corridors/Corridor to control room/Ceiling/TopCables_Corner_Square_Inner (1)",Structure,T_Trim_02_BaseColor_Red,697,1.42
+"Environment/Corridors/Corridor to control room/Ceiling/TopCables_Corner_Square_Outer (1)",Structure,T_Trim_02_BaseColor_Red,691,1.41
+"Environment/Corridors/Corridor to control room/Ceiling/TopCables_Straight (1)",Structure,T_Trim_02_BaseColor_Red,697,1.42
+"Environment/Corridors/Corridor to control room/Ceiling/TopCables_Corner_Square_Outer (2)",Structure,T_Trim_02_BaseColor_Red,691,1.41
+"Environment/Corridors/Control room → lab corridor/Art/Platform_Simple (1)",Structure,T_Trim_03_BaseColor,305,0.62
+"Environment/Corridors/Control room → lab corridor/Art/WallAstra_Straight (1)",Structure,T_Trim_03_BaseColor,490,1.00
+"Environment/Corridors/Control room → lab corridor/Art/WallAstra_Corner_Square_Outer (1)",Structure,T_Trim_03_BaseColor,492,1.01
+"Environment/Corridors/Control room → lab corridor/Ceiling/Platform_DarkPlates (1)",Structure,T_Trim_01_BaseColor_Red,484,0.99
+"Environment/Corridors/Control room → lab corridor/Ceiling/TopCables_Straight (1)",Structure,T_Trim_02_BaseColor_Red,697,1.42
+"Environment/Corridors/Control room → lab corridor/Ceiling/TopCables_Corner_Square_Outer (1)",Structure,T_Trim_02_BaseColor_Red,691,1.41
+"Environment/QuarantineCell/Props/Throwables/Throwable_Mug",Props,T_Trim_03_BaseColor,1231,1.41
+"Environment/QuarantineCell/Props/Decor/Prop_Desk_Small",Props,T_Trim_03_Dark,778,0.89
+"Environment/QuarantineCell/Props/Decor/Prop_Chair",Props,T_Trim_03_BaseColor,961,1.10
+"Environment/QuarantineCell/Props/Decor/Prop_Crate3",Props,T_Trim_02_BaseColor_Red,1154,1.32
+"Environment/QuarantineCell/Props/Decor/Prop_Vent_Wide",Props,T_Trim_01_BaseColor_Red,2478,2.84
+"Environment/QuarantineCell/Props/Decor/Prop_Vent_Small",Props,T_Trim_02_BaseColor_Red,2004,2.30
+"Environment/Armoury/Props/Cover/Barricade_CrateTarp",Props,T_Props_Crates_BaseColor,500,0.57
+"Environment/Armoury/Props/Throwables/Throwable_AmmoSmall",Props,T_Props_Batch2_BaseColor,356,0.41
+"Environment/Armoury/Props/Throwables/Throwable_AmmoClosed",Props,T_Props_Batch2_BaseColor,306,0.35
+"Environment/Armoury/Props/Decor/Gun_Rifle",Props,T_Guns_Batch1_BaseColor,1591,1.82
+"Environment/Armoury/Props/Decor/Gun_Pistol",Props,T_Guns_Batch1_BaseColor,1511,1.73
+"Environment/Armoury/Props/Decor/Gun_Revolver/Gun_Revolver",Props,T_Guns_Batch2_BaseColor,1427,1.64
+"Environment/Armoury/Props/Decor/Gun_Revolver/Gun_Revolver_Barrel",Props,T_Guns_Batch2_BaseColor,1426,1.64
+"Environment/Armoury/Props/Decor/Gun_Sniper",Props,T_Guns_Batch2_BaseColor,1423,1.63
+"Environment/Armoury/Props/Decor/Gun_Rifle",Props,T_Guns_Batch1_BaseColor,1591,1.82
+"Environment/Armoury/Props/Decor/Gun_Pistol",Props,T_Guns_Batch1_BaseColor,1511,1.73
+"Environment/ServiceCorridor/Props/Cover/Prop_Crate3",Props,T_Trim_02_BaseColor_Red,1154,1.32
+"Environment/ServiceCorridor/Props/Cover/Prop_Crate3",Props,T_Trim_02_BaseColor_Red,1154,1.32
+"Environment/ServiceCorridor/Props/Cover/Prop_Crate3",Props,T_Trim_02_BaseColor_Red,1154,1.32
+"Environment/ServiceCorridor/Props/Cover/Prop_Barrel2_Closed",Props,T_Props_Batch1_BaseColor,260,0.30
+"Environment/ServiceCorridor/Props/Cover/Barricade_Barrel",Props,T_Props_Batch1_BaseColor,278,0.32
+"Environment/ServiceCorridor/Props/Throwables/Throwable_AmmoSmall",Props,T_Props_Batch2_BaseColor,356,0.41
+"Environment/ServiceCorridor/Props/Throwables/Throwable_AmmoClosed",Props,T_Props_Batch2_BaseColor,306,0.35
+"Environment/ServiceCorridor/Props/Throwables/Throwable_AmmoSmall",Props,T_Props_Batch2_BaseColor,356,0.41
+"Environment/ServiceCorridor/Props/Decor/Prop_Cable_3",Props,T_Trim_03_Cables,853,0.98
+"Environment/ServiceCorridor/Props/Decor/Prop_Cable_1",Props,T_Trim_02_BaseColor_Red,806,0.92
+"Environment/MaintenanceBay/Props/Cover/Prop_Crate_Tarp_Large",Props,T_Props_Crates_BaseColor,484,0.55
+"Environment/MaintenanceBay/Props/Cover/Prop_Crate_Large",Props,T_Props_Crates_BaseColor,414,0.47
+"Environment/MaintenanceBay/Props/Cover/Prop_Desk_L",Props,T_Trim_03_BaseColor,735,0.84
+"Environment/MaintenanceBay/Props/Cover/Prop_Barrel2_Closed",Props,T_Props_Batch1_BaseColor,260,0.30
+"Environment/MaintenanceBay/Props/Cover/Prop_Barrel2_Closed",Props,T_Props_Batch1_BaseColor,260,0.30
+"Environment/MaintenanceBay/Props/Throwables/Throwable_AmmoClosed",Props,T_Props_Batch2_BaseColor,306,0.35
+"Environment/MaintenanceBay/Props/Throwables/Throwable_AmmoClosed",Props,T_Props_Batch2_BaseColor,306,0.35
+"Environment/MaintenanceBay/Props/Throwables/Throwable_AmmoSmall",Props,T_Props_Batch2_BaseColor,356,0.41
+"Environment/MaintenanceBay/Props/Throwables/Throwable_Mug",Props,T_Trim_03_BaseColor,1231,1.41
+"Environment/MaintenanceBay/Props/Pickups/Pickup_HealthPack",Props,T_Props_Batch2_BaseColor,319,0.37
+"Environment/MaintenanceBay/Props/Decor/Prop_Vent_Wide",Props,T_Trim_01_BaseColor_Red,2478,2.84
+"Environment/MaintenanceBay/Props/Decor/Prop_Vent_Small",Props,T_Trim_02_BaseColor_Red,2004,2.30
+"Environment/MaintenanceBay/Props/Decor/Prop_PipeHolder",Props,T_Trim_02_BaseColor_Red,1165,1.34
+"Environment/Infirmary/Props/Cover/Barricade_Barrel",Props,T_Props_Batch1_BaseColor,278,0.32
+"Environment/Infirmary/Props/Throwables/Throwable_Mug",Props,T_Trim_03_BaseColor,1231,1.41
+"Environment/Infirmary/Props/Throwables/Throwable_Mug",Props,T_Trim_03_BaseColor,1231,1.41
+"Environment/Infirmary/Props/Pickups/Pickup_HealthPack",Props,T_Props_Batch2_BaseColor,319,0.37
+"Environment/Infirmary/Props/Pickups/Prop_KeyCard",Props,T_Props_Batch1_BaseColor,1290,1.48
+"Environment/Infirmary/Props/Decor/Prop_Desk_Small",Props,T_Trim_03_Dark,778,0.89
+"Environment/Infirmary/Props/Decor/Prop_HealthPack_Tube",Props,T_Props_Batch2_BaseColor,319,0.37
+"Environment/Infirmary/Props/Decor/Prop_Syringe",Props,T_Props_Batch1_BaseColor,872,1.00
+"Environment/ResearchLab/Props/Cover/Prop_Desk_Medium",Props,T_Trim_03_Dark,731,0.84
+"Environment/ResearchLab/Props/Throwables/Throwable_Mug",Props,T_Trim_03_BaseColor,1231,1.41
+"Environment/ResearchLab/Props/Throwables/Throwable_Mug",Props,T_Trim_03_BaseColor,1231,1.41
+"Environment/ResearchLab/Props/Pickups/Pickup_HealthPack",Props,T_Props_Batch2_BaseColor,319,0.37
+"Environment/ResearchLab/Props/Story/Mess/Prop_Chair",Props,T_Trim_03_BaseColor,961,1.10
+"Environment/ResearchLab/Props/Story/Mess/Prop_Syringe",Props,T_Props_Batch1_BaseColor,872,1.00
+"Environment/ResearchLab/Props/Story/Mess/Prop_Syringe",Props,T_Props_Batch1_BaseColor,872,1.00
+"Environment/ResearchLab/Props/Story/Mess/Prop_Syringe",Props,T_Props_Batch1_BaseColor,872,1.00
+"Environment/ResearchLab/Props/Story/Mess/Prop_Syringe",Props,T_Props_Batch1_BaseColor,872,1.00
+"Environment/ResearchLab/Props/Story/Mess/Prop_Syringe",Props,T_Props_Batch1_BaseColor,872,1.00
+"Environment/ControlRoom/Props/Cover/Barricade_Barrel",Props,T_Props_Batch1_BaseColor,278,0.32
+"Environment/ControlRoom/Props/Cover/Barricade_Barrel",Props,T_Props_Batch1_BaseColor,278,0.32
+"Environment/ControlRoom/Props/Cover/Prop_Crate4",Props,T_Trim_02_BaseColor_Red,419,0.48
+"Environment/ControlRoom/Props/Cover/Prop_Crate4",Props,T_Trim_02_BaseColor_Red,419,0.48
+"Environment/ControlRoom/Props/Throwables/Throwable_Mug",Props,T_Trim_03_BaseColor,1231,1.41
+"Environment/ControlRoom/Props/Throwables/Throwable_Mug",Props,T_Trim_03_BaseColor,1231,1.41
+"Environment/ControlRoom/Props/Decor/Prop_Desk_L",Props,T_Trim_03_BaseColor,735,0.84
+"Environment/ControlRoom/Props/Decor/Prop_Desk_L",Props,T_Trim_03_BaseColor,735,0.84
+"Environment/ControlRoom/Props/Decor/Prop_Computer",Props,T_Decals,1131,1.30
+"Environment/ControlRoom/Props/Decor/Prop_Computer",Props,T_Decals,1131,1.30
+"Environment/ControlRoom/Props/Decor/Prop_Chair",Props,T_Trim_03_BaseColor,961,1.10
+"Environment/ControlRoom/Props/Decor/Prop_Chair",Props,T_Trim_03_BaseColor,961,1.10
+"Environment/ControlRoom/Props/Decor/Prop_AccessPoint",Props,T_Trim_01_BaseColor_Red,2156,2.47
+"Environment/Doors/Door_InfirmaryNorth/Hinge_L/Door_DarkMetal",Other,T_Trim_01_BaseColor_Red,276,0.19
+"Environment/Doors/Door_InfirmaryNorth/Hinge_R/Door_DarkMetal",Other,T_Trim_01_BaseColor_Red,276,0.19
+"Environment/Doors/Door_ControlWest/Hinge_L/Door_DarkMetal",Other,T_Trim_01_BaseColor_Red,276,0.19
+"Environment/Doors/Door_ControlWest/Hinge_R/Door_DarkMetal",Other,T_Trim_01_BaseColor_Red,276,0.19
+"Environment/Doors/Door_ControlEast/Hinge_L/Door_DarkMetal",Other,T_Trim_01_BaseColor_Red,276,0.19
+"Environment/Doors/Door_ControlEast/Hinge_R/Door_DarkMetal",Other,T_Trim_01_BaseColor_Red,276,0.19
+"Environment/Doors/Door_LabSouth/Hinge_L/Door_DarkMetal",Other,T_Trim_01_BaseColor_Red,276,0.19
+"Environment/Doors/Door_LabSouth/Hinge_R/Door_DarkMetal",Other,T_Trim_01_BaseColor_Red,276,0.19
+"Environment/Doors/Door_ArmouryNorth/Hinge_L/Door_DarkMetal",Other,T_Trim_01_BaseColor_Red,276,0.19
+"Environment/Doors/Door_ArmouryNorth/Hinge_R/Door_DarkMetal",Other,T_Trim_01_BaseColor_Red,276,0.19
+"Environment/Lighting/QuarantineCell/Light_Wide_White",Other,T_Trim_01_BaseColor_Red,1420,1.00
+"Environment/Lighting/QuarantineCell/Light_Floor_White (desk)",Other,T_Trim_01_BaseColor_Red,421,0.30
+"Environment/Lighting/Corridors/Light_Small_White",Other,T_Trim_01_BaseColor_Red,1703,1.20
+"Environment/Lighting/Corridors/Light_Small_White",Other,T_Trim_01_BaseColor_Red,1703,1.20
+"Environment/Lighting/Corridors/Light_Small_Red",Other,T_Trim_01_BaseColor_Red,1703,1.20
+"Environment/Lighting/Corridors/Light_Small_White",Other,T_Trim_01_BaseColor_Red,1703,1.20
+"Environment/Lighting/Corridors/Light_Small_White",Other,T_Trim_01_BaseColor_Red,1703,1.20
+"Environment/Lighting/Corridors/Light_Small_White",Other,T_Trim_01_BaseColor_Red,1703,1.20
+"Environment/Lighting/Corridors/Light_Small_Red",Other,T_Trim_01_BaseColor_Red,1703,1.20
+"Environment/Lighting/Corridors/Light_Small_Red",Other,T_Trim_01_BaseColor_Red,1703,1.20
+"Environment/Lighting/Corridors/Light_Small_White",Other,T_Trim_01_BaseColor_Red,1703,1.20
+"Environment/Lighting/ServiceCorridor/Light_Small_Red",Other,T_Trim_01_BaseColor_Red,1703,1.20
+"Environment/Lighting/ServiceCorridor/Light_Small_White",Other,T_Trim_01_BaseColor_Red,1703,1.20
+"Environment/Lighting/ServiceCorridor/Light_Small_White",Other,T_Trim_01_BaseColor_Red,1703,1.20
+"Environment/Lighting/ServiceCorridor/Light_Small_White",Other,T_Trim_01_BaseColor_Red,1703,1.20
+"Environment/Lighting/ServiceCorridor/Light_Small_Red",Other,T_Trim_01_BaseColor_Red,1703,1.20
+"Environment/Lighting/ServiceCorridor/Light_Small_Red (crossroads)",Other,T_Trim_01_BaseColor_Red,1703,1.20
+"Environment/Lighting/Armoury/Light_Wide_White",Other,T_Trim_01_BaseColor_Red,1420,1.00
+"Environment/Lighting/Armoury/Light_Small_Spot",Other,T_Trim_01_BaseColor_Red,1703,1.20
+"Environment/Lighting/Armoury/Light_Small_Spot",Other,T_Trim_01_BaseColor_Red,1703,1.20
+"Environment/Lighting/Armoury/Light_Small_Spot (pickup tile)",Other,T_Trim_01_BaseColor_Red,1703,1.20
+"Environment/Lighting/MaintenanceBay/Light_Wide_Red",Other,T_Trim_01_BaseColor_Red,1420,1.00
+"Environment/Lighting/MaintenanceBay/Light_Wide_Red",Other,T_Trim_01_BaseColor_Red,1420,1.00
+"Environment/Lighting/MaintenanceBay/Light_Small_Spot (medkit)",Other,T_Trim_01_BaseColor_Red,1703,1.20
+"Environment/Lighting/MaintenanceBay/Light_Small_White (fill)",Other,T_Trim_01_BaseColor_Red,1703,1.20
+"Environment/Lighting/MaintenanceBay/Light_Small_White (fill)",Other,T_Trim_01_BaseColor_Red,1703,1.20
+"Environment/Lighting/MaintenanceBay/Light_Small_White (fill)",Other,T_Trim_01_BaseColor_Red,1703,1.20
+"Environment/Lighting/Infirmary/Light_Wide_White",Other,T_Trim_01_BaseColor_Red,1420,1.00
+"Environment/Lighting/Infirmary/Light_Wide_White",Other,T_Trim_01_BaseColor_Red,1420,1.00
+"Environment/Lighting/Infirmary/Light_Small_White (desk)",Other,T_Trim_01_BaseColor_Red,1703,1.20
+"Environment/Lighting/ResearchLab/Light_Small_White",Other,T_Trim_01_BaseColor_Red,1703,1.20
+"Environment/Lighting/ControlRoom/Light_Wide_White",Other,T_Trim_01_BaseColor_Red,1420,1.00
+"Environment/Lighting/ControlRoom/Light_Wide_White",Other,T_Trim_01_BaseColor_Red,1420,1.00
+"Environment/Lighting/ControlRoom/Light_Corner_White",Other,T_Trim_01_BaseColor_Red,1328,0.94
+"Environment/Lighting/ControlRoom/Light_Corner_White",Other,T_Trim_01_BaseColor_Red,1328,0.94
+"Environment/Lighting/ControlRoom/Light_Floor_White",Other,T_Trim_01_BaseColor_Red,421,0.30
+"Environment/Decals/HazardStripes/Decal_Dashes",Other,T_Decals_Cutout,190,0.13
+"Environment/Decals/HazardStripes/Decal_Dashes",Other,T_Decals_Cutout,190,0.13
+"Environment/Decals/HazardStripes/Decal_Dashes",Other,T_Decals_Cutout,190,0.13
+"Environment/Decals/HazardStripes/Decal_Dashes",Other,T_Decals_Cutout,190,0.13
+"Environment/Decals/HazardStripes/Decal_Dashes",Other,T_Decals_Cutout,190,0.13
+"Environment/Decals/HazardStripes/Decal_Dashes",Other,T_Decals_Cutout,190,0.13
+"Environment/Decals/HazardStripes/Decal_Dashes",Other,T_Decals_Cutout,190,0.13
+"Environment/Decals/HazardStripes/Decal_Dashes",Other,T_Decals_Cutout,190,0.13
+"Environment/Decals/HazardStripes/Decal_Dashes",Other,T_Decals_Cutout,190,0.13
+"Environment/Decals/HazardStripes/Decal_Dashes",Other,T_Decals_Cutout,190,0.13
+"Environment/Decals/HazardStripes/Decal_Dashes",Other,T_Decals_Cutout,190,0.13
+"Environment/Decals/HazardStripes/Decal_Dashes",Other,T_Decals_Cutout,190,0.13
+"Environment/AccessPanels/AccessPanel_LabSouth",Other,T_Trim_01_BaseColor_Red,2156,1.52
+"Environment/AccessPanels/AccessPanel_InfirmaryNorth",Other,T_Trim_01_BaseColor_Red,2156,1.52
+"Environment/AccessPanels/AccessPanel_ControlWest",Other,T_Trim_01_BaseColor_Red,2156,1.52
+"Environment/AccessPanels/AccessPanel_ControlEast",Other,T_Trim_01_BaseColor_Red,2156,1.52

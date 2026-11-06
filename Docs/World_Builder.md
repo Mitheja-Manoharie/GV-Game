@@ -245,7 +245,7 @@ Placed by **Tools > World Builder > Place Particle Effects** (`Assets/Scripts/Ed
 - **Probes:**
   - **Light probes:** 346 in one Light Probe Group per room. They sit on a grid about 2–2.5 m apart at
     heights 0.5 m and 2 m, with extra probes in every opening and under the accent lights. They light
-    dynamic props, robots and the player.
+    dynamic props, robots and the player, and 24 small static props whose lightmap UVs overlapped (see Quality checks).
   - **Reflection probes:** 14 Baked, box-projected probes, one per floor area.
 - **Readability:** every room was reviewed after a preview bake.
   - The maintenance bay was too dark and too red to see robots. It got white fill lights and a lighter
@@ -320,20 +320,27 @@ normal moment, all small and without shadows: the 4 `AlienGlow` tank lights, the
 glow and the 4 drones' eye lights. A Peak adds the 8 alarm beacons (21 in total), and a faulty-light flash adds 1 for a
 split second. Shadow casters: 0. Forward+ rendering handles this many lights without a per-object limit.
 
-**Texture budget** (`Tools > World Builder > Cap Small-Prop Textures At 1024`). The small Essentials props (ammo boxes,
-health packs, chest) never fill more than a small part of the screen, so their texture set was capped from 2048 to
-1024 px:
+**Texture budget** (`Tools > World Builder > Apply Prop Texture Budget`). Texture memory goes where the player looks.
+A first pass capped every small Essentials prop texture at 1024 px. The texel density check (see Quality checks) then
+showed two problems. The cap had halved the sharpness of the ammo boxes and health packs, to 153–178 px/m against
+490 px/m on the walls. The cover crates, which the player crouches beside, imported their 4096 px source at only
+2048 px (207–250 px/m). The budget now sizes each map by what it shows at the distance the player sees it:
 
-| Texture | Before | After |
-|---|---|---|
-| T_Props_Batch2_BaseColor | 2048 px, 2,730 KB | 1024 px, 682 KB |
-| T_Props_Batch2_Emissive | 2048 px, 2,730 KB | 1024 px, 682 KB |
-| T_Props_Batch2_ORM | 2048 px, 2,730 KB | 1024 px, 682 KB |
-| T_Props_Batch2_Normal | 1024 px (source), 682 KB | unchanged |
-| **Total** | **8,874 KB** | **2,730 KB (−69 %, 6 MB saved)** |
+| Texture | Kit default | Budget | Reason |
+|---|---|---|---|
+| T_Props_Batch2_BaseColor | 2048 px, 2,730 KB | unchanged | colour is what the player reads on a pickup |
+| T_Props_Batch2_Emissive | 2048 px, 2,730 KB | 1024 px, 682 KB | small glow areas, no fine detail |
+| T_Props_Batch2_ORM | 2048 px, 2,730 KB | 1024 px, 682 KB | roughness and metal detail do not show on props this small |
+| T_Props_Batch2_Normal | 1024 px (source), 682 KB | unchanged | |
+| T_Props_Crates_BaseColor | 2048 px, 2,730 KB | 4096 px (source), 10,922 KB | cover crates are seen up close |
+| T_Props_Crates_Normal | 2048 px, 2,730 KB | unchanged | |
+| T_Props_Crates_ORM | 2048 px, 2,730 KB | unchanged | |
+| **Total** | **17,062 KB** | **21,162 KB (+4,100 KB, +24 %)** | |
 
-The wall and trim sheets and the crates stay at 2048 px because the player sees them up close; the decal copy
-(`T_Decals_Cutout`) was already imported at 1024 px from its 2000 px source.
+The budget saves 4 MB on maps that do not show at this size and spends 8 MB on the crate colour. Pickups are now at
+306–356 px/m (twice as sharp as under the cap) and crates at 414–500 px/m, in line with the walls. The wall and trim
+sheets stay at 2048 px. The decal copy (`T_Decals_Cutout`) is imported at 1024 px from its 2000 px source. Raw data:
+`Docs/Performance/textures.csv`. `Restore Prop Textures To 2048` puts the kit defaults back.
 
 **LOD culling of small props** (`Tools > World Builder > Add LOD Culling To Small Props`). 27 props under 0.8 m got a
 LOD Group that hides them beyond about 25 m (cull height = size / (2 · 25 m · tan(FOV/2))). Measured gain: none worth
@@ -341,6 +348,64 @@ reporting (at most 2 triangles in these views). The level's longest sightlines a
 prop is ever that far away while visible, and occlusion culling already removes the ones behind walls. The groups
 are kept because they cost almost nothing and only help on the longest views; in a larger level this technique would
 matter more.
+
+## Quality checks
+
+`Tools > World Builder > Quality Report` (`Assets/Scripts/Editor/QualityReport.cs`) checks the lighting and texturing
+with numbers. It writes CSV files to `Docs/Quality` and a summary to the Console. Last run on 6 November 2026, after
+the final bake. The Scene view screenshots in the same folder show the same checks visually.
+
+| Check | Method | Result |
+|---|---|---|
+| Lightmap UVs | every lightmapped renderer has a second UV set (lightmap UVs); its Scale In Lightmap | 277 of 277 have lightmap UVs. All use scale 1, so lightmap resolution is the same 20 texels/unit everywhere. |
+| Lightmap UV overlap | each renderer's lightmap UVs laid onto its real lightmap texels; a texel touched by two UV islands is shared | 24 props found and fixed (below). Now 0. |
+| Seams and blotches | Scene view, Baked Lightmap mode (`baked_lightmap.png`) | none. Light falls off smoothly across wall-piece joins. |
+| Texel density | texture pixels per metre on each surface: sqrt(UV area / world area) × texture width | walls and floors 484–514 px/m (room medians); props fixed (below) |
+| Light probes | every probe compared with its neighbours within 3 m; 2,744 walkable points sampled from the NavMesh at 1 m height | 346 probes, 0 inside geometry. No walkable point is more than 1.8 m from a probe. |
+
+The 55 greybox Cube walls and floors under the kit art are disabled and not counted.
+
+**Texel density of the structure, per room** (median px/m; the structure median is 490):
+
+| Armoury | Control room | Corridors | Infirmary | Maintenance bay | Quarantine cell | Research lab | Service corridor |
+|---|---|---|---|---|---|---|---|
+| 494 | 514 | 490 | 494 | 484 | 514 | 494 | 490 |
+
+Every room is within about 6 % of the others, so no room looks blurrier than the next. The only outliers are the three
+`GapFiller` cubes (1,070–1,529 px/m), which sit inside wall gaps and are never seen.
+
+### Found and fixed
+
+1. **Overlapping lightmap UVs on small props.** The Scene view's UV Overlap mode showed red on the barrels, the guns
+   on the armoury wall and the vents (`uv_overlap_before.png`). The report found 24 renderers whose UV islands share
+   lightmap texels:
+
+   | Props | Shared texels |
+   |---|---|
+   | wall guns (rifle, sniper, pistol, revolver) | 28–84 % |
+   | health pack tube, syringe | 20–28 % |
+   | barrels | 12 % |
+   | vents | 1–4 % |
+   | specimen tank glow strips and pipes | under 1 % |
+
+   At 20 texels/unit a small prop gets only a few texels per face, so the gaps between its UV islands become
+   narrower than one texel, and baked light bleeds from one face onto another.
+   **Fix:** `Tools > World Builder > Light Overlapping Props With Probes`. These props keep Contribute GI, so they
+   still block and bounce light in the bake, but receive their own light from the light probes, which cover the whole
+   level (check above). After the rebake: 0 overlaps (`uv_overlap_after.png`).
+2. **Blurry pickups and crates.** The texel density check showed ammo boxes and health packs at 153–178 px/m and
+   cover crates at 207–250 px/m, against 490 on the walls. The first was caused by my own 1024 px texture cap.
+   **Fix:** the texture budget in Performance. Pickups are now at 306–356 px/m and crates at 414–500 px/m.
+
+### Checked and accepted
+
+| Item | px/m | Why it stays |
+|---|---|---|
+| Barrels | 260–278 | the kit ships this texture at 1024 px, so there is nothing to raise |
+| Door panels (`Door_DarkMetal`) | 276 | plain dark metal with little detail; reads cleanly in play |
+| Hazard-stripe decals | 190 | plain stripes with no detail to lose; the 1024 px copy keeps memory low |
+| Vents and access panels | 2,000–2,478 | small parts of a trim sheet. Extra density costs nothing, because mipmaps pick the right size. |
+| Ceiling fixtures and wall tops in Baked Lightmap mode | | shown dark because they face up, where no light reaches; the player never sees them |
 
 ## Design decisions
 
