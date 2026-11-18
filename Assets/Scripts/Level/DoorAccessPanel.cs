@@ -89,6 +89,15 @@ namespace GVGame.Level
             StopAllCoroutines();
         }
 
+        /// <summary>The door this panel shows (its Door_* marker name).</summary>
+        public string DoorId => doorId;
+
+        /// <summary>
+        /// Shows the door as locked (with the blink and beep) or open, without a Facility AI event. Used by the intro
+        /// cutscene's door slam; the next FacilityEvents.DoorLockChanged for this door takes over again.
+        /// </summary>
+        public void ShowLocked(bool isLocked) => OnDoorLockChanged(doorId, isLocked);
+
         private void OnDoorLockChanged(string id, bool isLocked)
         {
             if (id != doorId || isLocked == locked) return;
