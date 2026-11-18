@@ -9,7 +9,7 @@ is documented separately in [FacilityAI.md](FacilityAI.md).
 ## Level layout
 
 The level is built on a **4 m grid**: one floor tile, wall piece and level-graph node per 4 × 4 m cell,
-with a 5 m ceiling. The player starts in the quarantine cell at (−2, −2) and must reach the `ExitPoint`
+with a 5 m ceiling. The player starts in the quarantine cell at (−1.2, −1.2) and must reach the `ExitPoint`
 in front of the control room window at (2, 30.5).
 
 | Area | Tiles (X × Z) | Role |
@@ -100,6 +100,7 @@ are under **Tools > World Builder** (`Assets/Scripts/Editor`).
 | Apply Prop Texture Budget / Restore Prop Textures To 2048 | sets the import size of each prop texture and records memory before and after | the budget is code, so it can be reviewed and repeated, and it writes `textures.csv` as evidence |
 | Quality Report | checks lightmap UVs, lightmap UV overlap, texel density and light-probe coverage, and writes CSV files | turns visual checks into numbers. It found the 24 props with overlapping lightmap UVs and the blurry pickups (see Quality checks). |
 | Light Overlapping Props With Probes | switches the props the report flags to light-probe lighting | changes exactly the props the report lists and nothing else |
+| Add / Remove Intro Cutscene | adds the intro cutscene object to Main | one object holds every shot, caption and timing in the Inspector, and the cutscene puts back everything it changes |
 
 `PerformanceBenchmark` (`Assets/Scripts/Level`, **F4** in Play mode) does the same for measurement. It uses four
 fixed viewpoints and the same settings every run, so the before/after numbers in Performance can be repeated.
@@ -298,6 +299,66 @@ pulses in from the screen edges like a heartbeat, stronger and faster (70 → 12
 global Volume (priority 100, Color Adjustments saturation −35) drains the colour. The red is a screen overlay, not
 a Vignette: URP's Vignette multiplies the image, so in this dark level it only made the edges blacker. Both are off
 while the player is healthy and fade out on death; the level's own profile is never changed.
+
+## Intro cutscene
+
+`IntroCutscene` (`Assets/Scripts/Level`, added by **Tools > World Builder > Add Intro Cutscene**) plays when `Main`
+starts, once per session: about 40 s in seven shots, with letterbox bars (2.39:1), a location tag, typed captions and
+fades through black, then the title **LAB LOCKDOWN** and the hand-over to the player. **Space** or **Enter** skips it.
+
+| # | Shot | Caption | On screen |
+|---|---|---|---|
+| 1 | Sublevel B (overhead) | Containment breach. The facility is in lockdown. | The whole level from above; every alarm beacon spins and a siren sounds for 6 s |
+| 2 | Lab corridor | Its AI decides which doors stay open. | The Facility AI locks `Door_LabSouth`: it swings shut and its access panel turns red |
+| 3 | Control room | The only way out is through the control room. | Push-in on the exit window |
+| 4 | Research lab | The staff left in a hurry. Someone dropped a keycard on the way out. | Low dolly over the desk to the specimen tanks |
+| 5 | Location unknown | It could be anywhere. | Close-up of the keycard at this run's spot, background blurred |
+| 6 | Maintenance bay | The facility's robots hunt anything that moves. | A Security Hunter and a Tactical Flanker walk through the bay |
+| 7 | Quarantine cell | You are the breach. Find the keycard and get out. | The camera circles the player's alien body |
+
+**Story.** The player starts in the quarantine cell as the alien body, so the cutscene makes the player the escaped
+specimen: the breach announced in shot 1 is revealed in shot 7.
+
+**Camera animation.** Each shot is a set of keyframes: a camera position and the point it looks at. Both are
+interpolated with a uniform Catmull-Rom spline, which passes through every key with no corners (C1 continuous; the
+ends are extended by reflection), and the shot's time is eased in and out with smoothstep, so the camera starts and
+settles gently. The rotation is `LookRotation(lookAt − position)`. The keys are Inspector fields, and selecting
+`IntroCutscene` draws every path in the Scene view.
+
+**Shots built at run time.**
+
+- **Orbit (shot 7):** keys every 20° or less on an arc round the player's eye. The camera closes in (2 → 1.45 m),
+  drops from 0.9 m above eye level to 0.15 m below (a slightly low, heroic angle) and moves its aim from the chest to
+  the face. Raycasts at both camera heights, every 10°, find how far the arc can go on each side without meeting a
+  wall; it starts on the side with more room, passes in front of the player and ends 30° past the front. A cold-white
+  spot light (no shadows) lights the player, because the quarantine cell is the darkest room.
+- **Keycard close-up (shot 5):** the camera distance comes from the card's size, so it fills about 65 % of the
+  letterboxed picture, and it films from the side with room for the camera and the deepest background behind the
+  card. A temporary URP Volume adds Gaussian depth of field (sharp to 0.12 m behind the card, fully blurred 1 m further
+  back), and a small point light makes the spinning card glint. The keycard is hidden in every other shot, so the
+  cutscene never shows where it is.
+
+**The game's own systems, put back afterwards.**
+
+- **Gameplay held:** the components in **Hold Until End** (Facility AI director, drone spawner, weapon, interaction,
+  HUD, view toggle) are switched off in `Awake` (execution order −1000), before their `Start`. Unity runs `Start` when
+  a component is first enabled, so the Facility AI's clocks and the drones start when the player gets control.
+- **Camera:** the player's own camera is borrowed (same post-processing and culling) and given back. Occlusion culling
+  is off while the cutscene plays, because the overhead shot is outside the baked view cells.
+- **Robots:** copies of the `RobotSpawner`'s prefabs, made inside an inactive parent so their brains, guns and movers
+  are switched off before `Awake`. The Flanker walks with its NavMeshAgent, the Hunter along a NavMesh path, and
+  `RobotAnimator` animates both from their real speed. They are removed when the shot ends.
+- **Door:** opened when the cutscene starts. 1.5 s into its shot it is locked through the Facility AI's own door
+  service (`DoorControllerDoorService.SetLocked`: close, lock and NavMesh barrier), swinging at 190°/s with no
+  ease-out. `DoorAccessPanel.ShowLocked` blinks the panel red with its beep, and the camera shakes when the door hits
+  its frame. The door is unlocked, closed and reset before the player gets control.
+- **Alarm:** `AlarmBeacon.Forced` switches every beacon on, and a siren made in code loops for 6 s: a sweep from 420
+  to 980 Hz in 0.7 s with a detuned second voice and soft clipping, then 0.3 s of silence, with a hallway reverb.
+
+**Fixed while building it.** The player start (−2, 1.59, −2) was 0.45 m from the quarantine cell chair, whose box
+collider (0.88 × 1.64 × 1.12 m) covers its tall backrest. The player landed on top of it, 1.6 m above the floor, at
+every start and respawn. First person hid it; the orbit showed it. The start is now (−1.2, 0, −1.2), on the floor and
+clear of the chair and desk.
 
 ## Bakes
 

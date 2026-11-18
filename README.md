@@ -5,7 +5,7 @@ An interactive 3D shooting game built in Unity for the **SE3032 – Graphics and
 > **Theme:** Lab Lockdown
 > **Status:** Complete. The `Main` scene is integrated with the final lighting, occlusion and NavMesh bake, the player systems, physics doors and props, audio, all four AI agents and the Facility AI director.
 
-You are trapped in a research facility in lockdown. Armed with a rifle, move barricades and throw objects to get past the facility's robots, find the keycard, which turns up in a different place each run, and reach the exit while the facility decides where to send enemies and which doors to lock.
+You are the containment breach: an alien specimen loose in a research facility in lockdown. Armed with a rifle, move barricades and throw objects to get past the facility's robots, find the keycard, which turns up in a different place each run, and reach the exit while the facility decides where to send enemies and which doors to lock.
 
 ---
 
@@ -92,6 +92,7 @@ Open `Assets/Scenes/Main.unity` and press **Play**.
 | Release / lock cursor | Esc / Left click |
 | First / third-person view (shows the Alien body) | V |
 | Show / hide the AI debug overlays (Facility AI, Hunter, Flankers, Drone Stalker) | F1 |
+| Skip the intro cutscene | Space or Enter |
 
 ---
 
