@@ -13,6 +13,7 @@ namespace GVGame.Level
     /// It creates its own Realtime spot light at runtime, so it never affects the lighting bake, and the light casts
     /// no shadows, so it stays cheap. The light is only enabled while the alarm is on.
     /// Driven by <see cref="FacilityEvents.PhaseChanged"/>; turns off when the run ends (the player dies or escapes).
+    /// <see cref="Forced"/> switches it on regardless (used by the intro cutscene).
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class AlarmBeacon : MonoBehaviour
@@ -48,6 +49,16 @@ namespace GVGame.Level
         private ExitTrigger exit;
 
         private bool On => forced || (phaseOn && !ended);
+
+        /// <summary>
+        /// On regardless of the Facility AI's phase while true (the intro cutscene's lockdown alarm). It fades in and out
+        /// as usual; set back to false, the beacon follows the phase again.
+        /// </summary>
+        public bool Forced
+        {
+            get => forced;
+            set => forced = value;
+        }
 
         private void Awake()
         {
