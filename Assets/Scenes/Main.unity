@@ -22900,6 +22900,162 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 4214e79058c154cd68fd238a8adedde4, type: 3}
   m_PrefabInstance: {fileID: 368540576}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &372378756
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 372378758}
+  - component: {fileID: 372378757}
+  m_Layer: 0
+  m_Name: IntroCutscene
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &372378757
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 372378756}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3579605cc6b974ba1ae8dcb4861ab1d7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GVGame.Level.IntroCutscene
+  shots:
+  - location: SUBLEVEL B   02:14
+    line: Containment breach. The facility is in lockdown.
+    duration: 6.5
+    fieldOfView: 50
+    keys:
+    - position: {x: 2, y: 50, z: -20}
+      lookAt: {x: 2, y: 0, z: 16}
+    - position: {x: 2, y: 46, z: -14}
+      lookAt: {x: 2, y: 0, z: 15}
+    - position: {x: 2, y: 42, z: -8}
+      lookAt: {x: 2, y: 0, z: 14}
+    lockDoor: 
+    lockAt: 1.5
+  - location: LAB CORRIDOR
+    line: Its AI decides which doors stay open.
+    duration: 5.5
+    fieldOfView: 55
+    keys:
+    - position: {x: 14.9, y: 1.75, z: 16.8}
+      lookAt: {x: 14.4, y: 1.5, z: 24}
+    - position: {x: 14.75, y: 1.68, z: 17.7}
+      lookAt: {x: 14.35, y: 1.45, z: 24}
+    - position: {x: 14.6, y: 1.6, z: 18.6}
+      lookAt: {x: 14.3, y: 1.45, z: 24}
+    lockDoor: Door_LabSouth
+    lockAt: 1.5
+  - location: CONTROL ROOM
+    line: The only way out is through the control room.
+    duration: 5
+    fieldOfView: 55
+    keys:
+    - position: {x: 0.4, y: 2.4, z: 25.4}
+      lookAt: {x: 3, y: 1.4, z: 32}
+    - position: {x: 1.3, y: 2.15, z: 26.7}
+      lookAt: {x: 2.4, y: 1.5, z: 32}
+    - position: {x: 2, y: 1.9, z: 28}
+      lookAt: {x: 2, y: 1.6, z: 32}
+    lockDoor: 
+    lockAt: 1.5
+  - location: RESEARCH LAB
+    line: The staff left in a hurry. Someone dropped a keycard on the way out.
+    duration: 5.5
+    fieldOfView: 50
+    keys:
+    - position: {x: 13.3, y: 1.2, z: 25.4}
+      lookAt: {x: 16.4, y: 1.1, z: 29.6}
+    - position: {x: 14.4, y: 1.35, z: 26}
+      lookAt: {x: 17, y: 1.2, z: 30.2}
+    - position: {x: 15.3, y: 1.5, z: 26.3}
+      lookAt: {x: 17.6, y: 1.3, z: 30.4}
+    lockDoor: 
+    lockAt: 1.5
+  - location: MAINTENANCE BAY
+    line: The facility's robots hunt anything that moves.
+    duration: 5
+    fieldOfView: 55
+    keys:
+    - position: {x: 6.6, y: 3.4, z: 18.6}
+      lookAt: {x: 0.5, y: 0.6, z: 12}
+    - position: {x: 6.9, y: 3.1, z: 15.8}
+      lookAt: {x: -0.5, y: 0.6, z: 12.5}
+    - position: {x: 6.6, y: 2.8, z: 13.2}
+      lookAt: {x: -1.5, y: 0.8, z: 13.5}
+    lockDoor: 
+    lockAt: 1.5
+  robots:
+  - robot: 0
+    shot: 4
+    from: {x: -2.5, y: 0, z: 16.5}
+    to: {x: 1.5, y: 0, z: 12.5}
+  - robot: 1
+    shot: 4
+    from: {x: 2.5, y: 0, z: 17.5}
+    to: {x: 3, y: 0, z: 11}
+  robotWalkSpeed: 1.5
+  robotPartsOff:
+  - HunterAgent
+  - HunterMover
+  - HunterShooter
+  - FlankerAgent
+  - RobotPathFollower
+  - RobotGun
+  - GunshotAudio
+  - StalkerAgent
+  - StalkerSensor
+  - StalkerDebugView
+  finalLocation: QUARANTINE CELL
+  finalLine: You are the breach. Find the keycard and get out.
+  finalDuration: 7
+  finalFieldOfView: 45
+  orbitDegrees: 150
+  orbitRadius: {x: 2, y: 1.45}
+  playerLightIntensity: 2.5
+  alarmSeconds: 6
+  alarmClip: {fileID: 0}
+  alarmVolume: 0.35
+  keycardAfterShot: 3
+  keycardLocation: LOCATION UNKNOWN
+  keycardLine: It could be anywhere.
+  keycardDuration: 3.5
+  keycardFieldOfView: 30
+  doorSlamSpeed: 190
+  title: LAB LOCKDOWN
+  playInEditor: 1
+  holdUntilEnd:
+  - FacilityDirectorRunner
+  - DroneStalkerSpawn
+  - WeaponController
+  - PlayerInteractor
+  - PlayerHud
+  - PlayerViewToggle
+--- !u!4 &372378758
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 372378756}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &372723116
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -67093,15 +67249,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4698726052551913292, guid: ad6b711990230764a8411ff83ffa5c25, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -2
+      value: -1.2
       objectReference: {fileID: 0}
     - target: {fileID: 4698726052551913292, guid: ad6b711990230764a8411ff83ffa5c25, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.59272
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4698726052551913292, guid: ad6b711990230764a8411ff83ffa5c25, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -2
+      value: -1.2
       objectReference: {fileID: 0}
     - target: {fileID: 4698726052551913292, guid: ad6b711990230764a8411ff83ffa5c25, type: 3}
       propertyPath: m_LocalRotation.w
@@ -74777,3 +74933,4 @@ SceneRoots:
   - {fileID: 489904358}
   - {fileID: 1793356605}
   - {fileID: 1939498504}
+  - {fileID: 372378758}
